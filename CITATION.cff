@@ -1,0 +1,10 @@
+cff-version: 1.2.0
+title: "BovSys / MetRep Model"
+message: "If you use this repository, please cite the associated thesis, publications, and software record."
+type: software
+authors:
+  - family-names: "Omari"
+    given-names: "Mohamed"
+repository-code: "https://github.com/OWNER/REPOSITORY"
+abstract: "Original MATLAB reference implementation and Python translation of a mechanistic dairy cow metabolic-reproductive model with sensitivity, identifiability, Bayesian experimental design, and planned Dexa extension workflows."
+license: "NOASSERTION"

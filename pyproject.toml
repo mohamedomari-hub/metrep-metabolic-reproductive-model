@@ -1,0 +1,23 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "bovsys-metrep"
+version = "0.1.0"
+description = "Python translation and analysis workflows for the BovSys/MetRep metabolic-reproductive model."
+readme = "README.md"
+requires-python = ">=3.10"
+dependencies = [
+  "numpy",
+  "scipy",
+  "pandas",
+  "matplotlib",
+  "networkx",
+]
+
+[tool.setuptools]
+package-dir = {"" = "MetRep_Python"}
+
+[tool.setuptools.packages.find]
+where = ["MetRep_Python"]

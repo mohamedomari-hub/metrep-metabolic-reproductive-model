@@ -1,0 +1,5 @@
+check,passed
+parameter_count_is_98,True
+matlab_y0_25_matches_documented_reference,True
+core_state_count_is_22,True
+raw_core_y0_matches_first_22_matlab_states,True
