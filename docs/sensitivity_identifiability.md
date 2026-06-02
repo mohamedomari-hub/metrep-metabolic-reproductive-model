@@ -23,21 +23,28 @@ How it is calculated:
 
 The result is a local sensitivity score. In simple terms:
 
-```text
-sensitivity = output change / parameter change
-```
+$$
+\text{sensitivity} =
+\frac{\text{output change}}{\text{parameter change}}
+$$
 
 More specifically, the public sensitivity table uses one-at-a-time relative
-sensitivity of output AUC values. For parameter `theta_j` and output `y_k(t)`:
+sensitivity of output AUC values. For parameter $\theta_j$ and output $y_k(t)$:
 
-```text
-AUC_k(theta) = integral y_k(t; theta) dt
+$$
+\mathrm{AUC}_k(\theta) =
+\int y_k(t; \theta)\,dt
+$$
 
-S_kj =
-    ((AUC_k(theta_j * (1 + h)) - AUC_k(theta_j)) / AUC_k(theta_j)) / h
-```
+$$
+S_{kj} =
+\frac{
+  \left(\mathrm{AUC}_k(\theta_j(1+h)) - \mathrm{AUC}_k(\theta_j)\right)
+  / \mathrm{AUC}_k(\theta_j)
+}{h}
+$$
 
-where `h = 0.01` in the sensitivity script by default. This is a forward local
+where $h = 0.01$ in the sensitivity script by default. This is a forward local
 perturbation. Each parameter is changed separately while all other parameters
 are kept at their reference values.
 
@@ -68,45 +75,59 @@ How it is calculated:
 
 SVD separates the sensitivity matrix into independent information directions:
 
-```text
-sensitivity matrix = informed directions + weak directions
-```
+$$
+\text{sensitivity matrix}
+= \text{informed directions} + \text{weak directions}
+$$
 
 The implemented SVD screen uses a stacked trajectory sensitivity matrix. For a
-parameter `theta_j`, selected output vector `Y(theta)`, and step size `h_j`, the
+parameter $\theta_j$, selected output vector $Y(\theta)$, and step size $h_j$, the
 central-difference column is:
 
-```text
-S[:, j] =
-    (Y(theta_j + h_j) - Y(theta_j - h_j)) / (2 * h_j)
+$$
+S_{:,j} =
+\frac{
+  Y(\theta_j + h_j) - Y(\theta_j - h_j)
+}{2h_j}
+$$
 
-h_j = max(absolute_step_min, relative_step * abs(theta_j))
-```
+$$
+h_j =
+\max\left(
+  \text{absolute\_step\_min},
+  \text{relative\_step}\cdot |\theta_j|
+\right)
+$$
 
-`Y(theta)` is made by stacking all selected output trajectories over the
+$Y(\theta)$ is made by stacking all selected output trajectories over the
 simulation time points. In the default identifiability script,
 `relative_step = 1e-3`. If a nominal parameter value is zero, the code uses
 `relative_step * 1.0` before applying the absolute minimum step.
 
 The matrix is then decomposed as:
 
-```text
-S = U Sigma V^T
-```
+$$
+S = U \Sigma V^T
+$$
 
 where:
 
 - `S` is the stacked sensitivity matrix.
 - `U` contains output-space directions.
-- `Sigma` contains the singular values.
-- `V^T` contains parameter-space directions.
+- $\Sigma$ contains the singular values.
+- $V^T$ contains parameter-space directions.
 
 The numerical rank is calculated using a relative threshold:
 
-```text
-threshold = tolerance_value * largest_singular_value
-rank = number of singular values above threshold
-```
+$$
+\text{threshold}
+= \text{tolerance\_value}\cdot \sigma_{\max}
+$$
+
+$$
+\text{rank}
+= \#\{\sigma_i : \sigma_i > \text{threshold}\}
+$$
 
 with `tolerance_value = 1e-8` by default.
 
@@ -120,26 +141,34 @@ together in weak directions, they may compensate for each other. That means the
 model can produce similar outputs by changing both parameters together, making
 their separate values difficult to estimate from the current measurements.
 
-The nullspace basis is taken from the rows of `V^T` after the numerical rank:
+The nullspace basis is taken from the rows of $V^T$ after the numerical rank:
 
-```text
-nullspace = V^T[rank:, :]
-```
+$$
+\mathcal{N} =
+\{v_i^T : i > r\}
+$$
+
+where $r$ is the numerical rank and $\mathcal{N}$ is the nullspace basis.
 
 Nullspace participation for each parameter is summarized as the Euclidean norm
 of that parameter's coefficients across all nullspace directions:
 
-```text
-nullspace_participation_j =
-    sqrt(sum over weak directions q of nullspace[q, j]^2)
-```
+$$
+\text{nullspace\_participation}_j =
+\sqrt{
+  \sum_q \mathcal{N}_{qj}^2
+}
+$$
 
 The local SVD ranking score used in the curated result is `rel2_colnorm`:
 
-```text
-ranking_score_j =
-    || (theta_j / max(abs(Y), epsilon)) * S[:, j] ||_2
-```
+$$
+\text{ranking\_score}_j =
+\left\|
+  \frac{\theta_j}{\max(|Y|,\epsilon)}
+  S_{:,j}
+\right\|_2
+$$
 
 This makes the ranking relative to both parameter size and output scale.
 
@@ -173,15 +202,24 @@ The three-class decision uses normalized sensitivity and normalized nullspace
 scores. The high and low thresholds are quantiles of the analyzed parameter
 set:
 
-```text
-sensitivity_0to1 = normalized ranking score
-nullspace_0to1   = normalized nullspace participation
+$$
+\text{sensitivity}_{0\ldots1}
+= \text{normalized ranking score}
+$$
 
-sens_hi = 75th percentile of sensitivity_0to1
-sens_lo = 25th percentile of sensitivity_0to1
-null_hi = 75th percentile of nullspace_0to1
-null_lo = 25th percentile of nullspace_0to1
-```
+$$
+\text{nullspace}_{0\ldots1}
+= \text{normalized nullspace participation}
+$$
+
+$$
+\begin{aligned}
+\text{sens}_{hi} &= Q_{0.75}(\text{sensitivity}_{0\ldots1}) \\
+\text{sens}_{lo} &= Q_{0.25}(\text{sensitivity}_{0\ldots1}) \\
+\text{null}_{hi} &= Q_{0.75}(\text{nullspace}_{0\ldots1}) \\
+\text{null}_{lo} &= Q_{0.25}(\text{nullspace}_{0\ldots1})
+\end{aligned}
+$$
 
 The practical rule is:
 
@@ -243,34 +281,42 @@ curve rises only at one end, the result is boundary-limited and the tested range
 may not be wide enough.
 
 The calculation uses synthetic observations from the reference simulation. For
-observation `z_i`, model prediction `m_i(theta)`, and assumed standard
-deviation `sigma_i`, the fit loss is:
+observation $z_i$, model prediction $m_i(\theta)$, and assumed standard
+deviation $\sigma_i$, the fit loss is:
 
-```text
-fit_loss(theta) =
-    0.5 * sum_i ((m_i(theta) - z_i) / sigma_i)^2
-```
+$$
+\text{fit\_loss}(\theta) =
+\frac{1}{2}
+\sum_i
+\left(
+  \frac{m_i(\theta)-z_i}{\sigma_i}
+\right)^2
+$$
 
-The profile for parameter `theta_j` fixes `theta_j` on a grid of multipliers
-and re-optimizes selected nuisance parameters `eta`:
+The profile for parameter $\theta_j$ fixes $\theta_j$ on a grid of multipliers
+and re-optimizes selected nuisance parameters $\eta$:
 
-```text
+$$
 P_j(a) =
-    min_eta [ fit_loss(theta_j = a * theta_j_ref, eta)
-              + admissibility_penalty ]
-```
+\min_{\eta}
+\left[
+  \text{fit\_loss}(\theta_j = a\theta_{j,\mathrm{ref}}, \eta)
+  + \text{admissibility penalty}
+\right]
+$$
 
 The plotted profile is the increase from the best value:
 
-```text
-delta_loss_j(a) = P_j(a) - min_a P_j(a)
-```
+$$
+\Delta\text{loss}_j(a)
+= P_j(a) - \min_a P_j(a)
+$$
 
 The horizontal cutoff used in the plots is:
 
-```text
-profile_cutoff = 1.92
-```
+$$
+\text{profile cutoff} = 1.92
+$$
 
 This is an approximate 95% cutoff for one profiled parameter. The script can
 plot `log1p(delta_loss)` to keep very large curves readable, but the

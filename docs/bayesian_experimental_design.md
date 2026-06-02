@@ -55,25 +55,33 @@ The main information measure is mutual information.
 
 In simple terms:
 
-```text
-mutual information = how much knowing the measurement tells us about the target
-```
+$$
+\text{mutual information}
+= \text{how much knowing the measurement tells us about the target}
+$$
 
-Mathematically, for a target quantity `W` and a candidate future measurement
-`Z`, mutual information is:
+Mathematically, for a target quantity $W$ and a candidate future measurement
+$Z$, mutual information is:
 
-```text
-I(W; Z) = integral integral p(w, z) log( p(w, z) / (p(w) p(z)) ) dw dz
-```
+$$
+I(W; Z) =
+\iint
+p(w,z)
+\log
+\left(
+  \frac{p(w,z)}{p(w)p(z)}
+\right)
+\,dw\,dz
+$$
 
 Equivalently:
 
-```text
-I(W; Z) = H(W) - H(W | Z)
-```
+$$
+I(W; Z) = H(W) - H(W \mid Z)
+$$
 
-where `H(W)` is the uncertainty before observing `Z`, and `H(W | Z)` is the
-remaining uncertainty after observing `Z`. Therefore, a high mutual information
+where $H(W)$ is the uncertainty before observing $Z$, and $H(W \mid Z)$ is the
+remaining uncertainty after observing $Z$. Therefore, a high mutual information
 value means the candidate measurement is expected to reduce uncertainty about
 the target.
 
@@ -108,12 +116,15 @@ the target.
 
 The posterior is based on Bayes' rule:
 
-```text
-p(w | z*) = p(z* | w) p(w) / p(z*)
-```
+$$
+p(w \mid z^*) =
+\frac{
+  p(z^* \mid w)p(w)
+}{p(z^*)}
+$$
 
-where `z*` is a hypothetical or selected observation. In practical terms, the
-BED result asks whether observing `z*` would make the distribution of `W`
+where $z^*$ is a hypothetical or selected observation. In practical terms, the
+BED result asks whether observing $z^*$ would make the distribution of $W$
 narrower or more concentrated than the prior distribution.
 
 This is why BED naturally follows identifiability analysis:

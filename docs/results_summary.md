@@ -76,12 +76,20 @@ These 60 parameters were profiled with a weighted least-squares loss against
 synthetic measurable outputs. For a tested parameter, the profile fixes that
 parameter across a grid and re-optimizes nuisance parameters:
 
-```text
-profile_loss(a) =
-    min_nuisance [ weighted_output_loss + admissibility_penalty ]
+$$
+\text{profile\_loss}(a) =
+\min_{\text{nuisance}}
+\left[
+  \text{weighted output loss}
+  + \text{admissibility penalty}
+\right]
+$$
 
-delta_loss(a) = profile_loss(a) - best_profile_loss
-```
+$$
+\Delta\text{loss}(a)
+= \text{profile\_loss}(a)
+- \text{best profile loss}
+$$
 
 The cutoff shown in the profile plots is `1.92`, an approximate 95% cutoff for
 one profiled parameter.
