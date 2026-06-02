@@ -35,6 +35,49 @@ because:
 - exact repeatability is limited because the original script does not define a
   clean public random-seed/output convention
 
+## Methodology
+
+BED asks which future measurements would be most useful before collecting the
+data. In this project, the useful measurement is the one expected to give the
+most information about a target model quantity or parameter.
+
+The calculation follows this logic:
+
+1. Sample many possible parameter sets around the reference model.
+2. Run the model for each sampled parameter set.
+3. Store simulated outputs for candidate sampling days and measured species.
+4. Treat those simulated outputs as possible future observations.
+5. Estimate how much each candidate observation reduces uncertainty about the
+   target.
+6. Rank sampling days and species by expected information gain.
+
+The main information measure is mutual information.
+
+In simple terms:
+
+```text
+mutual information = how much knowing the measurement tells us about the target
+```
+
+Here:
+
+- the target can be ovulation time or a parameter;
+- the measurement can be one species, several species, or a species pair at a
+  candidate sampling day;
+- higher mutual information means the design is more informative.
+
+The script also estimates posterior distributions. A posterior distribution is
+the uncertainty after a hypothetical measurement has been observed. If the
+posterior is narrower than the prior, the measurement has improved knowledge of
+the target.
+
+This is why BED naturally follows identifiability analysis:
+
+```text
+identifiability finds weak or compensatory directions
+BED asks which new measurements would reduce those weaknesses
+```
+
 ## Recommended Public Presentation
 
 Present v3 as the canonical model line. Use the single clean MATLAB BED script

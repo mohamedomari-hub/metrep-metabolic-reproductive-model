@@ -13,6 +13,25 @@ selected model outputs. It is useful as a first screen, but sensitivity alone is
 not identifiability: a parameter can strongly affect outputs and still be hard
 to estimate if another parameter can compensate for it.
 
+How it is calculated:
+
+1. Run the model once with the reference parameter values.
+2. Change one parameter by a small amount while keeping the others fixed.
+3. Run the model again.
+4. Compare how much selected outputs change.
+5. Repeat this for each parameter.
+
+The result is a local sensitivity score. In simple terms:
+
+```text
+sensitivity = output change / parameter change
+```
+
+The analysis is called local because it tests changes around the reference
+parameter set, not across all possible biological values. Outputs can be
+summarized by trajectory metrics such as AUC, peak value, mean value, or final
+value. Parameters with high scores are influential for the selected outputs.
+
 Main script:
 
 ```bash
@@ -23,6 +42,31 @@ python MetRep_Python/scripts/04_run_sensitivity.py
 
 The SVD workflow builds a local sensitivity matrix using selected measurable
 outputs and analyzes its singular values and nullspace directions.
+
+How it is calculated:
+
+1. Build a sensitivity matrix.
+2. In that matrix, rows represent output features and columns represent
+   parameters.
+3. Each entry says how much one output feature changes when one parameter is
+   perturbed.
+4. Apply singular value decomposition, or SVD, to the matrix.
+
+SVD separates the sensitivity matrix into independent information directions:
+
+```text
+sensitivity matrix = informed directions + weak directions
+```
+
+Large singular values indicate parameter combinations that strongly affect the
+selected outputs. Very small singular values indicate weak or near-null
+directions: parameter combinations that can change while producing little
+observable change.
+
+The nullspace part is used to detect compensation. If two parameters appear
+together in weak directions, they may compensate for each other. That means the
+model can produce similar outputs by changing both parameters together, making
+their separate values difficult to estimate from the current measurements.
 
 The key SVD outputs are:
 
@@ -73,6 +117,27 @@ profile likelihood.
 Profile likelihood fixes one selected parameter over a grid of values and
 allows nuisance parameters to compensate. The resulting loss curve provides a
 nonlinear practical-identifiability confirmation.
+
+How it is calculated:
+
+1. Choose one parameter to test.
+2. Fix that parameter at a sequence of values, for example 80%, 90%, 100%,
+   110%, and 120% of its reference value.
+3. At each fixed value, allow selected nuisance parameters to adjust.
+4. Re-run the model and calculate the loss, meaning the mismatch between the
+   model outputs and the synthetic/reference outputs.
+5. Plot the increase in loss relative to the best fit.
+
+The key question is:
+
+```text
+Does the fit get clearly worse when this parameter moves away from its best value?
+```
+
+If yes, the parameter is practically identifiable. If the curve stays flat, the
+parameter is not well identified because other parameters can compensate. If the
+curve rises only at one end, the result is boundary-limited and the tested range
+may not be wide enough.
 
 Current profile-likelihood summary:
 
