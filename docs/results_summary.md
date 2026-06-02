@@ -16,8 +16,43 @@ For detailed explanations of the plots and technical terms, see
 | Baseline run | Does the translated Python model run? | `results_final/figures/baseline_selected_states.png` |
 | Sensitivity | Which parameters have the largest local output effect? | `results_final/tables/sensitivity_top_parameters.csv`, `results_final/figures/sensitivity_top_parameters.png` |
 | SVD identifiability | Which parameters are estimable, anchors, or irrelevant? | `results_final/tables/identifiability_class_counts.csv`, `results_final/figures/identifiability_decision_map.png` |
-| SVD nullspace | Which parameters compensate or sit in weak directions? | `results_final/figures/identifiability_singular_values.png`, `results_final/figures/identifiability_nullspace_participation.png`, `results_final/figures/identifiability_compensation_edges.png`, `results_final/figures/identifiability_compensation_network.png` |
+| SVD nullspace | Which parameters compensate or sit in weak directions? | `results_final/figures/identifiability_singular_values.png`, `results_final/figures/identifiability_nullspace_participation_all_parameters.png`, `results_final/figures/identifiability_sensitivity_vs_nullspace_all_parameters.png`, `results_final/figures/identifiability_compensation_network_sensitivity.png` |
 | Profile likelihood | Which selected parameters are practically identifiable? | `results_final/tables/profile_50d_balanced_relaxed_summary.csv`, `results_final/figures/profile_50d_balanced_relaxed_combined_profiles.png` |
+
+## Key Identifiability Figures
+
+### Singular values
+
+![Singular values](../results_final/figures/identifiability_singular_values.png)
+
+This plot shows whether the selected measurements support many independent
+parameter combinations or only a smaller number of strong directions. Large
+singular values are well-supported directions. Very small singular values are
+weak directions that lead to non-identifiability or compensation.
+
+### All-parameter sensitivity and nullspace map
+
+![All-parameter nullspace participation](../results_final/figures/identifiability_nullspace_participation_all_parameters.png)
+
+This plot shows every analyzed parameter, not only the strongest nullspace
+participants. It makes clear which parameters are heavily involved in weak
+directions and which are less affected by the nullspace structure.
+
+![Sensitivity versus nullspace](../results_final/figures/identifiability_sensitivity_vs_nullspace_all_parameters.png)
+
+This plot separates two ideas that are easy to mix up. Sensitivity means the
+parameter changes the outputs. Nullspace participation means the parameter is
+involved in weak or compensatory directions. A parameter can therefore be
+sensitive and still difficult to estimate.
+
+### Sensitivity-aware compensation network
+
+![Sensitivity-aware compensation network](../results_final/figures/identifiability_compensation_network_sensitivity.png)
+
+This graph shows which parameters compensate each other. Large red-outlined
+nodes are sensitive parameters inside the compensation network. These are the
+most important targets for anchoring, prior constraints, or Bayesian
+experimental design.
 
 ## Identifiability Headline
 
@@ -62,6 +97,9 @@ estimated together without additional information.
 - `identifiability_compensation_network.png` shows those relationships as a
   graph: nodes are parameters, edges are compensation relationships, node color
   is the SVD class, and thicker edges indicate stronger compensation.
+- `identifiability_compensation_network_sensitivity.png` adds sensitivity to
+  the graph: larger nodes are more sensitive, and red-outlined nodes are locally
+  sensitive parameters.
 
 Examples of strong compensation relationships include
 `fsh_syn_scale` with `insulin_fsh_scale`, `blood_usage_max` with
@@ -69,6 +107,13 @@ Examples of strong compensation relationships include
 `lactation_oxt_decay` with `fat_mobilization_storage_threshold`. These pairs
 are important because changing one parameter can be partly offset by changing
 the other, producing similar measured outputs.
+
+Sensitivity and compensation should be read together. A sensitive parameter is
+one that changes the model outputs. A compensatory parameter is one whose effect
+can be hidden by changing another parameter. Therefore, a parameter can be
+sensitive and still be difficult to estimate. The most important BED targets
+are the parameters that are both sensitive and strongly connected in the
+compensation network.
 
 Operationally, compensation pairs should be handled in one of three ways:
 

@@ -32,10 +32,16 @@ This folder contains selected result files for public reporting.
 - `identifiability_svd_ranking.png`: top parameters by local SVD ranking score
 - `identifiability_nullspace_participation.png`: parameters most involved in
   weak/non-identifiable directions
+- `identifiability_nullspace_participation_all_parameters.png`: all analyzed
+  parameters ranked by weak/nullspace participation
+- `identifiability_sensitivity_vs_nullspace_all_parameters.png`: all-parameter
+  map comparing sensitivity against nullspace participation
 - `identifiability_compensation_edges.png`: strongest parameter-pair
   compensation relationships
 - `identifiability_compensation_network.png`: graph view of compensation
   relationships, with nodes colored by SVD class
+- `identifiability_compensation_network_sensitivity.png`: compensation network
+  with node size and outline indicating local sensitivity
 - `identifiability_class_counts.png`: Estimate / Fix class counts
 - `identifiability_decision_map.png`: sensitivity vs nullspace decision map
 - `profile_50d_balanced_relaxed_combined_profiles.png`: combined profile

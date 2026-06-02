@@ -46,6 +46,9 @@ What it shows:
   model outputs.
 - Higher bars indicate that a small parameter perturbation causes a larger
   relative change in at least one output metric.
+- The x-axis is the maximum absolute relative sensitivity across outputs. In
+  simple terms, it asks: "when this parameter is slightly changed, what is the
+  largest relative response seen in the measured model outputs?"
 
 Technical terms:
 
@@ -66,6 +69,9 @@ Interpretation:
   parameter is identifiable.
 - A parameter can strongly affect outputs and still be hard to estimate if
   another parameter can compensate for it.
+- For example, a parameter may strongly change glucose or insulin trajectories,
+  but if another parameter can be adjusted to undo that change, the data may not
+  be able to separate the two parameters.
 - This plot motivates the next step: identifiability analysis.
 
 ## SVD: Singular Values
@@ -103,6 +109,13 @@ Interpretation:
   measurement set informs some parameter combinations much better than others.
 - This supports the idea that the model has identifiable and weakly
   identifiable directions, rather than all parameters being equally estimable.
+- This plot is not a parameter ranking. It does not say which parameter is weak
+  by itself. Instead, it says how many independent parameter combinations are
+  well supported by the selected outputs.
+- The large singular values represent combinations that the data can "see".
+  The small tail represents combinations that the data can barely distinguish.
+- Those weak combinations are then inspected in the nullspace and compensation
+  plots.
 
 ## SVD: Ranking
 
@@ -119,6 +132,8 @@ What it shows:
 - Parameters ranked by their local SVD sensitivity-ranking score.
 - These are the parameters with the largest contribution to output variation in
   the SVD screen.
+- The score is normalized, so the highest ranked parameter is shown as 1 and
+  the others are shown relative to it.
 
 Technical terms:
 
@@ -134,16 +149,23 @@ Interpretation:
 - Parameters high in this plot are important for the selected outputs.
 - This plot should be read together with nullspace participation. A parameter
   can be high-impact but still compensatory.
+- If a parameter is high in this ranking and low in nullspace participation, it
+  is a good estimation candidate.
+- If a parameter is high in this ranking and also high in nullspace
+  participation, it is influential but difficult to estimate alone.
 
 ## SVD: Nullspace Participation
 
 Figure:
 
 - `identifiability_nullspace_participation.png`
+- `identifiability_nullspace_participation_all_parameters.png`
+- `identifiability_sensitivity_vs_nullspace_all_parameters.png`
 
 Table:
 
 - `structid_50d_measurable_ranking_and_participation.csv`
+- `structid_50d_measurable_holistic_table.csv`
 
 What it shows:
 
@@ -151,6 +173,14 @@ What it shows:
   directions.
 - High values indicate that the parameter is involved in combinations that are
   difficult to distinguish from the selected outputs.
+- `identifiability_nullspace_participation.png` focuses on the strongest
+  weak-direction participants.
+- `identifiability_nullspace_participation_all_parameters.png` shows the full
+  parameter list, so the reader can see both problematic and well-supported
+  parameters.
+- `identifiability_sensitivity_vs_nullspace_all_parameters.png` puts every
+  parameter on one map: sensitivity on the x-axis and nullspace participation
+  on the y-axis.
 
 Technical terms:
 
@@ -162,6 +192,9 @@ Technical terms:
   in another parameter, making separate estimation difficult.
 - **Local linear approximation**: the approximation that small parameter changes
   affect outputs approximately linearly near the nominal parameter set.
+- **Sensitivity axis**: how strongly a parameter affects outputs.
+- **Nullspace axis**: how strongly a parameter belongs to weak or compensatory
+  directions.
 
 Interpretation:
 
@@ -169,6 +202,21 @@ Interpretation:
   independently.
 - These parameters are good candidates for fixing, anchoring, or targeting with
   improved experimental design.
+- A parameter can be sensitive and still appear in the nullspace. This means it
+  affects the model, but its effect is not unique enough under the current
+  measurements.
+- In the all-parameter sensitivity/nullspace map, high sensitivity and low
+  nullspace means a favorable estimation candidate.
+- High sensitivity and high nullspace means an important but compensatory
+  parameter, usually better treated as an anchor or constrained by prior
+  knowledge.
+- Low sensitivity and high nullspace means the current outputs do not provide
+  useful information for estimating that parameter.
+- Low sensitivity and low nullspace means the parameter is not driving this
+  analysis strongly.
+- This is the clearest answer to the question "are they sensitive?" Some of the
+  weak/nullspace parameters are sensitive, but others are weak because the
+  selected outputs barely respond to them.
 
 ## SVD: Compensation Edges
 
@@ -176,10 +224,12 @@ Figure:
 
 - `identifiability_compensation_edges.png`
 - `identifiability_compensation_network.png`
+- `identifiability_compensation_network_sensitivity.png`
 
 Table:
 
 - `structid_50d_measurable_compensation_edges.csv`
+- `structid_50d_measurable_holistic_table.csv`
 
 What it shows:
 
@@ -189,6 +239,11 @@ What it shows:
   direction.
 - The network plot shows the same idea as a graph: each node is a parameter,
   and each edge is a compensation relationship.
+- `identifiability_compensation_network.png` emphasizes the compensation
+  structure and SVD class.
+- `identifiability_compensation_network_sensitivity.png` adds the sensitivity
+  information: larger nodes are more sensitive, and red-outlined nodes are
+  locally sensitive parameters.
 
 Technical terms:
 
@@ -200,8 +255,10 @@ Technical terms:
 - **Node**: one model parameter in the compensation graph.
 - **Node color**: the SVD class of the parameter: `Estimate`,
   `Fix (anchor)`, or `Fix (irrelevant)`.
-- **Node size**: scaled by the parameter's sensitivity/nullspace involvement,
-  so larger nodes are more prominent in the SVD structure.
+- **Node size**: in the sensitivity-aware network, scaled by local sensitivity,
+  so larger nodes affect the selected outputs more strongly.
+- **Red node outline**: a sensitive parameter in the compensation network
+  using a normalized local sensitivity threshold.
 - **Edge width**: scaled by compensation strength; thicker edges indicate
   stronger compensatory relationships.
 
@@ -216,6 +273,11 @@ Interpretation:
 - A node connected to many strong edges is a warning sign: that parameter may
   be influential, but its separate value is difficult to recover unless one of
   its partners is fixed, constrained, or targeted by a better experiment.
+- In the sensitivity-aware network, the most important cases are large nodes
+  with red outlines that are also connected by thick edges. These parameters
+  matter to the outputs, but their effects can be masked by compensation.
+- Small nodes without a red outline are less urgent for calibration in the
+  current measurement setting, even if they appear in the compensation network.
 - The graph is also a BED guide. Candidate sampling times/species should be
   judged by whether they reduce ambiguity within these connected compensation
   groups.
@@ -346,8 +408,11 @@ The figures should be read in this order:
 sensitivity_top_parameters.png
 -> identifiability_singular_values.png
 -> identifiability_nullspace_participation.png
+-> identifiability_nullspace_participation_all_parameters.png
+-> identifiability_sensitivity_vs_nullspace_all_parameters.png
 -> identifiability_compensation_edges.png
 -> identifiability_compensation_network.png
+-> identifiability_compensation_network_sensitivity.png
 -> identifiability_decision_map.png
 -> identifiability_class_counts.png
 -> profile_50d_balanced_relaxed_combined_profiles.png
