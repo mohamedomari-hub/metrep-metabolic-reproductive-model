@@ -72,6 +72,29 @@ selected `Estimate` parameters:
 - 1 weakly identifiable
 - 2 flat/non-identifiable
 
+These 60 parameters were profiled with a weighted least-squares loss against
+synthetic measurable outputs. For a tested parameter, the profile fixes that
+parameter across a grid and re-optimizes nuisance parameters:
+
+```text
+profile_loss(a) =
+    min_nuisance [ weighted_output_loss + admissibility_penalty ]
+
+delta_loss(a) = profile_loss(a) - best_profile_loss
+```
+
+The cutoff shown in the profile plots is `1.92`, an approximate 95% cutoff for
+one profiled parameter.
+
+The profile classes mean:
+
+| Profile result | Meaning in this repository |
+|---|---|
+| 51 practically identifiable | The profile has a clear enough minimum inside the tested range; moving the parameter away from its best value worsens the fit. |
+| 6 boundary-limited | The best point is at the edge of the tested grid, so the true optimum or confidence interval may extend outside the tested range. |
+| 1 weakly identifiable | The profile has some curvature, but most of the tested range remains below the cutoff, so the parameter is only weakly bounded. |
+| 2 flat/non-identifiable | The profile stays too flat; changing the parameter does not worsen the fit enough under the current outputs and nuisance compensation. |
+
 ## How To Use The Identifiability Classes
 
 The SVD result should be read as an estimation strategy, not only as a label

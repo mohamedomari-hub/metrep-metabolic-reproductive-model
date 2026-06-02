@@ -97,6 +97,13 @@ whether high-impact parameters are separable or compensatory. Profile
 likelihood provides a nonlinear practical-identifiability confirmation for the
 selected parameters.
 
+The mathematical definitions for sensitivity, SVD/nullspace identifiability,
+profile likelihood, and Bayesian experimental design are documented in:
+
+- `docs/sensitivity_identifiability.md`
+- `docs/bayesian_experimental_design.md`
+- `docs/results_summary.md`
+
 ## Quick Start
 
 Create an environment and install dependencies:
@@ -164,6 +171,11 @@ profile-likelihood confirmation gives:
 - 6 boundary-limited
 - 1 weakly identifiable
 - 2 flat/non-identifiable
+
+In plain language, 51 parameters had profile curves with clear enough minima
+inside the tested range. Six had best fits at the edge of the tested range, one
+was only weakly bounded, and two stayed too flat to support reliable estimation
+from the current output panel.
 
 See `docs/sensitivity_identifiability.md`, `docs/results_summary.md`,
 `docs/plot_interpretation_guide.md`, and `results_final/` for the curated

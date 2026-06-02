@@ -59,6 +59,41 @@ In simple terms:
 mutual information = how much knowing the measurement tells us about the target
 ```
 
+Mathematically, for a target quantity `W` and a candidate future measurement
+`Z`, mutual information is:
+
+```text
+I(W; Z) = integral integral p(w, z) log( p(w, z) / (p(w) p(z)) ) dw dz
+```
+
+Equivalently:
+
+```text
+I(W; Z) = H(W) - H(W | Z)
+```
+
+where `H(W)` is the uncertainty before observing `Z`, and `H(W | Z)` is the
+remaining uncertainty after observing `Z`. Therefore, a high mutual information
+value means the candidate measurement is expected to reduce uncertainty about
+the target.
+
+In the MATLAB BED script, this is estimated by Monte Carlo simulation and
+density estimation:
+
+```text
+1. sample parameter sets
+2. simulate model outputs for each parameter set
+3. form simulated pairs (target W, candidate measurement Z)
+4. estimate p(w), p(z), and p(w, z)
+5. evaluate log( p(w, z) / (p(w) p(z)) )
+6. average/rank this information over candidate designs
+```
+
+The script uses MATLAB density functions such as `ksdensity`, `mvksdensity`,
+`normpdf`, and `mvnpdf`. Because this is the original PhD MATLAB workflow, the
+repository presents it as methodological provenance and selected results, not
+as a fully lightweight Python reproduction.
+
 Here:
 
 - the target can be ovulation time or a parameter;
@@ -70,6 +105,16 @@ The script also estimates posterior distributions. A posterior distribution is
 the uncertainty after a hypothetical measurement has been observed. If the
 posterior is narrower than the prior, the measurement has improved knowledge of
 the target.
+
+The posterior is based on Bayes' rule:
+
+```text
+p(w | z*) = p(z* | w) p(w) / p(z*)
+```
+
+where `z*` is a hypothetical or selected observation. In practical terms, the
+BED result asks whether observing `z*` would make the distribution of `W`
+narrower or more concentrated than the prior distribution.
 
 This is why BED naturally follows identifiability analysis:
 
