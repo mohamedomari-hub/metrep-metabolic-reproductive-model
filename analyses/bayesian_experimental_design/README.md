@@ -26,6 +26,25 @@ Method summary:
 - Use posterior narrowing to show how informative measurements reduce
   uncertainty.
 
+Posterior summary:
+
+- Draw prior samples for the selected uncertain parameters.
+- Simulate the model for each prior sample at the candidate sampling day.
+- Generate one fixed synthetic observation from the nominal/reference
+  simulation plus Gaussian measurement noise.
+- Compute a Gaussian likelihood for each prior sample.
+- Normalize the likelihoods into weights.
+- Estimate the posterior for the target parameter as a weighted KDE of the
+  prior samples.
+
+Mutual-information summary:
+
+- Build Monte Carlo pairs of target quantity and candidate measurement.
+- Estimate marginal and joint densities for the target, measurement, and their
+  joint distribution.
+- Rank candidate designs by the average log-density ratio
+  `log(p(target, measurement) / (p(target) p(measurement)))`.
+
 Within the full project logic, BED is the proposed way to improve information
 about parameters or model directions that classical identifiability analysis
 shows are weakly informed.

@@ -109,10 +109,192 @@ Here:
   candidate sampling day;
 - higher mutual information means the design is more informative.
 
-The script also estimates posterior distributions. A posterior distribution is
-the uncertainty after a hypothetical measurement has been observed. If the
-posterior is narrower than the prior, the measurement has improved knowledge of
-the target.
+## Posterior Calculation By Importance Reweighting
+
+The posterior plots were calculated by importance reweighting of prior samples.
+In other words, the workflow first generated parameter samples from the prior,
+then used a synthetic observation and a Gaussian observation model to assign a
+likelihood weight to each sample.
+
+The steps are:
+
+1. Draw Monte Carlo parameter samples from the prior:
+
+$$
+\theta_i \sim p(\theta),
+\qquad i=1,\ldots,N
+$$
+
+In this workflow, the prior was uniform over the selected uncertain
+parameters.
+
+2. For each parameter sample, run the model and store the predicted measured
+species at the candidate sampling day:
+
+$$
+y_i = y(\theta_i)
+$$
+
+Here, $y_i$ can contain measured species such as FSH, PGF, P4, E2, INH, IGF1,
+insulin, and glucose.
+
+3. Generate one fixed synthetic observation vector from the nominal/reference
+simulation. If $\mu$ is the nominal model prediction at that sampling day, then:
+
+$$
+z_{\mathrm{obs}}
+= \mu + \sigma \odot \varepsilon,
+\qquad
+\varepsilon \sim \mathcal{N}(0,I)
+$$
+
+The observation standard deviation is defined from a relative noise level:
+
+$$
+\sigma_j =
+\mathrm{relSigma}\,|\mu_j|
+$$
+
+with clipping away from zero so that nearly zero outputs do not give a zero
+measurement error.
+
+The same fixed observation vector was used when comparing the full ODE model
+and surrogate calculations, so both workflows were evaluated against the same
+synthetic data.
+
+4. Compute the Gaussian likelihood for each prior sample:
+
+$$
+p(z_{\mathrm{obs}} \mid \theta_i)
+\propto
+\exp
+\left[
+  -\frac{1}{2}
+  \sum_j
+  \left(
+    \frac{z_{\mathrm{obs},j}-y_{i,j}}{\sigma_j}
+  \right)^2
+\right]
+$$
+
+Equivalently, the log-likelihood is:
+
+$$
+\ell_i =
+-\frac{1}{2}
+\sum_j
+\left(
+  \frac{z_{\mathrm{obs},j}-y_{i,j}}{\sigma_j}
+\right)^2
+$$
+
+5. Stabilize and normalize the likelihood weights:
+
+$$
+\tilde{w}_i =
+\exp(\ell_i - \max_k \ell_k)
+$$
+
+$$
+w_i =
+\frac{\tilde{w}_i}{\sum_k \tilde{w}_k}
+$$
+
+The normalized weights satisfy:
+
+$$
+\sum_i w_i = 1
+$$
+
+These weights measure how compatible each parameter sample is with the
+synthetic observation under the assumed Gaussian measurement noise.
+
+6. Estimate the posterior for the parameter of interest, for example
+$\theta_p$, using a weighted distribution of the prior samples:
+
+$$
+p(\theta_p \mid z_{\mathrm{obs}})
+\approx
+\sum_i
+w_i
+K_h(\theta_p - \theta_{i,p})
+$$
+
+where $K_h$ is a kernel density estimate with bandwidth $h$. Practically, this
+means that samples with higher likelihood contribute more strongly to the
+posterior density.
+
+This is Bayes' rule written in an importance-sampling form:
+
+$$
+p(\theta \mid z_{\mathrm{obs}})
+\propto
+p(\theta)\,p(z_{\mathrm{obs}}\mid\theta)
+$$
+
+Because the samples were already drawn from the prior, the likelihood becomes
+the weight that reshapes the prior sample cloud into the posterior.
+
+The posterior is narrower than the prior when the synthetic measurement is
+informative for the target parameter. If the posterior looks similar to the
+prior, that measurement does not strongly reduce uncertainty.
+
+## Mutual Information Calculation
+
+The mutual-information calculation uses the same Monte Carlo idea, but instead
+of conditioning on one fixed observed vector, it evaluates how informative a
+candidate measurement is on average.
+
+For a candidate sampling day and species set:
+
+1. Use the prior parameter samples to generate paired samples:
+
+$$
+(W_i, Z_i)
+$$
+
+where $W_i$ is the target quantity for sample $i$ and $Z_i$ is the simulated
+candidate measurement for the same sample.
+
+2. Estimate the marginal and joint densities from the Monte Carlo cloud:
+
+$$
+p(w), \qquad p(z), \qquad p(w,z)
+$$
+
+In the MATLAB workflow these densities are estimated with KDE/Gaussian density
+tools such as `ksdensity`, `mvksdensity`, `normpdf`, and `mvnpdf`.
+
+3. Compute the information contribution:
+
+$$
+\log
+\left(
+  \frac{p(W_i,Z_i)}
+       {p(W_i)p(Z_i)}
+\right)
+$$
+
+4. Average this quantity across the Monte Carlo samples:
+
+$$
+\widehat{I}(W;Z)
+=
+\frac{1}{N}
+\sum_{i=1}^{N}
+\log
+\left(
+  \frac{p(W_i,Z_i)}
+       {p(W_i)p(Z_i)}
+\right)
+$$
+
+A candidate sampling day/species combination receives a high mutual information
+score when the simulated measurement $Z$ is strongly informative about the
+target $W$. This is why mutual information is used to rank candidate designs
+before collecting new data.
+
+## Posterior Interpretation
 
 The posterior is based on Bayes' rule:
 
