@@ -15,13 +15,13 @@ import pandas as pd
 PROJECT_ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(PROJECT_ROOT))
 
-from bovsys.initial_conditions import (
+from metrep.initial_conditions import (
     CORE_INITIAL_CONDITIONS,
     MATLAB_INITIAL_CONDITIONS_25,
     STATE_NAMES,
     matlab_core_initial_conditions,
 )
-from bovsys.parameters import matlab_parameter_vector, parameter_table
+from metrep.parameters import matlab_parameter_vector, parameter_table
 
 
 RESULTS_DIR = PROJECT_ROOT / "results" / "tables"

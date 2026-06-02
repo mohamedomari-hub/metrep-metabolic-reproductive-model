@@ -9,9 +9,9 @@ import sys
 PROJECT_ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(PROJECT_ROOT))
 
-from bovsys.plotting import plot_selected_states
-from bovsys.scenarios import constant_non_lactating
-from bovsys.simulate import run_simulation, save_result
+from metrep.plotting import plot_selected_states
+from metrep.scenarios import constant_non_lactating
+from metrep.simulate import run_simulation, save_result
 
 
 def main() -> None:

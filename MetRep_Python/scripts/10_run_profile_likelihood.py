@@ -1,6 +1,6 @@
 """Synthetic-data profile likelihood with biological admissibility penalties.
 
-Default outputs are the measurable BovSys variables:
+Default outputs are the measurable MetRep variables:
 FSH, PGF, P4, E2, INH, IGF1, Insulin, Glucose, Glucagon.
 
 The default mode is plot-first and storage-light: it saves figures plus one
@@ -26,17 +26,17 @@ sys.path.insert(0, str(PROJECT_ROOT))
 
 import matplotlib.pyplot as plt
 
-from bovsys.admissibility import AdmissibilityThresholds
-from bovsys.initial_conditions import STATE_INDEX
-from bovsys.parameters import PARAMETERS, default_parameters
-from bovsys.profile_likelihood import (
+from metrep.admissibility import AdmissibilityThresholds
+from metrep.initial_conditions import STATE_INDEX
+from metrep.parameters import PARAMETERS, default_parameters
+from metrep.profile_likelihood import (
     SyntheticData,
     classify_profile,
     make_synthetic_data,
     profile_one_parameter,
 )
-from bovsys.scenarios import constant_non_lactating
-from bovsys.simulate import run_simulation
+from metrep.scenarios import constant_non_lactating
+from metrep.simulate import run_simulation
 
 try:
     from scipy.interpolate import PchipInterpolator

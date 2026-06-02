@@ -15,7 +15,7 @@ def _interp(t: float, at: np.ndarray, values: np.ndarray) -> float:
     return float(np.interp(t, at, values))
 
 
-def bovsys_rhs(
+def metrep_rhs(
     t: float,
     y: np.ndarray,
     params: dict[str, float],
@@ -24,7 +24,7 @@ def bovsys_rhs(
     milk: np.ndarray,
     mode: str = "non_lactating",
 ) -> np.ndarray:
-    """Return dy/dt for the core BovSys model.
+    """Return dy/dt for the core MetRep model.
 
     Parameters
     ----------

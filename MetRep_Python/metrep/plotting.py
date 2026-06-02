@@ -13,8 +13,8 @@ import pandas as pd
 from matplotlib.lines import Line2D
 from matplotlib.patches import Patch
 
-from bovsys.initial_conditions import STATE_INDEX, STATE_NAMES
-from bovsys.simulate import SimulationResult
+from metrep.initial_conditions import STATE_INDEX, STATE_NAMES
+from metrep.simulate import SimulationResult
 
 
 DEFAULT_OUTPUTS = ["Glucose", "Insulin", "IGF1", "P4", "E2", "Follicle", "CL"]

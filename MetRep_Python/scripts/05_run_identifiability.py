@@ -1,8 +1,8 @@
 """Run SVD-based local structural identifiability diagnostics.
 
 This script follows the approach from the older
-``bovsys_structid_svd_merged_robust_updated.py`` workflow, adapted to the
-refactored BovSys package:
+``metrep_structid_svd_merged_robust_updated.py`` workflow, adapted to the
+refactored MetRep package:
 
     1. central-difference stacked sensitivity matrix
     2. SVD rank/nullspace analysis
@@ -37,10 +37,10 @@ sys.path.insert(0, str(PROJECT_ROOT))
 
 import matplotlib.pyplot as plt
 
-from bovsys.analysis import structural_identifiability_svd
-from bovsys.parameters import PARAMETERS
-from bovsys.plotting import plot_compensation_network
-from bovsys.scenarios import constant_non_lactating
+from metrep.analysis import structural_identifiability_svd
+from metrep.parameters import PARAMETERS
+from metrep.plotting import plot_compensation_network
+from metrep.scenarios import constant_non_lactating
 
 
 FOCUSED_PARAMETERS = [

@@ -11,10 +11,10 @@ import numpy as np
 PROJECT_ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(PROJECT_ROOT))
 
-from bovsys.analysis import uncertainty_trajectories
-from bovsys.parameters import PARAMETERS
-from bovsys.plotting import plot_uncertainty_band
-from bovsys.scenarios import constant_non_lactating
+from metrep.analysis import uncertainty_trajectories
+from metrep.parameters import PARAMETERS
+from metrep.plotting import plot_uncertainty_band
+from metrep.scenarios import constant_non_lactating
 
 
 def parse_args() -> argparse.Namespace:

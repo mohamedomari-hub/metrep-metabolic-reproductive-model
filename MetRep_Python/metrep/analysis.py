@@ -7,10 +7,10 @@ from dataclasses import replace
 import numpy as np
 import pandas as pd
 
-from bovsys.initial_conditions import STATE_INDEX
-from bovsys.parameters import default_parameters
-from bovsys.scenarios import Scenario
-from bovsys.simulate import run_simulation
+from metrep.initial_conditions import STATE_INDEX
+from metrep.parameters import default_parameters
+from metrep.scenarios import Scenario
+from metrep.simulate import run_simulation
 
 
 def state_auc(result, state: str) -> float:
@@ -122,7 +122,7 @@ def sensitivity_matrix_central_diff(
     """Build the stacked central-difference sensitivity matrix.
 
     This follows the approach in the older
-    ``bovsys_structid_svd_merged_robust_updated.py`` script:
+    ``metrep_structid_svd_merged_robust_updated.py`` script:
 
     ``S = d vec(Y_outputs) / d theta``
 

@@ -1,4 +1,4 @@
-"""Run configurable BovSys model scenarios.
+"""Run configurable MetRep model scenarios.
 
 Examples
 --------
@@ -29,14 +29,14 @@ PROJECT_ROOT = Path(__file__).resolve().parents[1]
 os.environ.setdefault("MPLCONFIGDIR", str(PROJECT_ROOT / ".matplotlib"))
 sys.path.insert(0, str(PROJECT_ROOT))
 
-from bovsys.scenarios import (
+from metrep.scenarios import (
     available_scenarios,
     built_in_scenario,
     custom_step_feeding,
     scenario_default_days,
     scenario_from_csv,
 )
-from bovsys.simulate import run_simulation, save_result
+from metrep.simulate import run_simulation, save_result
 
 
 DEFAULT_PLOT_STATES = ["Glucose", "Insulin", "IGF1", "P4", "E2", "Follicle", "CL"]
@@ -130,7 +130,7 @@ def main() -> None:
             print(f"- {name} ({scenario_default_days(name):g} days)")
         return
 
-    from bovsys.plotting import plot_all_states_grid, plot_scenario_comparison, plot_selected_states
+    from metrep.plotting import plot_all_states_grid, plot_scenario_comparison, plot_selected_states
 
     simulation_dir = PROJECT_ROOT / "results" / "simulations"
     figure_dir = PROJECT_ROOT / "results" / "figures"

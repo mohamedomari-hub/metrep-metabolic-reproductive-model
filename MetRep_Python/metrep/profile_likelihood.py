@@ -1,4 +1,4 @@
-"""Profile-likelihood utilities for synthetic BovSys experiments."""
+"""Profile-likelihood utilities for synthetic MetRep experiments."""
 
 from __future__ import annotations
 
@@ -8,14 +8,14 @@ import numpy as np
 import pandas as pd
 from scipy.optimize import minimize
 
-from bovsys.admissibility import (
+from metrep.admissibility import (
     AdmissibilityThresholds,
     trajectory_admissibility,
 )
-from bovsys.initial_conditions import STATE_INDEX
-from bovsys.parameters import default_parameters
-from bovsys.scenarios import Scenario
-from bovsys.simulate import SimulationResult, run_simulation
+from metrep.initial_conditions import STATE_INDEX
+from metrep.parameters import default_parameters
+from metrep.scenarios import Scenario
+from metrep.simulate import SimulationResult, run_simulation
 
 
 @dataclass(frozen=True)

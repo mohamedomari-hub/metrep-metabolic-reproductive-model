@@ -19,21 +19,21 @@ PROJECT_ROOT = Path(__file__).resolve().parents[1]
 os.environ.setdefault("MPLCONFIGDIR", str(PROJECT_ROOT / ".matplotlib"))
 sys.path.insert(0, str(PROJECT_ROOT))
 
-from bovsys.analysis import (
+from metrep.analysis import (
     local_sensitivity,
     structural_identifiability_svd,
     uncertainty_trajectories,
 )
-from bovsys.parameters import PARAMETERS
-from bovsys.plotting import (
+from metrep.parameters import PARAMETERS
+from metrep.plotting import (
     plot_compensation_network,
     plot_all_states_grid,
     plot_scenario_comparison,
     plot_selected_states,
     plot_uncertainty_band,
 )
-from bovsys.scenarios import available_scenarios, built_in_scenario
-from bovsys.simulate import run_simulation, save_result
+from metrep.scenarios import available_scenarios, built_in_scenario
+from metrep.simulate import run_simulation, save_result
 
 
 DEFAULT_OUTPUTS = ["Glucose", "Insulin", "IGF1", "P4", "E2", "Follicle", "CL"]

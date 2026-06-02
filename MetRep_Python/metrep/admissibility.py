@@ -1,4 +1,4 @@
-"""Biological admissibility checks for BovSys trajectories."""
+"""Biological admissibility checks for MetRep trajectories."""
 
 from __future__ import annotations
 
@@ -7,8 +7,8 @@ from dataclasses import dataclass
 import numpy as np
 import pandas as pd
 
-from bovsys.initial_conditions import STATE_INDEX
-from bovsys.simulate import SimulationResult
+from metrep.initial_conditions import STATE_INDEX
+from metrep.simulate import SimulationResult
 
 
 @dataclass(frozen=True)

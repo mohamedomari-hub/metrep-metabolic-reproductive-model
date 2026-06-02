@@ -1,4 +1,4 @@
-"""Simulation utilities for BovSys."""
+"""Simulation utilities for MetRep."""
 
 from __future__ import annotations
 
@@ -9,15 +9,15 @@ import numpy as np
 import pandas as pd
 from scipy.integrate import solve_ivp
 
-from bovsys.initial_conditions import STATE_NAMES, initial_conditions
-from bovsys.ode_model import bovsys_rhs
-from bovsys.parameters import default_parameters
-from bovsys.scenarios import Scenario
+from metrep.initial_conditions import STATE_NAMES, initial_conditions
+from metrep.ode_model import metrep_rhs
+from metrep.parameters import default_parameters
+from metrep.scenarios import Scenario
 
 
 @dataclass
 class SimulationResult:
-    """Container for one solved BovSys trajectory."""
+    """Container for one solved MetRep trajectory."""
 
     scenario_name: str
     t: np.ndarray
@@ -43,7 +43,7 @@ def run_simulation(
     rtol: float = 1e-6,
     atol: float = 1e-9,
 ) -> SimulationResult:
-    """Solve one BovSys scenario with SciPy ``solve_ivp``."""
+    """Solve one MetRep scenario with SciPy ``solve_ivp``."""
 
     params = default_parameters() if parameters is None else dict(parameters)
     params["c0"] = scenario.c0
@@ -51,7 +51,7 @@ def run_simulation(
     t_eval = np.asarray(scenario.t_eval, dtype=float)
 
     def rhs(t: float, y: np.ndarray) -> np.ndarray:
-        return bovsys_rhs(t, y, params, t_eval, scenario.dmi, scenario.milk, scenario.mode)
+        return metrep_rhs(t, y, params, t_eval, scenario.dmi, scenario.milk, scenario.mode)
 
     sol = solve_ivp(
         rhs,
