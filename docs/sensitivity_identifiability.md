@@ -24,9 +24,11 @@ How it is calculated:
 The result is a local sensitivity score. In simple terms:
 
 $$
-\text{sensitivity} =
-\frac{\text{output change}}{\text{parameter change}}
+S =
+\frac{\Delta O}{\Delta \theta}
 $$
+
+where $O$ is a model output summary and $\theta$ is a parameter.
 
 More specifically, the public sensitivity table uses one-at-a-time relative
 sensitivity of output AUC values. For parameter $\theta_j$ and output $y_k(t)$:
@@ -73,12 +75,8 @@ How it is calculated:
    perturbed.
 4. Apply singular value decomposition, or SVD, to the matrix.
 
-SVD separates the sensitivity matrix into independent information directions:
-
-$$
-\text{sensitivity matrix}
-= \text{informed directions} + \text{weak directions}
-$$
+SVD separates the sensitivity matrix into informed directions and weak
+directions.
 
 The implemented SVD screen uses a stacked trajectory sensitivity matrix. For a
 parameter $\theta_j$, selected output vector $Y(\theta)$, and step size $h_j$, the
@@ -120,18 +118,19 @@ where:
 The numerical rank is calculated using a relative threshold:
 
 $$
-\mathrm{threshold}
-= \mathrm{toleranceValue}\cdot \sigma_{\max}
+\tau = c\,\sigma_1
 $$
 
 $$
 r =
 \left|
-  \{\sigma_i : \sigma_i > \mathrm{threshold}\}
+  \{\sigma_i : \sigma_i > \tau\}
 \right|
 $$
 
-with `tolerance_value = 1e-8` by default.
+where $\tau$ is the rank threshold, $c$ is the tolerance value, and
+$\sigma_1$ is the largest singular value. The default tolerance value is
+`1e-8`.
 
 Large singular values indicate parameter combinations that strongly affect the
 selected outputs. Very small singular values indicate weak or near-null
@@ -156,21 +155,25 @@ Nullspace participation for each parameter is summarized as the Euclidean norm
 of that parameter's coefficients across all nullspace directions:
 
 $$
-\mathrm{nullspaceParticipation}_j =
+n_j =
 \sqrt{
   \sum_q \mathcal{N}_{qj}^2
 }
 $$
 
+where $n_j$ is the nullspace participation score for parameter $j$.
+
 The local SVD ranking score used in the curated result is `rel2_colnorm`:
 
 $$
-\mathrm{rankingScore}_j =
+s_j =
 \left\|
   \frac{\theta_j}{\max(|Y|,\epsilon)}
   S_{:,j}
 \right\|_2
 $$
+
+where $s_j$ is the local SVD ranking score.
 
 This makes the ranking relative to both parameter size and output scale.
 
@@ -205,21 +208,21 @@ scores. The high and low thresholds are quantiles of the analyzed parameter
 set:
 
 $$
-\mathrm{sensitivity}_{0\ldots1}
-= \text{normalized ranking score}
+\bar{s}_j =
+\frac{s_j-\min(s)}{\max(s)-\min(s)}
 $$
 
 $$
-\mathrm{nullspace}_{0\ldots1}
-= \text{normalized nullspace participation}
+\bar{n}_j =
+\frac{n_j-\min(n)}{\max(n)-\min(n)}
 $$
 
 $$
 \begin{aligned}
-\mathrm{sens}_{hi} &= Q_{0.75}(\mathrm{sensitivity}_{0\ldots1}) \\
-\mathrm{sens}_{lo} &= Q_{0.25}(\mathrm{sensitivity}_{0\ldots1}) \\
-\mathrm{null}_{hi} &= Q_{0.75}(\mathrm{nullspace}_{0\ldots1}) \\
-\mathrm{null}_{lo} &= Q_{0.25}(\mathrm{nullspace}_{0\ldots1})
+s_{hi} &= Q_{0.75}(\bar{s}) \\
+s_{lo} &= Q_{0.25}(\bar{s}) \\
+n_{hi} &= Q_{0.75}(\bar{n}) \\
+n_{lo} &= Q_{0.25}(\bar{n})
 \end{aligned}
 $$
 
@@ -287,7 +290,7 @@ observation $z_i$, model prediction $m_i(\theta)$, and assumed standard
 deviation $\sigma_i$, the fit loss is:
 
 $$
-\mathrm{fitLoss}(\theta) =
+L(\theta) =
 \frac{1}{2}
 \sum_i
 \left(
@@ -302,22 +305,24 @@ $$
 P_j(a) =
 \min_{\eta}
 \left[
-  \mathrm{fitLoss}(\theta_j = a\theta_{j,\mathrm{ref}}, \eta)
-  + \text{admissibility penalty}
+  L(\theta_j = a\theta_{j,\mathrm{ref}}, \eta)
+  + A(\theta)
 \right]
 $$
+
+where $A(\theta)$ is the biological admissibility penalty.
 
 The plotted profile is the increase from the best value:
 
 $$
-\Delta\text{loss}_j(a)
+\Delta L_j(a)
 = P_j(a) - \min_a P_j(a)
 $$
 
 The horizontal cutoff used in the plots is:
 
 $$
-\text{profile cutoff} = 1.92
+c_{\mathrm{profile}} = 1.92
 $$
 
 This is an approximate 95% cutoff for one profiled parameter. The script can

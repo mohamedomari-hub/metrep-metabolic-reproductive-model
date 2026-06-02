@@ -53,12 +53,8 @@ The calculation follows this logic:
 
 The main information measure is mutual information.
 
-In simple terms:
-
-$$
-\text{mutual information}
-= \text{how much knowing the measurement tells us about the target}
-$$
+In simple terms, mutual information measures how much knowing a candidate
+measurement tells us about the target.
 
 Mathematically, for a target quantity $W$ and a candidate future measurement
 $Z$, mutual information is:
