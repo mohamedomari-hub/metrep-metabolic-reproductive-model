@@ -94,8 +94,8 @@ $$
 $$
 h_j =
 \max\left(
-  \text{absolute\_step\_min},
-  \text{relative\_step}\cdot |\theta_j|
+  \mathrm{absoluteStepMin},
+  \mathrm{relativeStep}\cdot |\theta_j|
 \right)
 $$
 
@@ -120,13 +120,15 @@ where:
 The numerical rank is calculated using a relative threshold:
 
 $$
-\text{threshold}
-= \text{tolerance\_value}\cdot \sigma_{\max}
+\mathrm{threshold}
+= \mathrm{toleranceValue}\cdot \sigma_{\max}
 $$
 
 $$
-\text{rank}
-= \#\{\sigma_i : \sigma_i > \text{threshold}\}
+r =
+\left|
+  \{\sigma_i : \sigma_i > \mathrm{threshold}\}
+\right|
 $$
 
 with `tolerance_value = 1e-8` by default.
@@ -154,7 +156,7 @@ Nullspace participation for each parameter is summarized as the Euclidean norm
 of that parameter's coefficients across all nullspace directions:
 
 $$
-\text{nullspace\_participation}_j =
+\mathrm{nullspaceParticipation}_j =
 \sqrt{
   \sum_q \mathcal{N}_{qj}^2
 }
@@ -163,7 +165,7 @@ $$
 The local SVD ranking score used in the curated result is `rel2_colnorm`:
 
 $$
-\text{ranking\_score}_j =
+\mathrm{rankingScore}_j =
 \left\|
   \frac{\theta_j}{\max(|Y|,\epsilon)}
   S_{:,j}
@@ -203,21 +205,21 @@ scores. The high and low thresholds are quantiles of the analyzed parameter
 set:
 
 $$
-\text{sensitivity}_{0\ldots1}
+\mathrm{sensitivity}_{0\ldots1}
 = \text{normalized ranking score}
 $$
 
 $$
-\text{nullspace}_{0\ldots1}
+\mathrm{nullspace}_{0\ldots1}
 = \text{normalized nullspace participation}
 $$
 
 $$
 \begin{aligned}
-\text{sens}_{hi} &= Q_{0.75}(\text{sensitivity}_{0\ldots1}) \\
-\text{sens}_{lo} &= Q_{0.25}(\text{sensitivity}_{0\ldots1}) \\
-\text{null}_{hi} &= Q_{0.75}(\text{nullspace}_{0\ldots1}) \\
-\text{null}_{lo} &= Q_{0.25}(\text{nullspace}_{0\ldots1})
+\mathrm{sens}_{hi} &= Q_{0.75}(\mathrm{sensitivity}_{0\ldots1}) \\
+\mathrm{sens}_{lo} &= Q_{0.25}(\mathrm{sensitivity}_{0\ldots1}) \\
+\mathrm{null}_{hi} &= Q_{0.75}(\mathrm{nullspace}_{0\ldots1}) \\
+\mathrm{null}_{lo} &= Q_{0.25}(\mathrm{nullspace}_{0\ldots1})
 \end{aligned}
 $$
 
@@ -285,7 +287,7 @@ observation $z_i$, model prediction $m_i(\theta)$, and assumed standard
 deviation $\sigma_i$, the fit loss is:
 
 $$
-\text{fit\_loss}(\theta) =
+\mathrm{fitLoss}(\theta) =
 \frac{1}{2}
 \sum_i
 \left(
@@ -300,7 +302,7 @@ $$
 P_j(a) =
 \min_{\eta}
 \left[
-  \text{fit\_loss}(\theta_j = a\theta_{j,\mathrm{ref}}, \eta)
+  \mathrm{fitLoss}(\theta_j = a\theta_{j,\mathrm{ref}}, \eta)
   + \text{admissibility penalty}
 \right]
 $$

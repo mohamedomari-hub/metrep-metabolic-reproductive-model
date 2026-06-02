@@ -77,7 +77,7 @@ synthetic measurable outputs. For a tested parameter, the profile fixes that
 parameter across a grid and re-optimizes nuisance parameters:
 
 $$
-\text{profile\_loss}(a) =
+\mathrm{profileLoss}(a) =
 \min_{\text{nuisance}}
 \left[
   \text{weighted output loss}
@@ -87,7 +87,7 @@ $$
 
 $$
 \Delta\text{loss}(a)
-= \text{profile\_loss}(a)
+= \mathrm{profileLoss}(a)
 - \text{best profile loss}
 $$
 
