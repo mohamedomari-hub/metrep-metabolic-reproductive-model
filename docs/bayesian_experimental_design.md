@@ -39,8 +39,7 @@ because:
 
 Present v3 as the canonical model line. Use the single clean MATLAB BED script
 `analyses/bayesian_experimental_design/matlab_original/BED_1M_ALL.m`, which is
-the v3 baseline port. The historical `n2` BED files were moved to the local
-archive to avoid confusing readers with two model versions.
+the v3 baseline port.
 
 The full BED result is reported in the PhD thesis. This repository includes
 selected BED figures for context:

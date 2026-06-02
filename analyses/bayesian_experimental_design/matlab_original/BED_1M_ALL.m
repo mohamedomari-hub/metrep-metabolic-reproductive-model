@@ -8,9 +8,7 @@
 %   - this script uses the published v3 model equations through
 %     BovSys_run_v3_baseline();
 %   - Dexa PK/PD is switched off in the runner, so this is a baseline-model
-%     BED workflow rather than a Dexa perturbation workflow;
-%   - the original historical n2 BED script was moved out of this folder to
-%     avoid confusing two model versions in the GitHub repository.
+%     BED workflow rather than a Dexa perturbation workflow.
 %
 % Readability/port notes for GitHub curation:
 %   - comments mark the biological setup, Monte Carlo simulation, mutual

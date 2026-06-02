@@ -133,7 +133,7 @@ Run the profile likelihood confirmation:
 
 ```bash
 python MetRep_Python/scripts/10_run_profile_likelihood.py \
-  --from-identifiability MetRep_Python/results/tables/structid_50d_measurable_holistic_table.csv \
+  --from-identifiability results_final/tables/structid_50d_measurable_holistic_table.csv \
   --profile-class estimate \
   --max-profile-params 9 \
   --max-nuisance-params 8 \
@@ -177,10 +177,9 @@ single recommended entry point is `BED_1M_ALL.m`, which calls
 `BovSys_run_v3_baseline.m` and uses the published v3 model equations with Dexa
 PK/PD switched off.
 
-The historical `n2` BED files were moved out of the GitHub folder to avoid
-confusing two model versions. The full BED result is reported in the PhD
-thesis, and this repository includes selected BED figures for context. A compact
-Python BED reproduction can be added later using the translated Python model.
+The full BED result is reported in the PhD thesis, and this repository includes
+selected BED figures for context. A compact Python BED reproduction can be
+added later using the translated Python model.
 
 ## Dexa Perturbation Validation
 
@@ -192,5 +191,4 @@ reference code and documents the planned Python Dexa implementation.
 ## License And Citation
 
 Add a license after confirming what can be distributed for code, data, and
-published-paper material. A `CITATION.cff` file is included as a draft and
-should be updated with final publication details before release.
+published-paper material.

@@ -10,7 +10,7 @@ import pandas as pd
 
 
 PROJECT_ROOT = Path(__file__).resolve().parents[1]
-METREP_FORCING_CSV = PROJECT_ROOT / "data" / "metrep" / "DM_MILK_Data.csv"
+METREP_FORCING_CSV = PROJECT_ROOT / "data" / "DM_MILK_Data.csv"
 
 SCENARIO_DEFAULT_DAYS = {
     "baseline_non_lactating": 60.0,

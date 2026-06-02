@@ -23,10 +23,9 @@ simulation.
 - `BovSys_para_dexa_v3.m`: v3 parameter vector used by the BED script
 - `BovSys_Equa_dexa_v3.m`: v3 ODE right-hand side used by the baseline runner
 
-The old `n2` BED files were moved to the local archive to avoid showing two
-model versions in the GitHub-facing folder. The repository story uses v3 as the
-canonical MATLAB model line and exposes the non-interactive baseline interface
-required by BED through `BovSys_run_v3_baseline.m`.
+The repository story uses v3 as the canonical MATLAB model line and exposes the
+non-interactive baseline interface required by BED through
+`BovSys_run_v3_baseline.m`.
 
 The public project story uses BED as the experimental-design response to the
 identifiability analysis:

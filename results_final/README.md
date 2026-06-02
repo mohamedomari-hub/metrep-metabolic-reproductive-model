@@ -1,8 +1,6 @@
 # Curated Results
 
-This folder contains selected result files for public reporting. The full
-working output directory is `../MetRep_Python/results/` and may include
-exploratory, smoke-test, or intermediate files.
+This folder contains selected result files for public reporting.
 
 ## Tables
 

@@ -97,7 +97,7 @@ def main() -> None:
     print("Simulation-output validation TODO:")
     print("- Export MATLAB no-Dexa baseline output as CSV or MAT.")
     print("- Expected columns: time plus states 1..22 in BovSys_Equa_dexa_v3 order.")
-    print("- Place it under data/matlab_reference/ and compare trajectories here.")
+    print("- Place it under data/ and compare trajectories here.")
 
 
 if __name__ == "__main__":

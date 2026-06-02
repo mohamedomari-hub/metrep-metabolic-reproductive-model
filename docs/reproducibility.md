@@ -49,7 +49,7 @@ Profile likelihood confirmation:
 
 ```bash
 python MetRep_Python/scripts/10_run_profile_likelihood.py \
-  --from-identifiability MetRep_Python/results/tables/structid_50d_measurable_holistic_table.csv \
+  --from-identifiability results_final/tables/structid_50d_measurable_holistic_table.csv \
   --profile-class estimate \
   --max-profile-params 9 \
   --max-nuisance-params 8 \
@@ -71,6 +71,4 @@ python MetRep_Python/scripts/10_run_profile_likelihood.py \
 
 ## Results Policy
 
-The full working `MetRep_Python/results/` directory may contain exploratory,
-smoke-test, and intermediate outputs. Public releases should use
-`results_final/` for curated tables and figures only.
+Curated public outputs are stored in `results_final/`.
