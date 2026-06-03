@@ -8,14 +8,14 @@ import numpy as np
 import pandas as pd
 from scipy.optimize import minimize
 
-from metrep.admissibility import (
+from model_definition.admissibility import (
     AdmissibilityThresholds,
     trajectory_admissibility,
 )
-from metrep.initial_conditions import STATE_INDEX
-from metrep.parameters import default_parameters
-from metrep.scenarios import Scenario
-from metrep.simulate import SimulationResult, run_simulation
+from model_definition.initial_conditions import STATE_INDEX
+from model_definition.parameters import default_parameters
+from model_definition.scenarios import Scenario
+from model_definition.simulate import SimulationResult, run_simulation
 
 
 @dataclass(frozen=True)

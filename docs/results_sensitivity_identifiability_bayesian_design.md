@@ -6,7 +6,7 @@ The full biological scenario simulations are reported in the MetRep model paper,
 
 For technical definitions and formulas, see:
 
-- docs/sensitivity_identifiability.md
+- docs/sensitivity_identifiability_bayesian_design.md
 - docs/plot_interpretation_guide.md
 - docs/bayesian_experimental_design.md
 
@@ -22,7 +22,7 @@ For technical definitions and formulas, see:
 | Estimate/fix decision | Which parameters should be estimated, anchored, or fixed? | results_final/figures/identifiability_decision_map.png, results_final/tables/structid_50d_measurable_holistic_table.csv | results_final/figures/identifiability_class_counts.png |
 | Compensation | Which parameters compensate each other? | results_final/figures/identifiability_compensation_network_core.png, results_final/figures/identifiability_parameter_scenario_map.png | results_final/figures/identifiability_compensation_edges.png, results_final/figures/identifiability_nullspace_participation_all_parameters.png, results_final/figures/identifiability_sensitivity_vs_nullspace_all_parameters.png, results_final/figures/identifiability_sensitivity_ranked_by_class.png |
 | Profile likelihood | Do selected parameters remain identifiable under nonlinear profiling? | results_final/figures/profile_likelihood_representative_3x3.png, results_final/tables/profile_50d_balanced_relaxed_summary.csv | results_final/figures/profile_50d_balanced_synthetic_outputs.png |
-| Surrogate BED pilot | Which sampling day/species panel is informative, and how much faster is the surrogate? | analyses/bayesian_experimental_design/surrogate_bed/run_outputs/figures/surrogate_bed_thesis_style_summary.png | analyses/bayesian_experimental_design/surrogate_bed/run_outputs/figures/surrogate_bed_ode_vs_surrogate_speed.png |
+| Surrogate BED pilot | Which sampling day/species panel is informative, and how much faster is the surrogate? | Bayesian_Experimental_Design/surrogate_bed/run_outputs/figures/surrogate_bed_thesis_style_summary.png | Bayesian_Experimental_Design/surrogate_bed/run_outputs/figures/surrogate_bed_ode_vs_surrogate_speed.png |
 
 ---
 
@@ -204,9 +204,9 @@ In practical terms, parameters classified as weakly identifiable, boundary-limit
 
 ## 9. Surrogate BED thesis-style summary
 
-![Surrogate BED thesis-style summary](../analyses/bayesian_experimental_design/surrogate_bed/run_outputs/figures/surrogate_bed_thesis_style_summary.png)
+![Surrogate BED thesis-style summary](Bayesian_Experimental_Design/surrogate_bed/run_outputs/figures/surrogate_bed_thesis_style_summary.png)
 
-![ODE versus surrogate speed](../analyses/bayesian_experimental_design/surrogate_bed/run_outputs/figures/surrogate_bed_ode_vs_surrogate_speed.png)
+![ODE versus surrogate speed](Bayesian_Experimental_Design/surrogate_bed/run_outputs/figures/surrogate_bed_ode_vs_surrogate_speed.png)
 
 The surrogate BED pilot uses the translated Python ODE model to generate a local Monte Carlo prior around the nominal parameter set, retains biologically admissible trajectories, trains an ExtraTrees surrogate on ODE output features, and evaluates candidate measurements using mutual information and posterior reweighting.
 
@@ -290,7 +290,7 @@ This plot shows all analyzed parameters ranked by sensitivity and colored by rec
 
 ODE versus surrogate speed
 
-![ODE versus surrogate speed](../analyses/bayesian_experimental_design/surrogate_bed/run_outputs/figures/surrogate_bed_ode_vs_surrogate_speed.png)
+![ODE versus surrogate speed](Bayesian_Experimental_Design/surrogate_bed/run_outputs/figures/surrogate_bed_ode_vs_surrogate_speed.png)
 
 The speed comparison was measured locally using 12 ODE simulations and 200 repeated surrogate predictions on the same number of parameter samples. The ODE solver required 0.327 seconds per sample, while surrogate prediction required 0.00152 seconds per sample, giving an observed prediction speedup of about 215x.
 

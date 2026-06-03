@@ -58,7 +58,7 @@ value. Parameters with high scores are influential for the selected outputs.
 Main script:
 
 ```bash
-python MetRep_Python/scripts/04_run_sensitivity.py
+python MetRep_Python/model_running/04_run_sensitivity.py
 ```
 
 ## 2. SVD Identifiability Screen
@@ -665,8 +665,8 @@ BED asks which new measurements would reduce those weaknesses
 
 The original PhD BED implementation is retained in MATLAB for provenance and methodological traceability. For public presentation, the repository uses the cleaner v3 baseline BED port:
 
-- `analyses/bayesian_experimental_design/matlab_original/BED_1M_ALL.m`
-- `analyses/bayesian_experimental_design/matlab_original/BovSys_run_v3_baseline.m`
+- `docs/Bayesian_Experimental_Design/matlab_original/BED_1M_ALL.m`
+- `docs/Bayesian_Experimental_Design/matlab_original/BovSys_run_v3_baseline.m`
 
 This version uses the published v3 MetRep equations with Dexa PK/PD switched off, so it should be interpreted as BED for the baseline metabolic-reproductive model, not as a Dexa simulation.
 
@@ -680,7 +680,7 @@ The preferred approach is to keep the ODE model as the reference model and use
 a surrogate only as an accelerator. The implemented script and detailed
 mathematical documentation are in:
 
-`analyses/bayesian_experimental_design/surrogate_bed/`
+`docs/Bayesian_Experimental_Design/surrogate_bed/`
 
 The surrogate workflow should include:
 

@@ -26,11 +26,11 @@ PROJECT_ROOT = Path(__file__).resolve().parents[3]
 PYTHON_ROOT = PROJECT_ROOT / "MetRep_Python"
 sys.path.insert(0, str(PYTHON_ROOT))
 
-from metrep.admissibility import AdmissibilityThresholds, trajectory_admissibility
-from metrep.initial_conditions import STATE_INDEX
-from metrep.parameters import PARAMETERS, default_parameters
-from metrep.scenarios import constant_non_lactating
-from metrep.simulate import run_simulation
+from model_definition.admissibility import AdmissibilityThresholds, trajectory_admissibility
+from model_definition.initial_conditions import STATE_INDEX
+from model_definition.parameters import PARAMETERS, default_parameters
+from model_definition.scenarios import constant_non_lactating
+from model_definition.simulate import run_simulation
 
 
 DEFAULT_SPECIES = ["FSH", "PGF", "P4", "E2", "INH", "IGF1", "Insulin", "Glucose", "Glucagon"]
@@ -39,7 +39,7 @@ DEFAULT_DAYS = list(range(55, 91))
 
 def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(description="Generate surrogate BED input CSVs from MetRep ODE simulations.")
-    parser.add_argument("--output-dir", type=Path, default=Path("analyses/bayesian_experimental_design/surrogate_bed/input_tables"))
+    parser.add_argument("--output-dir", type=Path, default=Path("docs/Bayesian_Experimental_Design/surrogate_bed/input_tables"))
     parser.add_argument("--n-samples", type=int, default=200)
     parser.add_argument("--seed", type=int, default=42)
     parser.add_argument("--days", type=float, default=90.0)

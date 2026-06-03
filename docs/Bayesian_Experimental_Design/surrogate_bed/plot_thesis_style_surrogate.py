@@ -27,10 +27,10 @@ SCRIPT_DIR = Path(__file__).resolve().parent
 sys.path.insert(0, str(PYTHON_ROOT))
 sys.path.insert(0, str(SCRIPT_DIR))
 
-from metrep.initial_conditions import STATE_INDEX
-from metrep.parameters import default_parameters
-from metrep.scenarios import constant_non_lactating
-from metrep.simulate import run_simulation
+from model_definition.initial_conditions import STATE_INDEX
+from model_definition.parameters import default_parameters
+from model_definition.scenarios import constant_non_lactating
+from model_definition.simulate import run_simulation
 from surrogate_bed_pipeline import train_surrogate
 
 
@@ -49,7 +49,7 @@ SPECIES_LABELS = {
 
 
 def parse_args() -> argparse.Namespace:
-    base = Path("analyses/bayesian_experimental_design/surrogate_bed")
+    base = Path("docs/Bayesian_Experimental_Design/surrogate_bed")
     parser = argparse.ArgumentParser(description="Create thesis-style surrogate BED plots.")
     parser.add_argument("--input-dir", type=Path, default=base / "input_tables")
     parser.add_argument("--run-dir", type=Path, default=base / "run_outputs")

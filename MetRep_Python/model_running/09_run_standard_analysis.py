@@ -1,7 +1,7 @@
 """Run 90-day scenario simulations plus all-parameter standard-scenario analyses.
 
 Run from project root:
-    python scripts/09_run_standard_analysis.py
+    python model_running/09_run_standard_analysis.py
 """
 
 from __future__ import annotations
@@ -19,21 +19,21 @@ PROJECT_ROOT = Path(__file__).resolve().parents[1]
 os.environ.setdefault("MPLCONFIGDIR", str(PROJECT_ROOT / ".matplotlib"))
 sys.path.insert(0, str(PROJECT_ROOT))
 
-from metrep.analysis import (
+from model_definition.analysis import (
     local_sensitivity,
     structural_identifiability_svd,
     uncertainty_trajectories,
 )
-from metrep.parameters import PARAMETERS
-from metrep.plotting import (
+from model_definition.parameters import PARAMETERS
+from model_definition.plotting import (
     plot_compensation_network,
     plot_all_states_grid,
     plot_scenario_comparison,
     plot_selected_states,
     plot_uncertainty_band,
 )
-from metrep.scenarios import available_scenarios, built_in_scenario
-from metrep.simulate import run_simulation, save_result
+from model_definition.scenarios import available_scenarios, built_in_scenario
+from model_definition.simulate import run_simulation, save_result
 
 
 DEFAULT_OUTPUTS = ["Glucose", "Insulin", "IGF1", "P4", "E2", "Follicle", "CL"]

@@ -10,9 +10,9 @@ import sys
 PROJECT_ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(PROJECT_ROOT))
 
-from metrep.analysis import local_sensitivity
-from metrep.parameters import PARAMETERS
-from metrep.scenarios import constant_non_lactating
+from model_definition.analysis import local_sensitivity
+from model_definition.parameters import PARAMETERS
+from model_definition.scenarios import constant_non_lactating
 
 
 def parse_args() -> argparse.Namespace:

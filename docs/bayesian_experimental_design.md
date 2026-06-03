@@ -17,8 +17,8 @@ provenance and methodological traceability.
 For a clearer GitHub presentation, the repository also includes a v3 baseline
 port:
 
-- `analyses/bayesian_experimental_design/matlab_original/BED_1M_ALL.m`
-- `analyses/bayesian_experimental_design/matlab_original/BovSys_run_v3_baseline.m`
+- `Bayesian_Experimental_Design/matlab_original/BED_1M_ALL.m`
+- `Bayesian_Experimental_Design/matlab_original/BovSys_run_v3_baseline.m`
 
 This port uses the published v3 model equations with Dexa PK/PD switched off.
 It should be interpreted as BED on the baseline MetRep model, not as a Dexa
@@ -318,7 +318,7 @@ BED asks which new measurements would reduce those weaknesses
 ## Recommended Public Presentation
 
 Present v3 as the canonical model line. Use the single clean MATLAB BED script
-`analyses/bayesian_experimental_design/matlab_original/BED_1M_ALL.m`, which is
+`Bayesian_Experimental_Design/matlab_original/BED_1M_ALL.m`, which is
 the v3 baseline port.
 
 The full BED result is reported in the PhD thesis. The current public GitHub
@@ -336,7 +336,7 @@ The preferred approach is to keep the ODE model as the reference model and use
 a surrogate only as an accelerator. The implemented script and detailed
 mathematical documentation are in:
 
-`analyses/bayesian_experimental_design/surrogate_bed/`
+`Bayesian_Experimental_Design/surrogate_bed/`
 
 The surrogate workflow should include:
 

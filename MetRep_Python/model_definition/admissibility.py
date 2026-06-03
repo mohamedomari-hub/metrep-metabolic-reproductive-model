@@ -7,8 +7,8 @@ from dataclasses import dataclass
 import numpy as np
 import pandas as pd
 
-from metrep.initial_conditions import STATE_INDEX
-from metrep.simulate import SimulationResult
+from model_definition.initial_conditions import STATE_INDEX
+from model_definition.simulate import SimulationResult
 
 
 @dataclass(frozen=True)

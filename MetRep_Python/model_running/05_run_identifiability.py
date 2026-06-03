@@ -12,7 +12,7 @@ refactored MetRep package:
     6. holistic estimate/fix recommendation
 
 Run from project root:
-    python scripts/05_run_identifiability.py
+    python model_running/05_run_identifiability.py
 
 By default this now analyzes all 98 MATLAB-derived parameters for 90 days.
 """
@@ -37,15 +37,15 @@ sys.path.insert(0, str(PROJECT_ROOT))
 
 import matplotlib.pyplot as plt
 
-from metrep.analysis import structural_identifiability_svd
-from metrep.parameters import PARAMETERS
-from metrep.plotting import (
+from model_definition.analysis import structural_identifiability_svd
+from model_definition.parameters import PARAMETERS
+from model_definition.plotting import (
     parameter_scenario_classes,
     plot_compensation_network,
     plot_parameter_scenario_map,
     plot_sensitivity_ranked_by_class,
 )
-from metrep.scenarios import constant_non_lactating
+from model_definition.scenarios import constant_non_lactating
 
 
 FOCUSED_PARAMETERS = [

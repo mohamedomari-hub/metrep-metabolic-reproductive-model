@@ -46,14 +46,19 @@ endpoint.
 ## What Is Included
 
 - `MetRep_Matlab/` contains the original MATLAB reference implementation.
-- `MetRep_Python/` contains the translated 22-state non-Dexa Python model.
-- `analyses/sensitivity_identifiability/` summarizes sensitivity, SVD
-  identifiability, and profile likelihood workflows.
-- `analyses/bayesian_experimental_design/` documents BED, including a
+- `MetRep_Python/model_definition/` contains the translated 22-state non-Dexa
+  Python model equations, parameters, scenarios, simulation, analysis, and
+  plotting functions.
+- `MetRep_Python/model_running/` contains runnable scripts for validation,
+  baseline simulation, sensitivity, identifiability, and profile likelihood.
+- `docs/sensitivity_identifiability_bayesian_design.md` summarizes sensitivity,
+  SVD identifiability, profile likelihood, and the link to BED.
+- `docs/Bayesian_Experimental_Design/` documents BED, including a
   GitHub-facing v3 baseline MATLAB port and historical PhD provenance files.
-- `analyses/dexa_extension/` documents the Dexa extension status and plan.
+- `docs/dexa_extension_plan.md` documents the Dexa extension status and plan.
 - `results_final/` contains curated tables and figures for public reporting.
-- `docs/` contains reproducibility and method notes.
+- `docs/` contains reproducibility, method notes, BED materials, and result
+  interpretation pages.
 
 ## Repository Status
 
@@ -100,9 +105,9 @@ selected parameters.
 The mathematical definitions for sensitivity, SVD/nullspace identifiability,
 profile likelihood, and Bayesian experimental design are documented in:
 
-- `docs/sensitivity_identifiability.md`
+- `docs/sensitivity_identifiability_bayesian_design.md`
 - `docs/bayesian_experimental_design.md`
-- `docs/results_summary.md`
+- `docs/results_sensitivity_identifiability_bayesian_design.md`
 
 ## Quick Start
 
@@ -117,19 +122,19 @@ pip install -r requirements.txt
 Validate the Python translation metadata:
 
 ```bash
-python MetRep_Python/scripts/01_validate_against_matlab.py
+python MetRep_Python/model_running/01_validate_against_matlab.py
 ```
 
 Run the baseline non-Dexa simulation:
 
 ```bash
-python MetRep_Python/scripts/02_run_baseline.py
+python MetRep_Python/model_running/02_run_baseline.py
 ```
 
 Run the main identifiability screen:
 
 ```bash
-python MetRep_Python/scripts/05_run_identifiability.py \
+python MetRep_Python/model_running/05_run_identifiability.py \
   --outputs FSH PGF P4 E2 INH IGF1 Insulin Glucose Glucagon \
   --days 50 \
   --dt 2 \
@@ -139,7 +144,7 @@ python MetRep_Python/scripts/05_run_identifiability.py \
 Run the profile likelihood confirmation:
 
 ```bash
-python MetRep_Python/scripts/10_run_profile_likelihood.py \
+python MetRep_Python/model_running/10_run_profile_likelihood.py \
   --from-identifiability results_final/tables/structid_50d_measurable_holistic_table.csv \
   --profile-class estimate \
   --max-profile-params 9 \
@@ -177,14 +182,14 @@ inside the tested range. Six had best fits at the edge of the tested range, one
 was only weakly bounded, and two stayed too flat to support reliable estimation
 from the current output panel.
 
-See `docs/sensitivity_identifiability.md`, `docs/results_summary.md`,
+See `docs/sensitivity_identifiability_bayesian_design.md`, `docs/results_sensitivity_identifiability_bayesian_design.md`,
 `docs/plot_interpretation_guide.md`, and `results_final/` for the curated
 summary.
 
 ## Bayesian Experimental Design
 
 The BED implementation is kept as MATLAB reference code in
-`analyses/bayesian_experimental_design/matlab_original/`. For GitHub, the
+`docs/Bayesian_Experimental_Design/matlab_original/`. For GitHub, the
 single recommended entry point is `BED_1M_ALL.m`, which calls
 `BovSys_run_v3_baseline.m` and uses the published v3 model equations with Dexa
 PK/PD switched off.

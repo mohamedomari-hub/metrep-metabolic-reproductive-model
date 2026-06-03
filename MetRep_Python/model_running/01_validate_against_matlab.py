@@ -1,7 +1,7 @@
 """Validate Python constants against the MATLAB reference metadata.
 
 Run from project root:
-    python scripts/01_validate_against_matlab.py
+    python model_running/01_validate_against_matlab.py
 """
 
 from __future__ import annotations
@@ -15,13 +15,13 @@ import pandas as pd
 PROJECT_ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(PROJECT_ROOT))
 
-from metrep.initial_conditions import (
+from model_definition.initial_conditions import (
     CORE_INITIAL_CONDITIONS,
     MATLAB_INITIAL_CONDITIONS_25,
     STATE_NAMES,
     matlab_core_initial_conditions,
 )
-from metrep.parameters import matlab_parameter_vector, parameter_table
+from model_definition.parameters import matlab_parameter_vector, parameter_table
 
 
 RESULTS_DIR = PROJECT_ROOT / "results" / "tables"

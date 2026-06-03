@@ -8,9 +8,9 @@ translated Python ODE model.
 Input tables were generated with:
 
 ```bash
-python analyses/bayesian_experimental_design/surrogate_bed/prepare_surrogate_inputs.py \
+python docs/Bayesian_Experimental_Design/surrogate_bed/prepare_surrogate_inputs.py \
   --n-samples 500 \
-  --output-dir analyses/bayesian_experimental_design/surrogate_bed/input_tables
+  --output-dir docs/Bayesian_Experimental_Design/surrogate_bed/input_tables
 ```
 
 The local prior sampled all 98 analyzed parameters uniformly between 0.995 and
@@ -33,14 +33,14 @@ Biological admissibility retained 389 of 500 samples.
 The surrogate pipeline was run with:
 
 ```bash
-python analyses/bayesian_experimental_design/surrogate_bed/surrogate_bed_pipeline.py \
-  --parameters-csv analyses/bayesian_experimental_design/surrogate_bed/input_tables/prior_parameter_samples.csv \
-  --outputs-csv analyses/bayesian_experimental_design/surrogate_bed/input_tables/ode_output_features.csv \
+python docs/Bayesian_Experimental_Design/surrogate_bed/surrogate_bed_pipeline.py \
+  --parameters-csv docs/Bayesian_Experimental_Design/surrogate_bed/input_tables/prior_parameter_samples.csv \
+  --outputs-csv docs/Bayesian_Experimental_Design/surrogate_bed/input_tables/ode_output_features.csv \
   --target-column insulin_glucose_threshold \
-  --candidate-map-csv analyses/bayesian_experimental_design/surrogate_bed/input_tables/candidate_map.csv \
-  --nominal-output-csv analyses/bayesian_experimental_design/surrogate_bed/input_tables/nominal_output.csv \
-  --admissibility-csv analyses/bayesian_experimental_design/surrogate_bed/input_tables/admissibility.csv \
-  --output-dir analyses/bayesian_experimental_design/surrogate_bed/run_outputs \
+  --candidate-map-csv docs/Bayesian_Experimental_Design/surrogate_bed/input_tables/candidate_map.csv \
+  --nominal-output-csv docs/Bayesian_Experimental_Design/surrogate_bed/input_tables/nominal_output.csv \
+  --admissibility-csv docs/Bayesian_Experimental_Design/surrogate_bed/input_tables/admissibility.csv \
+  --output-dir docs/Bayesian_Experimental_Design/surrogate_bed/run_outputs \
   --n-estimators 600 \
   --convergence-sizes 100 200 300 389 \
   --mi-repeats 5 \
@@ -85,7 +85,7 @@ Posterior effective sample size for the top candidate:
 The thesis-style summary figure was generated with:
 
 ```bash
-python analyses/bayesian_experimental_design/surrogate_bed/plot_thesis_style_surrogate.py \
+python docs/Bayesian_Experimental_Design/surrogate_bed/plot_thesis_style_surrogate.py \
   --benchmark-samples 12 \
   --surrogate-benchmark-repeats 200
 ```

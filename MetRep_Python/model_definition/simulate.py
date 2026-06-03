@@ -9,10 +9,10 @@ import numpy as np
 import pandas as pd
 from scipy.integrate import solve_ivp
 
-from metrep.initial_conditions import STATE_NAMES, initial_conditions
-from metrep.ode_model import metrep_rhs
-from metrep.parameters import default_parameters
-from metrep.scenarios import Scenario
+from model_definition.initial_conditions import STATE_NAMES, initial_conditions
+from model_definition.ode_model import metrep_rhs
+from model_definition.parameters import default_parameters
+from model_definition.scenarios import Scenario
 
 
 @dataclass

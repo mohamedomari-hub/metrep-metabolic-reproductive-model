@@ -15,8 +15,8 @@ pip install -r requirements.txt
 These commands check that the Python translation is usable:
 
 ```bash
-python MetRep_Python/scripts/01_validate_against_matlab.py
-python MetRep_Python/scripts/02_run_baseline.py
+python MetRep_Python/model_running/01_validate_against_matlab.py
+python MetRep_Python/model_running/02_run_baseline.py
 ```
 
 `01_validate_against_matlab.py` verifies parameter count, core state order, and
@@ -32,13 +32,13 @@ and plotting path are all working.
 Sensitivity:
 
 ```bash
-python MetRep_Python/scripts/04_run_sensitivity.py
+python MetRep_Python/model_running/04_run_sensitivity.py
 ```
 
 SVD identifiability:
 
 ```bash
-python MetRep_Python/scripts/05_run_identifiability.py \
+python MetRep_Python/model_running/05_run_identifiability.py \
   --outputs FSH PGF P4 E2 INH IGF1 Insulin Glucose Glucagon \
   --days 50 \
   --dt 2 \
@@ -48,7 +48,7 @@ python MetRep_Python/scripts/05_run_identifiability.py \
 Profile likelihood confirmation:
 
 ```bash
-python MetRep_Python/scripts/10_run_profile_likelihood.py \
+python MetRep_Python/model_running/10_run_profile_likelihood.py \
   --from-identifiability results_final/tables/structid_50d_measurable_holistic_table.csv \
   --profile-class estimate \
   --max-profile-params 9 \

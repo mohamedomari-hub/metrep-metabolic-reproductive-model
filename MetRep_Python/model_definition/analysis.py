@@ -7,10 +7,10 @@ from dataclasses import replace
 import numpy as np
 import pandas as pd
 
-from metrep.initial_conditions import STATE_INDEX
-from metrep.parameters import default_parameters
-from metrep.scenarios import Scenario
-from metrep.simulate import run_simulation
+from model_definition.initial_conditions import STATE_INDEX
+from model_definition.parameters import default_parameters
+from model_definition.scenarios import Scenario
+from model_definition.simulate import run_simulation
 
 
 def state_auc(result, state: str) -> float:

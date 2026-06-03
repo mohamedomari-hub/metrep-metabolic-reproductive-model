@@ -26,17 +26,17 @@ sys.path.insert(0, str(PROJECT_ROOT))
 
 import matplotlib.pyplot as plt
 
-from metrep.admissibility import AdmissibilityThresholds
-from metrep.initial_conditions import STATE_INDEX
-from metrep.parameters import PARAMETERS, default_parameters
-from metrep.profile_likelihood import (
+from model_definition.admissibility import AdmissibilityThresholds
+from model_definition.initial_conditions import STATE_INDEX
+from model_definition.parameters import PARAMETERS, default_parameters
+from model_definition.profile_likelihood import (
     SyntheticData,
     classify_profile,
     make_synthetic_data,
     profile_one_parameter,
 )
-from metrep.scenarios import constant_non_lactating
-from metrep.simulate import run_simulation
+from model_definition.scenarios import constant_non_lactating
+from model_definition.simulate import run_simulation
 
 try:
     from scipy.interpolate import PchipInterpolator
