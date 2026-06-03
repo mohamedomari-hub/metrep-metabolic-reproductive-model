@@ -25,7 +25,10 @@ This folder contains selected result files for public reporting.
 
 ## Figures
 
-- `baseline_selected_states.png`: baseline Python simulation check
+- `baseline_selected_states.png`: baseline Python simulation check for the
+  main metabolic and reproductive states
+- `baseline_all_states.png`: baseline Python simulation check for all 22 model
+  states
 - `sensitivity_top_parameters.png`: top local sensitivity parameters
 - `identifiability_singular_values.png`: singular-value spectrum of the local
   sensitivity matrix

@@ -17,7 +17,7 @@ For technical definitions and formulas, see:
 | Step | Main question | Curated output |
 |---|---|---|
 | Python validation | Does the Python translation preserve MATLAB metadata? | `results_final/tables/validation_report.csv` |
-| Baseline run | Does the translated model produce baseline trajectories? | `results_final/figures/baseline_selected_states.png` |
+| Baseline run | Does the translated model produce baseline trajectories? | `results_final/figures/baseline_selected_states.png`, `results_final/figures/baseline_all_states.png` |
 | Sensitivity | Which parameters most strongly affect selected outputs? | `results_final/tables/sensitivity_top_parameters.csv`, `results_final/figures/sensitivity_top_parameters.png` |
 | SVD identifiability | Which parameter directions are informed or weak? | `results_final/figures/identifiability_singular_values.png`, `results_final/figures/identifiability_svd_ranking.png` |
 | SVD classes | Which parameters should be estimated, anchored, or fixed? | `results_final/tables/structid_50d_measurable_holistic_table.csv`, `results_final/figures/identifiability_decision_map.png`, `results_final/figures/identifiability_class_counts.png` |
@@ -33,6 +33,13 @@ The baseline simulation is used as a functional check of the translated Python
 model before analysis. It is not itself an identifiability test; it establishes
 that the model produces trajectories for the selected metabolic and
 reproductive states.
+
+![Baseline all model states](../results_final/figures/baseline_all_states.png)
+
+The all-state baseline panel shows every model state in the translated
+22-state Python implementation. This view is useful for checking that no state
+is silently missing or numerically unstable before sensitivity,
+identifiability, profile likelihood, or BED analyses are interpreted.
 
 ![Top local sensitivity parameters](../results_final/figures/sensitivity_top_parameters.png)
 
