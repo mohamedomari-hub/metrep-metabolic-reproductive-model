@@ -51,3 +51,8 @@ validation.
   `results_final` until the validation workflow is documented.
 - Dexa perturbation behavior is reported in the Dexa paper. The MATLAB
   reference code is retained here; Python Dexa implementation is planned.
+
+## Model Flowchart:
+
+<img width="3872" height="1990" alt="image" src="https://github.com/user-attachments/assets/9e2b9585-b882-446a-8113-839e2704f695" />
+
