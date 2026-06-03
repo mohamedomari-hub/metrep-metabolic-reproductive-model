@@ -253,17 +253,7 @@ The figure is useful for model debugging and detailed parameter review, but it c
 
 ---
 
-## Appendix E. Full Sensitivity versus Nullspace Scatter
-
-Sensitivity versus nullspace
-
-![Sensitivity versus nullspace](../results_final/figures/identifiability_sensitivity_vs_nullspace_all_parameters.png)
-
-This plot shows all parameters in sensitivity-nullspace space. It is useful as a raw diagnostic, but the improved parameter scenario map is clearer and easier to interpret. This version is therefore kept as a supplementary diagnostic.
-
----
-
-## Appendix F. Strongest Compensation Pairs
+## Appendix E. Strongest Compensation Pairs
 
 Compensation pairs
 
@@ -273,7 +263,7 @@ This barplot ranks the strongest compensation pairs extracted from weak SVD dire
 
 ---
 
-## Appendix G. Sensitivity Ranked by Class
+## Appendix F. Sensitivity Ranked by Class
 
 Sensitivity ranked by class
 
@@ -283,7 +273,7 @@ This plot shows all analyzed parameters ranked by sensitivity and colored by rec
 
 ---
 
-## Appendix H. Synthetic Profile-Likelihood Outputs
+## Appendix G. Synthetic Profile-Likelihood Outputs
 
 Synthetic measurable outputs
 
@@ -293,7 +283,7 @@ This figure shows the synthetic measurable outputs used for profile likelihood. 
 
 ---
 
-## Appendix I. ODE versus Surrogate Speed
+## Appendix H. ODE versus Surrogate Speed
 
 ODE versus surrogate speed
 
