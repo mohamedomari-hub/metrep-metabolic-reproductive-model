@@ -231,17 +231,7 @@ Therefore, parameters that change pulse timing, oscillation shape, or trajectory
 
 ---
 
-## Appendix C. Identifiability Class Counts
-
-Class counts
-
-![Class counts](../results_final/figures/identifiability_class_counts.png)
-
-This figure summarizes the number of parameters in each recommendation class. It is useful as a quick overview, but the same information is already stated in the main text. Therefore, it is better treated as an appendix figure rather than a main result.
-
----
-
-## Appendix D. Full Nullspace Participation Ranking
+## Appendix C. Full Nullspace Participation Ranking
 
 All-parameter nullspace participation
 
@@ -253,7 +243,7 @@ The figure is useful for model debugging and detailed parameter review, but it c
 
 ---
 
-## Appendix E. Strongest Compensation Pairs
+## Appendix D. Strongest Compensation Pairs
 
 Compensation pairs
 
@@ -263,7 +253,7 @@ This barplot ranks the strongest compensation pairs extracted from weak SVD dire
 
 ---
 
-## Appendix F. Sensitivity Ranked by Class
+## Appendix E. Sensitivity Ranked by Class
 
 Sensitivity ranked by class
 
@@ -273,17 +263,7 @@ This plot shows all analyzed parameters ranked by sensitivity and colored by rec
 
 ---
 
-## Appendix G. Synthetic Profile-Likelihood Outputs
-
-Synthetic measurable outputs
-
-![Synthetic measurable outputs](../results_final/figures/profile_50d_balanced_synthetic_outputs.png)
-
-This figure shows the synthetic measurable outputs used for profile likelihood. It supports transparency of the profiling setup but is methodological rather than interpretive, so it is better placed in the appendix.
-
----
-
-## Appendix H. ODE versus Surrogate Speed
+## Appendix F. ODE versus Surrogate Speed
 
 ODE versus surrogate speed
 
