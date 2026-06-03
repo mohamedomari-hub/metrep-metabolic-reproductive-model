@@ -225,6 +225,7 @@ Figure:
 - `identifiability_compensation_edges.png`
 - `identifiability_compensation_network.png`
 - `identifiability_compensation_network_sensitivity.png`
+- `identifiability_compensation_network_all_parameters.png`
 
 Table:
 
@@ -241,9 +242,10 @@ What it shows:
   and each edge is a compensation relationship.
 - `identifiability_compensation_network.png` emphasizes the compensation
   structure and SVD class.
-- `identifiability_compensation_network_sensitivity.png` adds the sensitivity
-  information: larger nodes are more sensitive, and red-outlined nodes are
-  locally sensitive parameters.
+- `identifiability_compensation_network_all_parameters.png` shows every
+  analyzed parameter. Parameters with strongest compensation edges are placed
+  in the central network; parameters without strong edges are still shown in
+  peripheral recommendation zones.
 
 Technical terms:
 
@@ -255,10 +257,8 @@ Technical terms:
 - **Node**: one model parameter in the compensation graph.
 - **Node color**: the SVD class of the parameter: `Estimate`,
   `Fix (anchor)`, or `Fix (irrelevant)`.
-- **Node size**: in the sensitivity-aware network, scaled by local sensitivity,
-  so larger nodes affect the selected outputs more strongly.
-- **Red node outline**: a sensitive parameter in the compensation network
-  using a normalized local sensitivity threshold.
+- **Node size**: scaled by local sensitivity, so larger nodes affect the
+  selected outputs more strongly.
 - **Edge width**: scaled by compensation strength; thicker edges indicate
   stronger compensatory relationships.
 
@@ -420,6 +420,7 @@ sensitivity_top_parameters.png
 -> identifiability_compensation_edges.png
 -> identifiability_compensation_network.png
 -> identifiability_compensation_network_sensitivity.png
+-> identifiability_compensation_network_all_parameters.png
 -> identifiability_decision_map.png
 -> identifiability_class_counts.png
 -> profile_likelihood_representative_3x3.png

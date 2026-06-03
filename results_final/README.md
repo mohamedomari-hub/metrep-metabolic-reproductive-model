@@ -42,6 +42,9 @@ This folder contains selected result files for public reporting.
   relationships, with nodes colored by SVD class
 - `identifiability_compensation_network_sensitivity.png`: compensation network
   with node size and outline indicating local sensitivity
+- `identifiability_compensation_network_all_parameters.png`: all analyzed
+  parameters shown in a zoned compensation network; strongest compensation
+  edges are central and no-edge parameters are placed in peripheral groups
 - `identifiability_class_counts.png`: Estimate / Fix class counts
 - `identifiability_decision_map.png`: sensitivity vs nullspace decision map
 - `profile_likelihood_representative_3x3.png`: representative profile

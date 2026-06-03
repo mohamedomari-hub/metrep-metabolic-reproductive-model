@@ -190,6 +190,10 @@ The key SVD outputs are:
 - `identifiability_compensation_network.png`: shows the same compensation
   structure as a node-link graph, where nodes are parameters and edges indicate
   compensatory relationships.
+- `identifiability_compensation_network_all_parameters.png`: shows all
+  analyzed parameters in one zoned network. Strongly compensating parameters
+  are central, while parameters with weak or no compensation are still visible
+  in peripheral estimate/fix zones.
 - `identifiability_decision_map.png`: combines normalized sensitivity and
   nullspace involvement to support the `Estimate`, `Fix (anchor)`, and
   `Fix (irrelevant)` classification.

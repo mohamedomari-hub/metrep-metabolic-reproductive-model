@@ -21,7 +21,7 @@ For technical definitions and formulas, see:
 | Sensitivity | Which parameters most strongly affect selected outputs? | `results_final/tables/sensitivity_top_parameters.csv`, `results_final/figures/sensitivity_top_parameters.png` |
 | SVD identifiability | Which parameter directions are informed or weak? | `results_final/figures/identifiability_singular_values.png`, `results_final/figures/identifiability_svd_ranking.png` |
 | SVD classes | Which parameters should be estimated, anchored, or fixed? | `results_final/tables/structid_50d_measurable_holistic_table.csv`, `results_final/figures/identifiability_decision_map.png`, `results_final/figures/identifiability_class_counts.png` |
-| Compensation | Which parameters can compensate each other? | `results_final/tables/structid_50d_measurable_compensation_edges.csv`, `results_final/figures/identifiability_compensation_edges.png`, `results_final/figures/identifiability_compensation_network_sensitivity.png` |
+| Compensation | Which parameters can compensate each other? | `results_final/tables/structid_50d_measurable_compensation_edges.csv`, `results_final/figures/identifiability_compensation_edges.png`, `results_final/figures/identifiability_compensation_network_all_parameters.png` |
 | Profile likelihood | Which selected parameters remain practically identifiable after nonlinear profiling? | `results_final/tables/profile_50d_balanced_relaxed_summary.csv`, `results_final/figures/profile_likelihood_representative_3x3.png` |
 
 ## Baseline And Sensitivity
@@ -130,7 +130,7 @@ need different scientific treatment:
 
 ![Compensation pairs](../results_final/figures/identifiability_compensation_edges.png)
 
-![Sensitivity-aware compensation network](../results_final/figures/identifiability_compensation_network_sensitivity.png)
+![All-parameter compensation network](../results_final/figures/identifiability_compensation_network_all_parameters.png)
 
 The compensation analysis identifies pairs of parameters that appear together
 in weak SVD directions. Strong pairings in the curated table include:
@@ -143,11 +143,14 @@ in weak SVD directions. Strong pairings in the curated table include:
 - `insulin_clearance` with `insulin_fsh_threshold`
 
 These pairings indicate directions where changes in one parameter can be
-partly offset by changes in another. The sensitivity-aware network adds an
-important distinction: large or highlighted nodes are parameters that affect
-the measured outputs, while edges indicate compensation structure. Parameters
-that are both sensitive and strongly connected are the most important targets
-for anchoring, prior constraints, or Bayesian experimental design.
+partly offset by changes in another. The all-parameter network adds an
+important distinction: the central graph contains parameters connected by the
+strongest compensation edges, while no-edge parameters remain visible in
+peripheral recommendation zones. Node color shows the estimate/fix
+recommendation, node size shows sensitivity, and edge width shows compensation
+strength. Parameters that are both large and strongly connected are the most
+important targets for anchoring, prior constraints, or Bayesian experimental
+design.
 
 ## Profile Likelihood Confirmation
 
