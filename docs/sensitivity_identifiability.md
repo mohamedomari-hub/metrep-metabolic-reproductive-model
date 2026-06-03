@@ -385,3 +385,11 @@ In practical terms, BED should be aimed at:
 - profile-likelihood cases that are weak, flat, or boundary-limited;
 - outputs and sampling times likely to distinguish between compensatory
   mechanisms.
+
+
+## Appendix
+
+<img width="1169" height="928" alt="image" src="https://github.com/user-attachments/assets/450ae339-29bf-403c-b5f2-a5865417f19d" />
+
+
+<img width="1326" height="995" alt="image" src="https://github.com/user-attachments/assets/29d46477-d6ec-4d05-baef-975e812575e0" />
