@@ -323,16 +323,18 @@ the v3 baseline port.
 
 The full BED result is reported in the PhD thesis. The current public GitHub
 repository does not include BED result figures in `results_final` because the
-available figures rely on an ODE-versus-surrogate comparison that still needs a
-documented public validation workflow.
+available thesis-style figures rely on an ODE-versus-surrogate comparison that
+should be rechecked with a documented public validation workflow.
 
-A compact Python reproduction can be added later. It should reproduce the main
-BED story rather than port the original MATLAB file line by line.
+The Python surrogate workflow is now implemented as a reproducible comparison
+pipeline. It is intended to reproduce the main BED story from precomputed ODE
+tables rather than port the original MATLAB file line by line.
 
-## Future Surrogate BED Workflow
+## Surrogate BED Workflow
 
-The preferred future approach is to keep the ODE model as the reference model
-and use a surrogate only as an accelerator. The recommended scaffold is in:
+The preferred approach is to keep the ODE model as the reference model and use
+a surrogate only as an accelerator. The implemented script and detailed
+mathematical documentation are in:
 
 `analyses/bayesian_experimental_design/surrogate_bed/`
 

@@ -54,5 +54,7 @@ Within the full project logic, BED is the proposed way to improve information
 about parameters or model directions that classical identifiability analysis
 shows are weakly informed.
 
-A compact Python BED reproduction can still be treated as future work. The
-recommended scaffold is in `surrogate_bed/`.
+A compact Python surrogate-assisted BED workflow is provided in
+`surrogate_bed/`. It uses precomputed ODE tables, validates a PCA-compressed
+tree-ensemble surrogate, checks mutual-information convergence, and generates
+posterior diagnostics for comparison with the thesis figures.

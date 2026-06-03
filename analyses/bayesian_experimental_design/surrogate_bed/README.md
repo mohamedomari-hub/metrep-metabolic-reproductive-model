@@ -1,48 +1,365 @@
-# Surrogate BED Plan
+# Surrogate-Assisted BED Workflow
 
-This folder is a future-work scaffold for a reproducible Python surrogate BED
-workflow. It is not part of the current curated result set.
+This folder contains a Python workflow for comparing surrogate-assisted
+Bayesian experimental design (BED) results with the original thesis results.
+The script does not run the MetRep ODE model. It uses ODE simulations that were
+already generated and stored as tables.
 
-## Recommended Strategy
+The key rule is:
 
-Use the ODE model as the reference model and the surrogate only as an
-accelerator. A surrogate result should be reported only after three checks:
+The ODE model remains the reference. The surrogate is only an accelerator.
 
-1. The surrogate predicts held-out ODE simulations accurately for the measured
-   species and sampling days used in BED.
-2. The candidate mutual-information ranking is stable as the Monte Carlo sample
-   size increases.
-3. Simulated trajectories used by the surrogate workflow pass biological
-   admissibility checks.
+## Script
 
-## Surrogate Choice
+Use:
 
-The recommended first implementation is a PCA-compressed multi-output emulator
-with a tree ensemble regressor:
+```bash
+python analyses/bayesian_experimental_design/surrogate_bed/surrogate_bed_pipeline.py \
+  --parameters-csv path/to/prior_parameter_samples.csv \
+  --outputs-csv path/to/ode_output_features.csv \
+  --target-column insulin_glucose_threshold \
+  --candidate-map-csv path/to/candidate_map.csv \
+  --nominal-output-csv path/to/nominal_output.csv \
+  --admissibility-csv path/to/admissibility.csv \
+  --output-dir analyses/bayesian_experimental_design/surrogate_bed/run_outputs \
+  --make-plots
+```
 
-- PCA compresses correlated multi-species/time outputs.
-- ExtraTrees or Random Forest provides a robust nonlinear baseline.
-- Held-out ODE predictions remain the required validation target.
+Only `--parameters-csv`, `--outputs-csv`, and `--target-column` are strictly
+required. The other inputs make the comparison more scientifically defensible.
 
-Gaussian processes can be useful for smaller training sets and uncertainty
-quantification, but they scale poorly for large Monte Carlo designs. Neural
-surrogates should only be used if enough ODE simulations are available for
-training and validation.
+## Input Tables
 
-## Required Inputs
+### Parameter Table
 
-The scaffold script expects:
+Rows are Monte Carlo prior samples. Columns are uncertain parameters.
 
-- prior parameter samples, one row per parameter set;
-- ODE outputs for the same samples, one row per sample and one column per
-  output feature;
-- optional biological admissibility flags for each sample.
+Example:
 
-The script does not rerun simulations. Generate these input tables separately
-from the ODE model, then use the scaffold to train and validate the surrogate
-and compute BED summaries.
+| insulin_glucose_threshold | insulin_clearance | p4_clearance |
+|---:|---:|---:|
+| 0.91 | 1.12 | 0.83 |
+| 1.04 | 0.96 | 1.18 |
+
+The target parameter named in `--target-column` must be one of these columns.
+
+### Output Table
+
+Rows must match the parameter table. Columns are simulated ODE outputs used as
+candidate measurements. A useful naming convention is species plus sampling
+day.
+
+Example:
+
+| FSH_day_65 | P4_day_65 | E2_day_65 | Glucose_day_65 |
+|---:|---:|---:|---:|
+| 1.45 | 0.32 | 0.12 | 0.47 |
+| 1.10 | 0.51 | 0.08 | 0.49 |
+
+### Candidate Map
+
+The candidate map defines what each possible design measures. It must contain
+two columns:
+
+| candidate | columns |
+|---|---|
+| FSH_day_65 | FSH_day_65 |
+| endocrine_panel_day_65 | FSH_day_65\|P4_day_65\|E2_day_65\|INH_day_65 |
+
+If this file is omitted, every output column is treated as one scalar
+candidate design.
+
+### Nominal Output Table
+
+This optional one-row table contains the nominal/reference prediction. It is
+used to generate a fixed synthetic observation for posterior plots.
+
+### Admissibility Table
+
+This optional table contains one Boolean column:
+
+| admissible |
+|---|
+| true |
+| false |
+
+Rows marked `false` are removed before training, validation, posterior
+calculation, and mutual-information calculation.
+
+## Method
+
+### Surrogate Model
+
+Let the uncertain parameter vector be:
+
+$$
+\theta_i \in \mathbb{R}^{p}
+$$
+
+and let the ODE output feature vector be:
+
+$$
+y_i = y(\theta_i) \in \mathbb{R}^{m}
+$$
+
+The surrogate learns an approximation:
+
+$$
+\widehat{y}(\theta_i) \approx y(\theta_i)
+$$
+
+The output matrix is first standardized and compressed with principal component
+analysis (PCA):
+
+$$
+\widetilde{Y} = \mathrm{scale}(Y)
+$$
+
+$$
+\widetilde{Y} \approx A C^{T}
+$$
+
+where `A` contains PCA scores and `C` contains PCA loading vectors. The tree
+ensemble is trained to predict the PCA scores from the parameter vector:
+
+$$
+\widehat{A} = f(\theta)
+$$
+
+The predicted output is reconstructed by inverse PCA and inverse scaling:
+
+$$
+\widehat{Y} =
+\mathrm{scale}^{-1}
+\left(
+  \widehat{A} C^{T}
+\right)
+$$
+
+This is more stable than fitting one independent model per output because the
+multi-species trajectory is treated as one correlated output object.
+
+### Training, Validation, And Test Split
+
+The samples are split into three groups:
+
+- training samples: fit the surrogate
+- validation samples: tune/check the workflow and learning curve
+- test samples: final held-out accuracy check
+
+For each output feature, the script reports:
+
+$$
+\mathrm{RMSE}_{j}
+=
+\sqrt{
+  \frac{1}{n}
+  \sum_{i=1}^{n}
+  \left(
+    y_{ij} - \widehat{y}_{ij}
+  \right)^2
+}
+$$
+
+and:
+
+$$
+\mathrm{NRMSE}_{j}
+=
+\frac{\mathrm{RMSE}_{j}}
+{\max_i(y_{ij}) - \min_i(y_{ij})}
+$$
+
+The script also reports `R2`, mean absolute error, and a learning curve. The
+learning curve repeats training with increasing fractions of the training data.
+If the validation error is still decreasing strongly at the largest training
+size, more ODE simulations are needed before reporting surrogate BED results.
+
+### Synthetic Observation And Posterior
+
+For posterior plots, the script uses one fixed synthetic observation vector:
+
+$$
+z_{\mathrm{obs}}
+=
+\mu + \sigma \odot \epsilon
+$$
+
+where:
+
+$$
+\epsilon \sim \mathcal{N}(0,I)
+$$
+
+and:
+
+$$
+\sigma_j =
+\max
+\left(
+  r |\mu_j|,
+  \sigma_{\min}
+\right)
+$$
+
+Here, `r` is the relative noise level and `sigma_min` is a small noise floor.
+The default relative noise is 0.05.
+
+For each prior sample, the Gaussian log-likelihood is:
+
+$$
+\ell_i
+=
+-
+\frac{1}{2}
+\sum_j
+\left(
+  \frac{
+    z_{\mathrm{obs},j} - \widehat{y}_{ij}
+  }
+  {\sigma_j}
+\right)^2
+$$
+
+The likelihood weights are stabilized and normalized:
+
+$$
+\widetilde{w}_i =
+\exp
+\left(
+  \ell_i - \max_k \ell_k
+\right)
+$$
+
+$$
+w_i =
+\frac{\widetilde{w}_i}
+{\sum_k \widetilde{w}_k}
+$$
+
+The posterior density of the target parameter is estimated with a weighted
+kernel density estimate:
+
+$$
+p(\theta_p \mid z_{\mathrm{obs}})
+\approx
+\sum_i
+w_i
+K_h
+\left(
+  \theta_p - \theta_{i,p}
+\right)
+$$
+
+The effective sample size is also reported:
+
+$$
+\mathrm{ESS}
+=
+\frac{1}
+{\sum_i w_i^2}
+$$
+
+A very small ESS means that the posterior is dominated by too few samples. In
+that case, increase the Monte Carlo sample size or use a less restrictive
+noise model before interpreting the posterior.
+
+### Mutual Information
+
+For each candidate design, the script estimates how informative the simulated
+measurement is about the target parameter.
+
+Let:
+
+$$
+W_i = \theta_{i,p}
+$$
+
+be the target parameter value for sample `i`, and let:
+
+$$
+Z_i =
+\widehat{y}_{i,D}
+$$
+
+be the surrogate-predicted output vector for candidate design `D`.
+
+The quantity of interest is:
+
+$$
+I(W;Z)
+=
+\int
+\int
+p(w,z)
+\log
+\left(
+  \frac{p(w,z)}
+  {p(w)p(z)}
+\right)
+dw dz
+$$
+
+The script estimates this using a k-nearest-neighbor mutual-information
+estimator with the Chebyshev distance. Before neighbor counting, `W` and `Z`
+are rank-Gaussianized so that species with large numerical units do not
+dominate the distance calculation.
+
+For reporting, the important point is practical:
+
+- high `I(W;Z)` means the candidate measurement is expected to reduce
+  uncertainty about the target parameter;
+- low `I(W;Z)` means the candidate measurement is weakly informative for that
+  target;
+- stable rankings across increasing sample sizes are more important than a
+  single absolute MI number.
+
+### Convergence
+
+The script estimates MI repeatedly at increasing Monte Carlo sample sizes:
+
+```text
+250, 500, 1000, 2000, 5000, 10000
+```
+
+For each size, it draws repeated subsamples and reports the mean and standard
+deviation of the MI estimate. A candidate design should only be interpreted if
+its MI curve is reasonably stable and its ranking does not change strongly
+with more samples.
+
+## Output Files
+
+The script writes:
+
+| File | Meaning |
+|---|---|
+| `surrogate_validation_metrics.csv` | Held-out validation/test accuracy for every output feature |
+| `surrogate_learning_curve.csv` | Whether more ODE training samples are still needed |
+| `surrogate_predicted_outputs.csv` | Surrogate predictions for all admissible samples |
+| `mi_candidate_ranking.csv` | Candidate designs ranked by estimated mutual information |
+| `mi_convergence.csv` | Repeated MI estimates across Monte Carlo sample sizes |
+| `posterior_prior_comparison.csv` | Prior and posterior KDE for the selected candidate |
+| `posterior_diagnostics.csv` | Effective sample size and posterior diagnostic values |
+| `run_metadata.json` | Settings used for the run |
+
+With `--make-plots`, the script also writes:
+
+| Figure | Meaning |
+|---|---|
+| `surrogate_validation_error.png` | Worst held-out prediction errors |
+| `surrogate_learning_curve.png` | Whether surrogate accuracy improves with more training data |
+| `mi_candidate_ranking.png` | Most informative candidate measurements |
+| `mi_convergence.png` | Stability of MI estimates with increasing Monte Carlo size |
+| `posterior_comparison.png` | Prior versus posterior density for the selected candidate |
 
 ## Reporting Rule
 
-Do not include surrogate BED figures in `results_final/` until the validation
-metrics, convergence diagnostics, and admissibility filtering are documented.
+Do not include surrogate BED figures in `results_final/` until these checks are
+acceptable:
+
+- held-out surrogate prediction errors are small for the measured species and
+  days used in BED;
+- learning-curve error has approximately plateaued;
+- MI rankings are stable across increasing Monte Carlo sample sizes;
+- posterior effective sample size is not too small;
+- biological admissibility filtering is applied and documented.
