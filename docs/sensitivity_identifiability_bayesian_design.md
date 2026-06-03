@@ -362,7 +362,7 @@ The recommended interpretation is that the selected measurable outputs identify
 a substantial subset of parameters, while some metabolic/endocrine feedback
 parameters require fixing, anchoring, or more informative experimental design.
 
-## Bayesian Experimental Design
+# Bayesian Experimental Design
 
 The Bayesian experimental design analysis evaluates which sampling times and
 measured species provide the most information about model quantities or
