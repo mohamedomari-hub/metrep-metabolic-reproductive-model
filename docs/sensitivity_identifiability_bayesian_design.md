@@ -373,6 +373,18 @@ identifiability analysis. Sensitivity and identifiability diagnose which model
 directions are weakly informed by existing outputs; BED asks how future
 measurements should be chosen to improve those directions.
 
+| Identifiability finding | BED interpretation |
+|---|---|
+| Sensitive and separable parameters | Current output panel is informative enough; these can be estimated and checked by profile likelihood. |
+| High-impact compensation pairs | Future designs should target sampling times/species that separate the paired mechanisms. |
+| Strong nullspace participation | Add measurements expected to reduce uncertainty in those weak directions. |
+| `Fix (irrelevant)` parameters | Do not spend estimation effort on them unless BED suggests a different output/time window can make them informative. |
+| Weak, flat, or boundary-limited profiles | Use BED to propose more informative observations before claiming precise estimates. |
+
+The classical analysis says where the model is under-informed; BED says how a
+future experiment could improve that information.
+
+
 ## Current Repository Status
 
 The original PhD BED implementation is MATLAB code. It is retained for
@@ -694,7 +706,7 @@ The Python surrogate workflow is now implemented as a reproducible comparison
 pipeline. It is intended to reproduce the main BED story from precomputed ODE
 tables rather than port the original MATLAB file line by line.
 
-## Surrogate BED Workflow
+# Surrogate BED Workflow
 
 The preferred approach is to keep the ODE model as the reference model and use
 a surrogate only as an accelerator. The implemented script and detailed
@@ -717,42 +729,10 @@ comparison alone because it treats the multi-species output vector as a
 correlated object and requires explicit validation before BED conclusions are
 claimed.
 
-## Interpretation In The Project
-
-The intended message is:
-
-```text
-Classical identifiability analysis shows the current measurement set does not
-equally inform all model parameters.
-
-Bayesian experimental design ranks candidate sampling times and measured
-species by expected information gain, suggesting how future experiments can be
-made more informative.
-```
-
-This connects the identifiability and BED parts into one workflow rather than
-two unrelated analyses.
-
-## Link Back To Identifiability
-
-The BED section should be presented as the answer to the specific weaknesses
-found by sensitivity and identifiability:
-
-| Identifiability finding | BED interpretation |
-|---|---|
-| Sensitive and separable parameters | Current output panel is informative enough; these can be estimated and checked by profile likelihood. |
-| High-impact compensation pairs | Future designs should target sampling times/species that separate the paired mechanisms. |
-| Strong nullspace participation | Add measurements expected to reduce uncertainty in those weak directions. |
-| `Fix (irrelevant)` parameters | Do not spend estimation effort on them unless BED suggests a different output/time window can make them informative. |
-| Weak, flat, or boundary-limited profiles | Use BED to propose more informative observations before claiming precise estimates. |
-
-This framing keeps BED from looking like an unrelated extra analysis. The
-classical analysis says where the model is under-informed; BED says how a
-future experiment could improve that information.
 
 
 
-## Appendix
+# Appendix
 
 <img width="1169" height="928" alt="image" src="https://github.com/user-attachments/assets/450ae339-29bf-403c-b5f2-a5865417f19d" />
 
