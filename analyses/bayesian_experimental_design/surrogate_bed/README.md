@@ -9,23 +9,51 @@ The key rule is:
 
 The ODE model remains the reference. The surrogate is only an accelerator.
 
-## Script
+## Step 1: Prepare Input Tables
 
-Use:
+Generate the required CSV files from the translated Python ODE model:
 
-The paths below are placeholders. Replace them with real CSV files containing
-your precomputed ODE prior samples, ODE output features, candidate definitions,
-nominal output, and admissibility flags.
+```bash
+cd /Users/omari/Documents/Academic/BovSys/MetRep_Model
+
+python analyses/bayesian_experimental_design/surrogate_bed/prepare_surrogate_inputs.py \
+  --n-samples 500 \
+  --output-dir analyses/bayesian_experimental_design/surrogate_bed/input_tables
+```
+
+This creates:
+
+```text
+analyses/bayesian_experimental_design/surrogate_bed/input_tables/prior_parameter_samples.csv
+analyses/bayesian_experimental_design/surrogate_bed/input_tables/ode_output_features.csv
+analyses/bayesian_experimental_design/surrogate_bed/input_tables/candidate_map.csv
+analyses/bayesian_experimental_design/surrogate_bed/input_tables/nominal_output.csv
+analyses/bayesian_experimental_design/surrogate_bed/input_tables/admissibility.csv
+```
+
+The default parameter prior is local: each analyzed parameter is sampled
+uniformly between 0.995 and 1.005 times its nominal value. This narrow local
+prior is intentional because the biological admissibility filter can reject
+very wide all-parameter perturbations. For a quick test, use fewer samples such
+as `--n-samples 120`. For a more stable BED comparison, increase the sample
+count after confirming the workflow runs correctly.
+
+## Step 2: Run The Surrogate BED Pipeline
+
+After the input tables exist, run:
 
 ```bash
 python analyses/bayesian_experimental_design/surrogate_bed/surrogate_bed_pipeline.py \
-  --parameters-csv path/to/prior_parameter_samples.csv \
-  --outputs-csv path/to/ode_output_features.csv \
+  --parameters-csv analyses/bayesian_experimental_design/surrogate_bed/input_tables/prior_parameter_samples.csv \
+  --outputs-csv analyses/bayesian_experimental_design/surrogate_bed/input_tables/ode_output_features.csv \
   --target-column insulin_glucose_threshold \
-  --candidate-map-csv path/to/candidate_map.csv \
-  --nominal-output-csv path/to/nominal_output.csv \
-  --admissibility-csv path/to/admissibility.csv \
+  --candidate-map-csv analyses/bayesian_experimental_design/surrogate_bed/input_tables/candidate_map.csv \
+  --nominal-output-csv analyses/bayesian_experimental_design/surrogate_bed/input_tables/nominal_output.csv \
+  --admissibility-csv analyses/bayesian_experimental_design/surrogate_bed/input_tables/admissibility.csv \
   --output-dir analyses/bayesian_experimental_design/surrogate_bed/run_outputs \
+  --n-estimators 600 \
+  --convergence-sizes 100 200 300 389 \
+  --mi-repeats 5 \
   --make-plots
 ```
 

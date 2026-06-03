@@ -1,0 +1,17 @@
+{
+  "n_samples_after_admissibility": 389,
+  "n_parameters": 98,
+  "n_outputs": 324,
+  "n_candidate_designs": 360,
+  "target_column": "insulin_glucose_threshold",
+  "regressor": "extra_trees",
+  "n_estimators": 600,
+  "min_samples_leaf": 2,
+  "pca_variance_requested": 0.995,
+  "pca_components_used": 11,
+  "pca_variance_explained": 0.9957936771718136,
+  "relative_noise": 0.05,
+  "mi_neighbors": 5,
+  "mi_repeats": 5,
+  "seed": 42
+}
