@@ -38,8 +38,16 @@ This folder contains selected result files for public reporting.
   map comparing sensitivity against nullspace participation
 - `identifiability_compensation_edges.png`: strongest parameter-pair
   compensation relationships
-- `identifiability_compensation_network.png`: graph view of compensation
-  relationships, with nodes colored by SVD class
+- `identifiability_compensation_network_core.png`: readable core network of
+  the strongest compensation relationships; node color shows recommendation
+  class, node size shows sensitivity, and edge width shows compensation
+  strength
+- `identifiability_parameter_scenario_map.png`: all-parameter diagnostic map
+  showing sensitivity versus nullspace/compensation involvement
+- `identifiability_sensitivity_ranked_by_class.png`: all analyzed parameters
+  ranked by sensitivity and colored by estimate/fix recommendation class
+- `identifiability_compensation_network.png`: older graph view of
+  compensation relationships, with nodes colored by SVD class
 - `identifiability_compensation_network_sensitivity.png`: compensation network
   with node size and outline indicating local sensitivity
 - `identifiability_compensation_network_all_parameters.png`: all analyzed

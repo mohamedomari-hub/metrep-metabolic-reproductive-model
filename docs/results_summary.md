@@ -21,7 +21,7 @@ For technical definitions and formulas, see:
 | Sensitivity | Which parameters most strongly affect selected outputs? | `results_final/tables/sensitivity_top_parameters.csv`, `results_final/figures/sensitivity_top_parameters.png` |
 | SVD identifiability | Which parameter directions are informed or weak? | `results_final/figures/identifiability_singular_values.png`, `results_final/figures/identifiability_svd_ranking.png` |
 | SVD classes | Which parameters should be estimated, anchored, or fixed? | `results_final/tables/structid_50d_measurable_holistic_table.csv`, `results_final/figures/identifiability_decision_map.png`, `results_final/figures/identifiability_class_counts.png` |
-| Compensation | Which parameters can compensate each other? | `results_final/tables/structid_50d_measurable_compensation_edges.csv`, `results_final/figures/identifiability_compensation_edges.png`, `results_final/figures/identifiability_compensation_network_all_parameters.png` |
+| Compensation | Which parameters can compensate each other? | `results_final/tables/structid_50d_measurable_compensation_edges.csv`, `results_final/figures/identifiability_compensation_edges.png`, `results_final/figures/identifiability_compensation_network_core.png`, `results_final/figures/identifiability_parameter_scenario_map.png` |
 | Profile likelihood | Which selected parameters remain practically identifiable after nonlinear profiling? | `results_final/tables/profile_50d_balanced_relaxed_summary.csv`, `results_final/figures/profile_likelihood_representative_3x3.png` |
 | Surrogate BED pilot | Which sampling day/species panel is expected to be informative, and how much faster is the surrogate than ODE simulation? | `analyses/bayesian_experimental_design/surrogate_bed/run_outputs/figures/surrogate_bed_thesis_style_summary.png`, `analyses/bayesian_experimental_design/surrogate_bed/run_outputs/figures/surrogate_bed_ode_vs_surrogate_speed.png` |
 
@@ -131,7 +131,7 @@ need different scientific treatment:
 
 ![Compensation pairs](../results_final/figures/identifiability_compensation_edges.png)
 
-![All-parameter compensation network](../results_final/figures/identifiability_compensation_network_all_parameters.png)
+![Core compensation network](../results_final/figures/identifiability_compensation_network_core.png)
 
 The compensation analysis identifies pairs of parameters that appear together
 in weak SVD directions. Strong pairings in the curated table include:
@@ -144,14 +144,32 @@ in weak SVD directions. Strong pairings in the curated table include:
 - `insulin_clearance` with `insulin_fsh_threshold`
 
 These pairings indicate directions where changes in one parameter can be
-partly offset by changes in another. The all-parameter network adds an
-important distinction: the central graph contains parameters connected by the
-strongest compensation edges, while no-edge parameters remain visible in
-peripheral recommendation zones. Node color shows the estimate/fix
-recommendation, node size shows sensitivity, and edge width shows compensation
-strength. Parameters that are both large and strongly connected are the most
-important targets for anchoring, prior constraints, or Bayesian experimental
-design.
+partly offset by changes in another. The core network keeps only the strongest
+compensation edges so the parameter trade-offs remain readable. Node color
+shows the estimate/fix recommendation, node size shows sensitivity, and edge
+width shows compensation strength. Parameters that are both large and strongly
+connected are the most important targets for anchoring, prior constraints, or
+Bayesian experimental design.
+
+![Parameter scenario map](../results_final/figures/identifiability_parameter_scenario_map.png)
+
+The scenario map replaces the unreadable all-parameter network as the main
+all-parameter diagnostic. Each point is one analyzed parameter. The x-axis
+shows nullspace or compensation involvement, and the y-axis shows local
+sensitivity. This makes the four practical cases visible at once:
+
+- sensitive and weakly compensated parameters are the best estimate candidates;
+- sensitive but highly compensated parameters are risky to estimate freely;
+- low-sensitivity parameters are better fixed in this experiment;
+- compensatory but weakly sensitive parameters are poor calibration targets
+  unless a new experiment is designed to excite them.
+
+![Sensitivity ranked by class](../results_final/figures/identifiability_sensitivity_ranked_by_class.png)
+
+The ranked sensitivity-by-class plot shows all analyzed parameters in one
+ordered list. It is useful for checking whether a fixed parameter is fixed
+because it is genuinely low-sensitivity in this analysis setting or because it
+is sensitive but confounded and therefore better treated as an anchor.
 
 ## Profile Likelihood Confirmation
 

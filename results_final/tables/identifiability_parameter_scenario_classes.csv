@@ -1,0 +1,99 @@
+parameter,sensitivity_0to1,nullspace_0to1,identifiable_0to1,recommendation_3class,scenario_label
+insulin_glucose_threshold,1.0,3.8332263982654e-05,0.9999999992618405,Estimate,Estimate candidate: sensitive and weakly compensated
+blood_usage_glucose_threshold,0.659689290589431,0.00023366909887111926,0.9999999726781766,Estimate,Estimate candidate: sensitive and weakly compensated
+inhibin_clearance,0.48700884835237646,2.8681014429560508e-05,0.999999999586097,Estimate,Estimate candidate: sensitive and weakly compensated
+blood_to_liver_glucose_threshold,0.20377544914225929,0.005263907465226412,0.999986145067962,Estimate,Estimate candidate: sensitive and weakly compensated
+hm_ih_2_threshold,0.16924559235312095,5.089932703979036e-05,0.9999999987000106,Estimate,Estimate candidate: sensitive and weakly compensated
+hp_fsh_follicle_scale,0.16416671193053392,0.00015801495370371604,0.9999999875013006,Estimate,Estimate candidate: sensitive and weakly compensated
+hp_cl_self_scale,0.16016483548310512,0.0,1.0,Estimate,Estimate candidate: sensitive and weakly compensated
+follicle_to_e2_scale,0.1561367579771317,1.4980724447576507e-05,0.9999999998864288,Estimate,Estimate candidate: sensitive and weakly compensated
+insulin_clearance,0.15113637147722364,0.9999580916788677,0.009155046605616076,Fix (anchor),Anchor candidate: high sensitivity but should be fixed
+insulin_secretion_max,0.15078011646228903,0.9999999776476256,0.0002114349626812651,Fix (anchor),Anchor candidate: high sensitivity but should be fixed
+hp_e2_oxt_scale,0.14761990637418296,0.08524333297631405,0.9963601557825899,Estimate,Estimate candidate: sensitive and weakly compensated
+hp_oxt_pg_threshold,0.1475804549315414,0.0487319829594216,0.9988118869053908,Estimate,Estimate candidate: sensitive and weakly compensated
+hp_p4_follicle_scale,0.13423838913329417,0.0003897261035503806,0.9999999240214273,Estimate,Estimate candidate: sensitive and weakly compensated
+cl_formation_scale,0.1323419636549925,0.0003479753784774356,0.9999999394250004,Estimate,Estimate candidate: sensitive and weakly compensated
+follicle_to_inhibin_scale,0.12462855204137978,0.0001552994050578695,0.9999999879269569,Estimate,Estimate candidate: sensitive and weakly compensated
+hp_fsh_follicle_threshold,0.12232168608026667,0.015998677840422797,0.9998720115345875,Estimate,Estimate candidate: sensitive and weakly compensated
+insulin_fsh_scale,0.1164420943720242,0.5913478362549701,0.8064165751636302,Estimate,Estimate candidate: sensitive and weakly compensated
+fsh_syn_scale,0.1164420940854214,0.8184037889565329,0.574643551472399,Fix (anchor),Anchor candidate: high sensitivity but should be fixed
+hp_e2_oxt_threshold,0.11508466479216459,0.0014541535303141233,0.9999989425864316,Estimate,Estimate candidate: sensitive and weakly compensated
+insulin_fsh_threshold,0.11449498561008693,0.8721732441914691,0.4891971094383174,Fix (anchor),Anchor candidate: high sensitivity but should be fixed
+e2_clearance,0.10708535526331558,3.935578156922725e-06,0.9999999999918984,Estimate,Estimate candidate: sensitive and weakly compensated
+blood_usage_max,0.10407704342118414,0.9999631433428401,0.008585566330560335,Fix (anchor),Anchor candidate: high sensitivity but should be fixed
+glucagon_secretion_max,0.09447141853155397,0.9999999998953564,1.446675668611081e-05,Fix (anchor),Anchor candidate: high sensitivity but should be fixed
+glucagon_clearance,0.0944683241554063,0.9999954935042406,0.003002160953751063,Fix (anchor),Anchor candidate: high sensitivity but should be fixed
+hepatic_glucose_release,0.0911745313154663,0.0012605756442168694,0.9999992053599611,Estimate,Estimate candidate: sensitive and weakly compensated
+insulin_lh_threshold,0.09042610994690227,0.8208060447740084,0.571206976645378,Fix (anchor),Weak/isolated parameter
+glucagon_glucose_threshold,0.0899057636132504,0.00558724785911247,0.9999843907046753,Estimate,Weak/isolated parameter
+fsh_basal_release,0.08663009156492553,0.007009851565296469,0.9999754300570276,Estimate,Weak/isolated parameter
+liver_usage_rate,0.08639664965339904,0.03772280476567004,0.9992882384040066,Estimate,Weak/isolated parameter
+igf_lh_sensitivity_threshold,0.08302561797198756,0.014605492133307084,0.9998933328048133,Estimate,Weak/isolated parameter
+oxt_clearance,0.0818472620011187,0.013205481519598994,0.9999128026447258,Estimate,Weak/isolated parameter
+igf_lh_sensitivity_scale,0.0802952988433692,0.011398604434939253,0.9999350327755252,Estimate,Weak/isolated parameter
+p4_clearance,0.07856039387441444,1.7642528877506603e-05,0.9999999998427693,Estimate,Weak/isolated parameter
+hp_lh_follicle_scale,0.07772557842846999,0.050742328479694655,0.9987117739160585,Estimate,Weak/isolated parameter
+hm_follicle_threshold,0.07318696051959651,0.0001661127941748471,0.9999999861881986,Estimate,Weak/isolated parameter
+igf_clearance,0.0676321374564693,0.00020835583250160307,0.9999999782750203,Estimate,Weak/isolated parameter
+blood_to_liver_max,0.05628961308023877,0.9799594430835823,0.19919710426373247,Fix (anchor),Weak/isolated parameter
+fsh_clearance,0.05613055593871721,0.02849453808174641,0.9995939456976569,Estimate,Weak/isolated parameter
+insulin_lh_scale,0.05605577528886891,0.04877170705305449,0.9988099479737319,Estimate,Weak/isolated parameter
+lh_clearance,0.043700151189243114,0.011952423555915997,0.9999285661625186,Estimate,Weak/isolated parameter
+p4_baseline,0.04271481320430268,2.064110824745931e-06,0.9999999999976824,Estimate,Weak/isolated parameter
+hm_p4_lh_threshold,0.040415315503673235,0.0005683575036174374,0.9999998384333147,Estimate,Weak/isolated parameter
+hm_p4_igf_scale,0.03938690069372485,0.9874415989252132,0.15798445006209869,Fix (anchor),Weak/isolated parameter
+insulin_igf_scale,0.039386900584224865,0.15822706218469096,0.9874027408406358,Estimate,Weak/isolated parameter
+hm_e2_fsh_scale,0.036485551778766445,0.003144435865878139,0.9999950559648778,Estimate,Weak/isolated parameter
+hp_e2_1_threshold,0.0344350717836813,0.006732748863799001,0.9999773341826506,Estimate,Weak/isolated parameter
+hp_e2_lh_scale,0.033120239103650716,0.027993620911026907,0.9996080993319169,Estimate,Weak/isolated parameter
+hp_gnrh_lh_threshold,0.03153777992484613,0.007433532751773928,0.9999723702441732,Estimate,Weak/isolated parameter
+igf_basal_release,0.031213083695854394,4.8434114347641704e-05,0.9999999988226735,Estimate,Weak/isolated parameter
+hp_e2_lh_threshold,0.03012900121650672,0.0024484275059451933,0.9999970023752441,Estimate,Weak/isolated parameter
+iof_clearance,0.0293544292388046,0.0005038926197448075,0.9999998730004032,Estimate,Weak/isolated parameter
+hp_e2_1_scale,0.028538574967935024,0.01976489102441484,0.9998046537031996,Estimate,Weak/isolated parameter
+gnrh_syn,0.027621764590109645,0.04644089082992749,0.9989210357289618,Estimate,Weak/isolated parameter
+hp_p4_fsh_scale,0.024427627543562966,0.0025811214248130225,0.9999966686669277,Estimate,Weak/isolated parameter
+hm_p4_lh_scale,0.024190477812023492,0.11366845535309016,0.9935187285466539,Estimate,Weak/isolated parameter
+hp_p4_follicle_threshold,0.02286506452564452,7.616602661755964e-05,0.9999999970924572,Estimate,Weak/isolated parameter
+hp_gnrh_lh_scale,0.02063876652096305,0.017094956829137774,0.999853869023616,Estimate,Weak/isolated parameter
+insulin_igf_threshold,0.01937827396061867,0.6682018784833466,0.7439799791349557,Estimate,Weak/isolated parameter
+hp_pg_iof_threshold,0.018901282584052048,0.029992637720524778,0.999550117003885,Estimate,Weak/isolated parameter
+hp_enz_pg_scale,0.018653232385407895,0.9975357356447107,0.0701602142644259,Fix (anchor),Weak/isolated parameter
+hp_enz_pg_threshold,0.012299820598532744,0.07790857521477215,0.9969605011584052,Estimate,Weak/isolated parameter
+hp_p4_enz_scale,0.0122552799328932,0.2747160940760018,0.9615253670571446,Estimate,Weak/isolated parameter
+hp_iof_scale,0.01168915402568159,0.17799725951548404,0.9840309695586285,Estimate,Weak/isolated parameter
+enz_clearance,0.0114104463047906,0.12602050777519302,0.9920276264454329,Estimate,Weak/isolated parameter
+cl_to_p4_scale,0.011142882415165006,2.4900730646022555e-05,0.9999999996877166,Estimate,Weak/isolated parameter
+gnrh_clearance,0.010390112990458382,0.009368110323576824,0.9999561174495013,Estimate,Weak/isolated parameter
+feed_direct_blood_fraction,0.008571903065207633,0.00918371066339809,0.999957828014268,Estimate,Weak/isolated parameter
+hp_pg_iof_scale,0.007652182818866216,0.9880711714971427,0.15399791530124834,Fix (anchor),Weak/isolated parameter
+hp_cl_self_threshold,0.007437648591873891,0.004141257681021075,0.9999914245814,Estimate,Weak/isolated parameter
+lh_basal_release,0.0068296683614445675,0.0001575318687896275,0.9999999875775619,Estimate,Weak/isolated parameter
+hp_iof_threshold,0.005385077189067366,0.008672417192919467,0.999962393102726,Estimate,Weak/isolated parameter
+liver_to_storage_max,0.004787991396949933,0.999702481793752,0.024391552665459913,Fix (anchor),Weak/isolated parameter
+storage_to_liver_max,0.004787932449164716,0.9999947692663282,0.003234414790100224,Fix (anchor),Weak/isolated parameter
+pg_clearance,0.004561213226811555,0.11250770966049027,0.9936508426732622,Fix (irrelevant),Fix candidate: low sensitivity
+hp_p4_enz_threshold,0.004262793849094668,0.040076002094429644,0.9991966308361163,Fix (irrelevant),Fix candidate: low sensitivity
+hp_cl_iof_threshold,0.004051457457988711,0.02507939346286149,0.9996854603254184,Fix (irrelevant),Fix candidate: low sensitivity
+hp_p4_fsh_threshold,0.003691182929035705,0.0008627630507461211,0.9999996277416667,Fix (irrelevant),Fix candidate: low sensitivity
+hm_p4_igf_threshold,0.0034160968352506408,6.814117469120738e-06,0.9999999999761658,Fix (irrelevant),Fix candidate: low sensitivity
+gnrh_release_scale,0.001477712544047366,0.6747159891026412,0.7380774310443181,Fix (irrelevant),Fix candidate: low sensitivity
+hm_p4_2_scale,0.0013536641564930064,0.7151976380701428,0.6989222428362938,Fix (irrelevant),Fix candidate: low sensitivity
+gnrh_hypo_max,0.0012333432475566733,0.9997544523772868,0.022159307462948637,Fix (irrelevant),Fix candidate: low sensitivity
+hp_gnrh_fsh_scale,0.0010727085509778934,0.028547231298146326,0.999592442224377,Fix (irrelevant),Fix candidate: low sensitivity
+hm_e2_fsh_threshold,0.0006568749206356251,0.00851783367599767,0.9999637218303173,Fix (irrelevant),Fix candidate: low sensitivity
+hm_p4_2_threshold,0.0005794535351519929,0.06802769258324483,0.9976834275136502,Fix (irrelevant),Fix candidate: low sensitivity
+storage_fat_threshold,0.0005057672625062938,0.999999504116811,0.0009958745105423123,Fix (irrelevant),Fix candidate: low sensitivity
+hm_p4_1_threshold,0.0004760782853526304,0.1231208827265521,0.9923916709861347,Fix (irrelevant),Fix candidate: low sensitivity
+hp_gnrh_fsh_threshold,0.0004690471536923826,0.003579088290605144,0.9999935947193699,Fix (irrelevant),Fix candidate: low sensitivity
+hm_e2_1_threshold,0.00018974538140371886,0.033114687677823516,0.9994515554288034,Fix (irrelevant),Fix candidate: low sensitivity
+hp_lh_follicle_threshold,5.067313232824314e-05,0.030087523763220107,0.9995472653244196,Fix (irrelevant),Fix candidate: low sensitivity
+milk_storage_threshold,7.846656609254581e-10,0.9999999999998638,5.211393379412869e-07,Fix (irrelevant),Fix candidate: low sensitivity
+milk_fat_threshold,6.040890243878525e-10,0.9999999999997164,7.523247949794618e-07,Fix (irrelevant),Fix candidate: low sensitivity
+lactation_oxt_scale,0.0,1.0,2.7739843626589647e-15,Fix (irrelevant),Fix candidate: low sensitivity
+lactation_oxt_decay,0.0,0.9999999999999998,1.2694761750096164e-15,Fix (irrelevant),Fix candidate: low sensitivity
+fat_glucose_transfer_threshold,0.0,0.9999999999999996,0.0,Fix (irrelevant),Fix candidate: low sensitivity
+fat_mobilization_storage_threshold,0.0,0.9999999999999994,2.2132383395314832e-15,Fix (irrelevant),Fix candidate: low sensitivity
+fat_to_liver_max,0.0,0.9999999999999994,3.5432475040181135e-18,Fix (irrelevant),Fix candidate: low sensitivity
+storage_to_liver_threshold,0.0,0.9999999999999994,5.717156742574702e-18,Fix (irrelevant),Fix candidate: low sensitivity
+milk_glucose_requirement,0.0,0.9999999999999993,0.0,Fix (irrelevant),Fix candidate: low sensitivity
