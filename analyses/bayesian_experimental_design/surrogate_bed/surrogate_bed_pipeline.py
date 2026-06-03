@@ -88,6 +88,11 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--pca-variance", type=float, default=0.995)
     parser.add_argument("--relative-noise", type=float, default=0.05)
     parser.add_argument("--noise-floor", type=float, default=1e-8)
+    parser.add_argument(
+        "--mi-noisy-measurements",
+        action="store_true",
+        help="Estimate MI after adding Gaussian measurement noise to predicted outputs, closer to the MATLAB BED workflow.",
+    )
     parser.add_argument("--synthetic-observation-seed", type=int, default=7)
     parser.add_argument("--posterior-candidate", help="Candidate name used for posterior plots. Defaults to top MI.")
     parser.add_argument("--posterior-grid-size", type=int, default=400)
@@ -399,6 +404,9 @@ def estimate_mi_for_designs(
 
     for design in designs:
         full_measurement = predicted_outputs[design.columns].to_numpy(dtype=float)
+        if args.mi_noisy_measurements:
+            sigma = np.maximum(args.relative_noise * np.abs(np.mean(full_measurement, axis=0)), args.noise_floor)
+            full_measurement = full_measurement + sigma[None, :] * rng.normal(size=full_measurement.shape)
         full_mi = ksg_mutual_information(target, full_measurement, args.mi_neighbors, args.seed)
         summary_rows.append(
             {

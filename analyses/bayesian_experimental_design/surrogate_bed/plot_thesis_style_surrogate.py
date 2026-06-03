@@ -53,7 +53,14 @@ def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(description="Create thesis-style surrogate BED plots.")
     parser.add_argument("--input-dir", type=Path, default=base / "input_tables")
     parser.add_argument("--run-dir", type=Path, default=base / "run_outputs")
-    parser.add_argument("--target-column", default="insulin_glucose_threshold")
+    parser.add_argument("--candidate-map-csv", type=Path, help="Candidate map used for the BED run.")
+    parser.add_argument("--target-column", default="follicle_to_e2_scale")
+    parser.add_argument(
+        "--measurement-mode",
+        choices=["auto", "cumulative", "single-day"],
+        default="auto",
+        help="Use thesis-style cumulative candidates, single-day candidates, or auto-detect from mi_candidate_ranking.csv.",
+    )
     parser.add_argument("--output-dir", type=Path, default=base / "run_outputs" / "figures")
     parser.add_argument("--relative-noise", type=float, default=0.05)
     parser.add_argument("--noise-floor", type=float, default=1e-8)
@@ -78,32 +85,70 @@ def load_tables(args: argparse.Namespace) -> dict[str, pd.DataFrame]:
     outputs = read_csv(args.input_dir / "ode_output_features.csv")
     admissibility = read_csv(args.input_dir / "admissibility.csv")
     admissible = admissibility["admissible"].astype(bool).to_numpy()
+    mi = read_csv(args.run_dir / "mi_candidate_ranking.csv")
+    candidate_map_path = args.candidate_map_csv
+    if candidate_map_path is None:
+        has_cumulative = mi["candidate"].astype(str).str.contains("_cumulative_to_day_").any()
+        cumulative_path = args.input_dir / "candidate_map_cumulative.csv"
+        single_day_path = args.input_dir / "candidate_map.csv"
+        candidate_map_path = cumulative_path if has_cumulative and cumulative_path.exists() else single_day_path
     return {
         "parameters": parameters.loc[admissible].reset_index(drop=True),
         "outputs": outputs.loc[admissible].reset_index(drop=True),
         "nominal": read_csv(args.input_dir / "nominal_output.csv"),
-        "candidate_map": read_csv(args.input_dir / "candidate_map.csv"),
-        "mi": read_csv(args.run_dir / "mi_candidate_ranking.csv"),
+        "candidate_map": read_csv(candidate_map_path),
+        "mi": mi,
         "predicted": read_csv(args.run_dir / "surrogate_predicted_outputs.csv"),
     }
 
 
 def parse_day(candidate: str) -> int | None:
-    marker = "_day_"
-    if marker not in candidate:
+    if "_cumulative_to_day_" in candidate:
+        day_text = candidate.rsplit("_cumulative_to_day_", maxsplit=1)[-1]
+    elif "_day_" in candidate:
+        day_text = candidate.rsplit("_day_", maxsplit=1)[-1]
+    else:
         return None
-    day_text = candidate.rsplit(marker, maxsplit=1)[-1]
     try:
         return int(float(day_text.replace("p", ".")))
     except ValueError:
         return None
 
 
-def all_species_mi_by_day(mi: pd.DataFrame) -> pd.DataFrame:
+def choose_measurement_mode(mi: pd.DataFrame, requested: str) -> str:
+    if requested != "auto":
+        return requested
+    candidates = mi["candidate"].astype(str)
+    if candidates.str.startswith("all_species_cumulative_to_day_").any():
+        return "cumulative"
+    return "single-day"
+
+
+def all_species_candidate_name(day: int, mode: str) -> str:
+    if mode == "cumulative":
+        return f"all_species_cumulative_to_day_{day}"
+    return f"all_species_day_{day}"
+
+
+def species_candidate_name(species: str, day: int, mode: str) -> str:
+    if mode == "cumulative":
+        return f"{species}_cumulative_to_day_{day}"
+    return f"{species}_day_{day}"
+
+
+def subset_candidate_name(species: list[str], day: int, mode: str) -> str:
+    if mode == "cumulative":
+        return f"{'_'.join(species)}_cumulative_to_day_{day}"
+    return "|".join(f"{state}_day_{day}" for state in species)
+
+
+def all_species_mi_by_day(mi: pd.DataFrame, mode: str) -> pd.DataFrame:
     rows = []
     for _, row in mi.iterrows():
         candidate = str(row["candidate"])
-        if not candidate.startswith("all_species_day_"):
+        if mode == "cumulative" and not candidate.startswith("all_species_cumulative_to_day_"):
+            continue
+        if mode == "single-day" and not candidate.startswith("all_species_day_"):
             continue
         day = parse_day(candidate)
         if day is not None:
@@ -111,10 +156,10 @@ def all_species_mi_by_day(mi: pd.DataFrame) -> pd.DataFrame:
     return pd.DataFrame(rows).sort_values("day").reset_index(drop=True)
 
 
-def species_mi_at_day(mi: pd.DataFrame, day: int) -> pd.DataFrame:
+def species_mi_at_day(mi: pd.DataFrame, day: int, mode: str) -> pd.DataFrame:
     rows = []
     for species in SPECIES:
-        candidate = f"{species}_day_{day}"
+        candidate = species_candidate_name(species, day, mode)
         match = mi[mi["candidate"] == candidate]
         rows.append(
             {
@@ -124,6 +169,15 @@ def species_mi_at_day(mi: pd.DataFrame, day: int) -> pd.DataFrame:
             }
         )
     return pd.DataFrame(rows)
+
+
+def candidate_columns(candidate_map: pd.DataFrame, candidate: str) -> list[str]:
+    match = candidate_map[candidate_map["candidate"] == candidate]
+    if match.empty:
+        if "|" in candidate:
+            return [column.strip() for column in candidate.split("|") if column.strip()]
+        raise ValueError(f"Candidate not found in candidate map: {candidate}")
+    return [column.strip() for column in str(match["columns"].iloc[0]).split("|") if column.strip()]
 
 
 def nominal_follicle_p4() -> pd.DataFrame:
@@ -182,23 +236,36 @@ def posterior_curves(
     parameters: pd.DataFrame,
     predicted: pd.DataFrame,
     nominal: pd.DataFrame,
+    candidate_map: pd.DataFrame,
     target_column: str,
     best_day: int,
     low_day: int,
+    mode: str,
     args: argparse.Namespace,
 ) -> tuple[pd.DataFrame, pd.DataFrame]:
     target = parameters[target_column].to_numpy(dtype=float)
     pad = 0.06 * (float(np.max(target)) - float(np.min(target)))
     grid = np.linspace(float(np.min(target)) - pad, float(np.max(target)) + pad, args.posterior_grid_size)
 
-    designs: list[tuple[str, list[str]]] = [
-        (f"Prior", []),
-        (f"All species, day {best_day}", [f"{species}_day_{best_day}" for species in SPECIES]),
-        (f"All species, day {low_day}", [f"{species}_day_{low_day}" for species in SPECIES]),
-        (f"PGF+E2+FSH+INH, day {best_day}", [f"{s}_day_{best_day}" for s in ["PGF", "E2", "FSH", "INH"]]),
-        (f"PGF+E2+FSH, day {best_day}", [f"{s}_day_{best_day}" for s in ["PGF", "E2", "FSH"]]),
-        (f"PGF+E2, day {best_day}", [f"{s}_day_{best_day}" for s in ["PGF", "E2"]]),
-        (f"PGF, day {best_day}", [f"PGF_day_{best_day}"]),
+    day_label = "cumulative to day" if mode == "cumulative" else "day"
+    candidate_specs: list[tuple[str, str | None]] = [
+        ("Prior", None),
+        (f"All species, {day_label} {best_day}", all_species_candidate_name(best_day, mode)),
+        (f"All species, {day_label} {low_day}", all_species_candidate_name(low_day, mode)),
+        (
+            f"PGF+E2+FSH+INH, {day_label} {best_day}",
+            subset_candidate_name(["PGF", "E2", "FSH", "INH"], best_day, mode),
+        ),
+        (
+            f"PGF+E2+FSH, {day_label} {best_day}",
+            subset_candidate_name(["PGF", "E2", "FSH"], best_day, mode),
+        ),
+        (f"PGF+E2, {day_label} {best_day}", subset_candidate_name(["PGF", "E2"], best_day, mode)),
+        (f"PGF, {day_label} {best_day}", species_candidate_name("PGF", best_day, mode)),
+    ]
+    designs = [
+        (label, [] if candidate is None else candidate_columns(candidate_map, candidate))
+        for label, candidate in candidate_specs
     ]
 
     curve_rows = []
@@ -370,6 +437,8 @@ def plot_composite(
         "Prior": {"color": "#1f77b4", "linestyle": "--", "linewidth": 2.2},
         f"All species, day {int(best['day'])}": {"color": "black", "linestyle": "-", "linewidth": 2.0},
         f"All species, day {int(low['day'])}": {"color": "#d62728", "linestyle": "-", "linewidth": 1.8},
+        f"All species, cumulative to day {int(best['day'])}": {"color": "black", "linestyle": "-", "linewidth": 2.0},
+        f"All species, cumulative to day {int(low['day'])}": {"color": "#d62728", "linestyle": "-", "linewidth": 1.8},
     }
     fallback_colors = ["#ff7f0e", "#8c564b", "#2ca02c", "#bcbd22", "#9467bd"]
     for index, (curve, subset) in enumerate(posterior.groupby("curve", sort=False)):
@@ -406,19 +475,22 @@ def main() -> None:
     args.output_dir.mkdir(parents=True, exist_ok=True)
     tables = load_tables(args)
 
-    mi_day = all_species_mi_by_day(tables["mi"])
+    mode = choose_measurement_mode(tables["mi"], args.measurement_mode)
+    mi_day = all_species_mi_by_day(tables["mi"], mode)
     if mi_day.empty:
-        raise ValueError("No all_species_day_* candidates found in mi_candidate_ranking.csv")
+        raise ValueError(f"No all-species {mode} candidates found in mi_candidate_ranking.csv")
     best_day = int(mi_day.loc[mi_day["mi_nats"].idxmax(), "day"])
     low_day = int(mi_day.loc[mi_day["mi_nats"].idxmin(), "day"])
-    mi_species = species_mi_at_day(tables["mi"], best_day)
+    mi_species = species_mi_at_day(tables["mi"], best_day, mode)
     posterior, posterior_diag = posterior_curves(
         tables["parameters"],
         tables["predicted"],
         tables["nominal"],
+        tables["candidate_map"],
         args.target_column,
         best_day,
         low_day,
+        mode,
         args,
     )
     trajectories = nominal_follicle_p4()
@@ -440,6 +512,7 @@ def main() -> None:
         args.output_dir / "surrogate_bed_thesis_style_summary.png",
     )
     print(f"Saved thesis-style surrogate BED figures to {args.output_dir}")
+    print(f"Measurement mode: {mode}")
     print(f"Best all-species day: {best_day}; lowest all-species day: {low_day}")
     if speed is not None:
         speedup = float(speed.loc[speed["method"] == "Surrogate prediction", "speedup_vs_surrogate_predict"].iloc[0])

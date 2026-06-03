@@ -49,6 +49,16 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--parameter-names", nargs="+", default=[parameter.name for parameter in PARAMETERS])
     parser.add_argument("--species", nargs="+", default=DEFAULT_SPECIES)
     parser.add_argument("--sample-days", nargs="+", type=float, default=DEFAULT_DAYS)
+    parser.add_argument(
+        "--candidate-mode",
+        choices=["single-day", "cumulative", "both"],
+        default="single-day",
+        help=(
+            "Candidate-map style. 'single-day' matches the initial pilot; "
+            "'cumulative' stacks all sampled days up to each candidate day; "
+            "'both' writes both maps."
+        ),
+    )
     parser.add_argument("--method", default="BDF")
     parser.add_argument("--rtol", type=float, default=1e-6)
     parser.add_argument("--atol", type=float, default=1e-9)
@@ -94,6 +104,51 @@ def build_candidate_map(species: list[str], sample_days: list[float]) -> pd.Data
         for state in species:
             column = f"{state}_day_{day_label}"
             rows.append({"candidate": column, "columns": column})
+    return pd.DataFrame(rows)
+
+
+def build_cumulative_candidate_map(species: list[str], sample_days: list[float]) -> pd.DataFrame:
+    """Build thesis-style cumulative measurement candidates.
+
+    A candidate ending at day ``d`` contains every selected sampling day up to
+    and including ``d``. For example, ``all_species_cumulative_to_day_68``
+    stacks all species measured from the first sampled day through day 68.
+    """
+
+    rows = []
+    ordered_days = sorted(float(day) for day in sample_days)
+    subset_definitions = [
+        ("PGF_E2_FSH_INH", ["PGF", "E2", "FSH", "INH"]),
+        ("PGF_E2_FSH", ["PGF", "E2", "FSH"]),
+        ("PGF_E2", ["PGF", "E2"]),
+    ]
+    for day in ordered_days:
+        day_label = f"{day:g}".replace(".", "p")
+        cumulative_days = [past_day for past_day in ordered_days if past_day <= day]
+        all_columns = [
+            f"{state}_day_{f'{past_day:g}'.replace('.', 'p')}"
+            for past_day in cumulative_days
+            for state in species
+        ]
+        rows.append(
+            {
+                "candidate": f"all_species_cumulative_to_day_{day_label}",
+                "columns": "|".join(all_columns),
+            }
+        )
+        for state in species:
+            columns = [f"{state}_day_{f'{past_day:g}'.replace('.', 'p')}" for past_day in cumulative_days]
+            rows.append({"candidate": f"{state}_cumulative_to_day_{day_label}", "columns": "|".join(columns)})
+        for label, subset_species in subset_definitions:
+            available_species = [state for state in subset_species if state in species]
+            if not available_species:
+                continue
+            columns = [
+                f"{state}_day_{f'{past_day:g}'.replace('.', 'p')}"
+                for past_day in cumulative_days
+                for state in available_species
+            ]
+            rows.append({"candidate": f"{label}_cumulative_to_day_{day_label}", "columns": "|".join(columns)})
     return pd.DataFrame(rows)
 
 
@@ -154,7 +209,13 @@ def main() -> None:
 
     parameter_samples.to_csv(args.output_dir / "prior_parameter_samples.csv", index=False)
     outputs.to_csv(args.output_dir / "ode_output_features.csv", index=False)
-    build_candidate_map(args.species, args.sample_days).to_csv(args.output_dir / "candidate_map.csv", index=False)
+    if args.candidate_mode in {"single-day", "both"}:
+        build_candidate_map(args.species, args.sample_days).to_csv(args.output_dir / "candidate_map.csv", index=False)
+    if args.candidate_mode in {"cumulative", "both"}:
+        build_cumulative_candidate_map(args.species, args.sample_days).to_csv(
+            args.output_dir / "candidate_map_cumulative.csv",
+            index=False,
+        )
     pd.DataFrame([nominal_output]).to_csv(args.output_dir / "nominal_output.csv", index=False)
     admissibility.to_csv(args.output_dir / "admissibility.csv", index=False)
 
