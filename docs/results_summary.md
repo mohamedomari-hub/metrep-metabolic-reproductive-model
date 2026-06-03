@@ -27,8 +27,6 @@ For technical definitions and formulas, see:
 
 ## Baseline And Sensitivity
 
-![Baseline selected states](../results_final/figures/baseline_selected_states.png)
-
 The baseline simulation is used as a functional check of the translated Python
 model before analysis. It is not itself an identifiability test; it establishes
 that the model produces trajectories for the selected metabolic and
