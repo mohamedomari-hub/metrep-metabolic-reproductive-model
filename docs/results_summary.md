@@ -154,26 +154,26 @@ This figure is especially useful because it summarizes the practical modelling d
 
 Representative profile likelihood classes
 
-![Representative profile likelihood classes](../results_final/figures/profile_likelihood_representative_3x3.png)
+Representative profile likelihood classes
 
-Profile likelihood was used as a nonlinear confirmation step after the local SVD screen. The SVD analysis is local and linear, while profile likelihood checks whether selected parameters remain practically identifiable when the model is refitted over a parameter range.
+Profile likelihood was used as a nonlinear confirmation step after the local SVD identifiability screen. The SVD analysis provides a local linear approximation of parameter identifiability near the nominal parameter set, whereas profile likelihood evaluates whether parameters remain practically identifiable when varied over a broader range while nuisance parameters are allowed to re-optimize.
 
-The 60 selected Estimate parameters were profiled against synthetic measurable outputs while nuisance parameters were allowed to compensate. The profile-likelihood classes were:
+The 60 parameters classified as Estimate candidates by the SVD screen were profiled against synthetic measurable outputs (FSH, PGF, P4, E2, INH, IGF1, Insulin, Glucose, Glucagon). The resulting practical identifiability classes were:
 
 - 51 practically identifiable
 - 6 boundary-limited
 - 1 weakly identifiable
 - 2 flat/non-identifiable
 
-The 3x3 panel shows representative examples from each class instead of plotting all 60 profiles in one crowded figure.
+The representative 3×3 panel summarizes the main practical outcomes of nonlinear profiling.
 
-The top row shows practically identifiable examples with clear profile minima. These support the SVD decision that a substantial subset of selected parameters is estimable from the current output panel.
+The top row shows representative practically identifiable parameters (insulin_glucose_threshold, inhibin_clearance, hp_p4_follicle_scale) with clear profile minima and likelihood increases on both sides of the optimum. These parameters appear sufficiently constrained by the current measurement panel and support the SVD prediction that a substantial subset of selected parameters is estimable.
 
-The middle row shows boundary-limited examples. Across the full table, the boundary-limited parameters were blood_to_liver_glucose_threshold, igf_lh_sensitivity_threshold, hp_enz_pg_threshold, gnrh_clearance, hp_p4_enz_scale, and hp_iof_threshold. Their best profile point occurred at the edge of the tested range, so they should not be claimed as fully bounded without wider profile ranges or additional information.
+The middle row illustrates boundary-limited cases (blood_to_liver_glucose_threshold, gnrh_clearance, hp_iof_threshold). These parameters exhibit local profile curvature but remain incompletely bounded within the explored range. A particularly informative example is blood_to_liver_glucose_threshold, which was classified by the SVD screen as an Estimate candidate due to moderate sensitivity and very low nullspace participation. However, profile likelihood revealed that one side of the profile remained insufficiently constrained, indicating that the parameter is locally informative but not yet fully bounded under the current experimental setup. This suggests that broader profile ranges, additional measurements, or more informative sampling strategies may be required for robust estimation.
 
-The bottom row shows weakly identifiable and flat/non-identifiable cases. The weakly identifiable parameter was insulin_igf_threshold. Its profile had some curvature, but a broad part of the tested range remained acceptable. The flat/non-identifiable parameters were feed_direct_blood_fraction and lh_basal_release; their tested changes did not increase the loss enough to support reliable estimation under the current output panel.
+The bottom row demonstrates two qualitatively different failure modes. insulin_igf_threshold represents a weakly identifiable parameter, where some profile curvature exists but a broad region remains acceptable. In contrast, feed_direct_blood_fraction and lh_basal_release exhibit flat/non-identifiable profiles, where substantial parameter changes produce only weak deterioration in fit quality. The case of lh_basal_release is particularly informative because the SVD screen initially classified it as an Estimate candidate, indicating that small local perturbations around the nominal parameter set appeared detectable. However, nonlinear profiling showed that the available measurable outputs do not sufficiently constrain the parameter over a realistic range, demonstrating that local identifiability does not necessarily imply practical identifiability.
 
----
+Overall, the comparison between SVD and profile likelihood supports a sequential interpretation of identifiability. The local SVD screen acts as an efficient screening tool that identifies promising parameter candidates and weak directions, whereas profile likelihood provides the nonlinear confirmation step needed to determine whether parameters are truly bounded by the available data. In this workflow, SVD efficiently reduced the candidate parameter space, while profile likelihood refined these candidates into practically identifiable, boundary-limited, weakly identifiable, and non-identifiable classes. This combination increases confidence that selected calibration targets are scientifically defensible and highlights where additional experimental information would be most valuable.
 
 ## 8. Bayesian Experimental Design Link
 
