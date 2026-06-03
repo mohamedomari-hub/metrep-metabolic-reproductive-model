@@ -179,14 +179,30 @@ Overall, the comparison between SVD and profile likelihood supports a sequential
 
 ## 8. Bayesian Experimental Design
 
-Sensitivity, SVD, compensation analysis, and profile likelihood identify where the current measurement panel is informative and where it leaves uncertainty. Bayesian experimental design is the constructive follow-up: it asks which future sampling days and measured species are expected to reduce uncertainty most efficiently.
+This figure illustrates how Bayesian experimental design (BED) acts as the constructive follow-up to identifiability analysis. Sensitivity, SVD identifiability, nullspace participation, compensation analysis, and profile likelihood identify which parameter directions remain weakly informed or confounded under the current measurement panel. BED then addresses the next scientific question:
+
+If some parameters are weakly identifiable, which measurements would make them more identifiable? 
+
+<img width="3174" height="2170" alt="image" src="https://github.com/user-attachments/assets/f441d1e7-5edc-4d35-807b-854ddd1c0947" />
+
+The upper panel shows the endocrine-metabolic cycle dynamics and the expected information gain across candidate sampling days. Information content is not constant across the trajectory. Instead, it changes with biological phase because parameter influence becomes stronger or weaker depending on system dynamics. In this example, day 68 (red bar) represents a relatively low-information sampling point, whereas day 83 (black bar) corresponds to a high-information region of the cycle.
+
+This result links directly to identifiability. A parameter may appear weakly identifiable or boundary-limited not because the model structure is fundamentally flawed, but because the current observations are collected at biologically uninformative times. The SVD and profile-likelihood analyses diagnose these weak directions; BED proposes where additional measurements would most efficiently reduce them.
+
+The lower-left panel further decomposes information content across measured species. Reproductive endocrine markers such as PGF, E2, FSH, and INH contribute substantially more information for the target parameter than metabolic outputs such as glucose, glucagon, or insulin. This finding provides a mechanistic explanation for some identifiability limitations observed in the SVD and profile-likelihood analyses. Parameters embedded in reproductive pathways are more likely to become practically identifiable when reproductive species are measured during informative phases of the cycle.
+
+The lower-right panel demonstrates the practical consequence of informative measurements through prior-to-posterior updating. The blue curve represents the prior uncertainty for the target parameter. Posterior distributions obtained from low-information observations (for example, measurements near day 68) remain broad and similar to the prior, indicating limited uncertainty reduction. In contrast, measurements collected at highly informative sampling times (for example, day 83) and using informative species produce substantially narrower posterior distributions. This corresponds to stronger parameter constraint and improved practical identifiability.
+
+The scientific take-home message is therefore:
+
+Identifiability analysis diagnoses where the model is weakly informed. Bayesian experimental design proposes how future experiments can repair those weaknesses. 
+
+In practical terms, parameters classified as weakly identifiable, boundary-limited, or strongly involved in nullspace compensation should not automatically be discarded. Instead, BED provides a principled strategy to improve their estimability by selecting more informative sampling times and measured species. This turns identifiability analysis from a purely diagnostic exercise into a constructive experimental-design workflow.
 
 
-<img width="4014" height="2186" alt="image" src="https://github.com/user-attachments/assets/a999d3bd-1582-4ab1-abb7-7afa22ef9f58" />
 
 
-
-Surrogate BED thesis-style summary
+## 9. Surrogate BED thesis-style summary
 
 ![Surrogate BED thesis-style summary](../analyses/bayesian_experimental_design/surrogate_bed/run_outputs/figures/surrogate_bed_thesis_style_summary.png)
 
