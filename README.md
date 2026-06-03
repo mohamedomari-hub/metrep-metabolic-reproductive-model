@@ -46,9 +46,9 @@ endpoint.
 ## What Is Included
 
 - `MetRep_Matlab/` contains the original MATLAB reference implementation.
-- `MetRep_Python/model_definition/` contains the translated 22-state non-Dexa
-  Python model equations, parameters, scenarios, simulation, analysis, and
-  plotting functions.
+- `MetRep_Python/model_definition/` contains the translated 22-state Python
+  core model equations, parameters, scenarios, simulation, analysis, plotting
+  functions, and the optional 25-state Dexa extension.
 - `MetRep_Python/model_running/` contains runnable scripts for validation,
   baseline simulation, sensitivity, identifiability, and profile likelihood.
 - `Project_Documentation/sensitivity_identifiability_bayesian_design.md`
@@ -56,19 +56,19 @@ endpoint.
   link to BED.
 - `Project_Documentation/Bayesian_Experimental_Design/` documents BED, including a
   GitHub-facing v3 baseline MATLAB port and historical PhD provenance files.
-- `Project_Documentation/dexa_extension_plan.md` documents the Dexa extension
-  status and plan.
+- `Project_Documentation/dexa_python_implementation.md` documents the Python
+  Dexa implementation and how it is kept separate from baseline analyses.
 - `results_final/` contains curated tables and figures for public reporting.
 - `Project_Documentation/` contains simulation instructions, method notes, BED
   materials, and result interpretation pages.
 
 ## Repository Status
 
-The Python implementation currently covers the 22-state metabolic-reproductive
-core model. The original MATLAB reference includes the Dexa PK/PD extension
-with states 23-25. The Python Dexa extension is planned and documented, but not
-yet presented as completed. The Dexa workflow is included in the scientific
-story as the validation/extension endpoint.
+The Python implementation covers the 22-state metabolic-reproductive core
+model and an optional Dexa perturbation workflow with states 23-25. Ordinary
+scenario simulations, sensitivity analysis, SVD identifiability, and profile
+likelihood use the non-Dexa core parameter set by default. Dexa is activated
+only through the dedicated Dexa runner.
 
 ## Core Workflow
 
@@ -144,6 +144,18 @@ Run all built-in non-Dexa Python scenarios:
 python MetRep_Python/model_running/08_run_model_scenarios.py --scenario all
 ```
 
+Run the optional Python Dexa perturbation:
+
+```bash
+python MetRep_Python/model_running/07_run_dexa_scenarios.py \
+  --scenario baseline_non_lactating \
+  --days 3 \
+  --dose-day 0 \
+  --figure-dir results_final/figures \
+  --table-dir results_final/tables \
+  --prefix dexa_non_lactating_standard_3d
+```
+
 Run the standard scenario simulation plus sensitivity, SVD identifiability, and
 uncertainty analyses:
 
@@ -151,18 +163,11 @@ uncertainty analyses:
 python MetRep_Python/model_running/09_run_standard_analysis.py
 ```
 
-Run the Dexa reference simulation:
+Run the MATLAB Dexa reference simulation:
 
 ```text
 Open MATLAB from the repository root and run:
 BovSys_run_dexa_v3
-```
-
-The Python Dexa script currently documents the planned extension and is kept as
-a placeholder:
-
-```bash
-python MetRep_Python/model_running/07_run_dexa_scenarios.py
 ```
 
 Run the main identifiability screen:
@@ -240,10 +245,15 @@ For all simulation and analysis commands, see
 
 ## Dexa Perturbation Validation
 
-The original MATLAB model includes a dexamethasone PK/PD extension. In the
-project logic, this is the final validation/extension step. The Dexa simulation
-result is reported in the Dexa paper; this repository keeps the MATLAB
-reference code and documents the planned Python Dexa implementation.
+The original MATLAB model includes a dexamethasone PK/PD extension. The Python
+translation implements the same optional three-state PK/PD structure and can
+compare Dexa trajectories against the matching no-Dexa baseline. The Dexa
+simulation result is reported in the Dexa paper; this repository keeps the
+MATLAB reference code and a Python runner for reproducible perturbation tests.
+
+Dexa PK/PD constants are not included in the sensitivity, SVD identifiability,
+or profile-likelihood parameter list. Those analyses remain focused on the
+98-parameter non-Dexa core model.
 
 ## License And Citation
 

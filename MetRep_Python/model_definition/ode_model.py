@@ -1,7 +1,9 @@
 """Core 22-state metabolic-reproductive ODE system.
 
-This module intentionally excludes Dexa PK/PD. It translates the non-Dexa
-behavior of ``BovSys_Equa_dexa_v3`` from MATLAB for states 1..22.
+This module translates the MetRep core behavior of ``BovSys_Equa_dexa_v3`` from
+MATLAB for states 1..22. Dexa PK states are handled in ``model_definition.dexa``;
+the optional PD multipliers here default to neutral values so ordinary Python
+scenarios remain non-Dexa unless explicitly run through the Dexa solver.
 """
 
 from __future__ import annotations
@@ -23,6 +25,8 @@ def metrep_rhs(
     dmi: np.ndarray,
     milk: np.ndarray,
     mode: str = "non_lactating",
+    effect_gluca: float = 1.0,
+    effect_bt: float = 1.0,
 ) -> np.ndarray:
     """Return dy/dt for the core MetRep model.
 
@@ -38,6 +42,8 @@ def metrep_rhs(
         Time grid and forcing vectors for dry matter intake and milk yield.
     mode:
         ``"lactating"`` enables the lactation OXT input term from MATLAB.
+    effect_gluca, effect_bt:
+        Dexa PD multipliers. The default values reproduce the non-Dexa model.
     """
 
     y = np.maximum(np.asarray(y, dtype=float), 0.0)
@@ -202,7 +208,8 @@ def metrep_rhs(
         "igf_clearance"
     ] * y_igf_b
 
-    # Metabolic model. Dexa multipliers are omitted because Phase 1 is no-Dexa.
+    # Metabolic model. Dexa multipliers are neutral unless a Dexa solver passes
+    # non-unit values.
     glu_pool = params["c0"] * DMI
     glu_feed_gng = (1.0 - params["feed_direct_blood_fraction"]) * glu_pool
     glu_feed_bl = params["feed_direct_blood_fraction"] * glu_pool
@@ -211,9 +218,12 @@ def metrep_rhs(
         y_glu**10 + params["insulin_glucose_threshold"] ** 10
     )
     ins_deg = params["insulin_clearance"] * y_ins
-    gluca_sec = params["glucagon_secretion_max"] * params[
-        "glucagon_glucose_threshold"
-    ] ** 2 / (y_glu**2 + params["glucagon_glucose_threshold"] ** 2)
+    gluca_sec = (
+        params["glucagon_secretion_max"]
+        * params["glucagon_glucose_threshold"] ** 2
+        / (y_glu**2 + params["glucagon_glucose_threshold"] ** 2)
+        * effect_gluca
+    )
     gluca_deg = params["glucagon_clearance"] * y_gluca
 
     glu_prod = params["hepatic_glucose_release"] * y_lv * y_gluca
@@ -227,6 +237,7 @@ def metrep_rhs(
         / (params["milk_storage_threshold"] ** 2 + Milk**2)
         * y_lv
         * y_ins
+        * effect_bt
     )
     glu_st_lv = params["storage_to_liver_max"] * y_gluca * y_glu_st**10 / (
         y_glu_st**10 + params["storage_to_liver_threshold"] ** 10
@@ -247,12 +258,13 @@ def metrep_rhs(
         / (y_glu_st**10 + params["storage_fat_threshold"] ** 10)
         * y_lv
         * y_ins
+        * effect_bt
     )
     glu_bl_usage = (
         params["blood_usage_max"]
         * y_glu**10
         / (y_glu**10 + params["blood_usage_glucose_threshold"] ** 10)
-        + params["milk_glucose_requirement"] * Milk
+        + params["milk_glucose_requirement"] * Milk * effect_bt
     )
     glu_lv_usage = params["liver_usage_rate"] * y_lv
 

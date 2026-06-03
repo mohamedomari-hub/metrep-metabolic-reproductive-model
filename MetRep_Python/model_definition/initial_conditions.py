@@ -32,6 +32,12 @@ STATE_NAMES: list[str] = [
 
 STATE_INDEX: dict[str, int] = {name: index for index, name in enumerate(STATE_NAMES)}
 
+DEXA_STATE_NAMES: list[str] = ["A_dep", "A_cent", "C_e"]
+EXTENDED_STATE_NAMES: list[str] = STATE_NAMES + DEXA_STATE_NAMES
+EXTENDED_STATE_INDEX: dict[str, int] = {
+    name: index for index, name in enumerate(EXTENDED_STATE_NAMES)
+}
+
 MATLAB_INITIAL_CONDITIONS_25 = np.array(
     [
         0.667,
@@ -91,4 +97,12 @@ def initial_conditions(mode: str = "non_lactating") -> np.ndarray:
     elif mode != "non_lactating":
         raise ValueError("mode must be 'non_lactating' or 'lactating'")
 
+    return y0
+
+
+def dexa_initial_conditions(mode: str = "non_lactating") -> np.ndarray:
+    """Return 25-state initial conditions for the optional Dexa extension."""
+
+    y0 = np.zeros(len(EXTENDED_STATE_NAMES), dtype=float)
+    y0[: len(STATE_NAMES)] = initial_conditions(mode=mode)
     return y0

@@ -1,7 +1,7 @@
 # Simulation And Analysis Reproducibility
 
 This page lists the main commands needed to reproduce the public Python
-simulation workflows and the MATLAB Dexa reference workflow.
+simulation workflows, baseline analyses, and Dexa perturbation runs.
 
 ## Environment
 
@@ -81,6 +81,9 @@ python MetRep_Python/model_running/09_run_standard_analysis.py
 python MetRep_Python/model_running/04_run_sensitivity.py
 ```
 
+This analyzes the 98 core metabolic-reproductive parameters. Dexa PK/PD
+constants are not part of this workflow.
+
 ## SVD Identifiability
 
 ```bash
@@ -90,6 +93,10 @@ python MetRep_Python/model_running/05_run_identifiability.py \
   --dt 2 \
   --prefix structid_50d_measurable
 ```
+
+This runs the 22-state non-Dexa core model. The parameter list comes from
+`model_definition.parameters.PARAMETERS`, so the optional Dexa constants do not
+interfere with the SVD/nullspace result.
 
 ## Profile Likelihood
 
@@ -115,21 +122,40 @@ python MetRep_Python/model_running/10_run_profile_likelihood.py \
   --prefix profile_50d_balanced_relaxed
 ```
 
-## Dexa Reference Simulation
+## Python Dexa Perturbation
 
-The Dexa perturbation is currently represented by the original MATLAB
-reference implementation. From MATLAB, set the repository root as the working
-directory and run:
+Run the optional Dexa perturbation for the non-lactating standard scenario:
+
+```bash
+python MetRep_Python/model_running/07_run_dexa_scenarios.py \
+  --scenario baseline_non_lactating \
+  --days 3 \
+  --dose-day 0 \
+  --figure-dir results_final/figures \
+  --table-dir results_final/tables \
+  --prefix dexa_non_lactating_standard_3d
+```
+
+Run the optional lactating day-50 perturbation:
+
+```bash
+python MetRep_Python/model_running/07_run_dexa_scenarios.py \
+  --scenario lactating_c0_20 \
+  --dose-day 50 \
+  --figure-dir results_final/figures \
+  --table-dir results_final/tables \
+  --prefix dexa_lactating_c0_20_day50
+```
+
+Add `--save-trajectories` to save full trajectory CSV/NPZ files. Without this
+flag, the script saves the public response figure and response summary table.
+
+## MATLAB Dexa Reference Simulation
+
+From MATLAB, set the repository root as the working directory and run:
 
 ```matlab
 BovSys_run_dexa_v3
-```
-
-The Python Dexa workflow is intentionally a placeholder until the 22-state
-Python core is fully validated against MATLAB outputs:
-
-```bash
-python MetRep_Python/model_running/07_run_dexa_scenarios.py
 ```
 
 ## Results Policy

@@ -4,9 +4,9 @@ The BovSys/MetRep model is a mechanistic ODE model for dairy cow
 metabolic-reproductive dynamics. It couples estrous-cycle endocrine regulation
 with glucose-insulin-glucagon metabolism and feeding or lactation inputs.
 
-The Python implementation in this repository currently translates the 22-state
-non-Dexa core model. The original MATLAB implementation also includes a
-dexamethasone PK/PD extension with three additional states:
+The Python implementation in this repository translates the 22-state core
+model and includes an optional dexamethasone PK/PD extension with three
+additional states:
 
 - `A_dep`: intramuscular depot amount
 - `A_cent`: central/systemic dexamethasone amount
@@ -18,7 +18,7 @@ dexamethasone PK/PD extension with three additional states:
   inhibin, enzyme proxy, OXT, IOF, IGF-1
 - Metabolic states: insulin, blood glucose, fat, liver glucose, glucose
   storage, glucagon
-- Dexa extension states in MATLAB reference: depot, central, and effect-site
+- Optional Dexa extension states: depot, central, and effect-site
   compartments
 
 ## Project Logic
@@ -44,15 +44,15 @@ validation.
 - MATLAB is the original reference implementation.
 - Python is the open translated implementation for users without MATLAB.
 - Sensitivity, identifiability, and profile likelihood are implemented on the
-  Python core model.
+  Python core model using the 98 core parameters only.
 - MetRep scenario simulations are reported in the MetRep model paper.
 - BED is reported in the PhD thesis. The MATLAB BED folder contains one clean
   v3 baseline BED port, while surrogate-assisted BED figures are excluded from
   `results_final` until the validation workflow is documented.
 - Dexa perturbation behavior is reported in the Dexa paper. The MATLAB
-  reference code is retained here; Python Dexa implementation is planned.
+  reference code is retained here, and the Python Dexa runner implements the
+  optional 25-state perturbation workflow.
 
 ## Model Flowchart:
 
 <img width="3872" height="1990" alt="image" src="https://github.com/user-attachments/assets/9e2b9585-b882-446a-8113-839e2704f695" />
-

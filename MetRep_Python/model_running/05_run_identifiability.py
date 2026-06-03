@@ -14,7 +14,10 @@ refactored MetRep package:
 Run from project root:
     python model_running/05_run_identifiability.py
 
-By default this now analyzes all 98 MATLAB-derived parameters for 90 days.
+By default this analyzes all 98 MATLAB-derived core parameters for 90 days.
+Dexa PK/PD constants are not part of this parameter list; Dexa is an optional
+perturbation runner and does not interfere with SVD/sensitivity/profile
+likelihood workflows.
 """
 
 from __future__ import annotations
@@ -451,6 +454,10 @@ def save_robust_consensus(holistic_paths: list[Path], horizons: list[float], out
 
 def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser()
+    parser.description = (
+        "Run SVD identifiability for the 22-state non-Dexa MetRep core. "
+        "Dexa PK/PD constants are intentionally excluded."
+    )
     parser.add_argument("--all-params", action="store_true", help="Use all 98 MATLAB-derived parameters. This is now the default.")
     parser.add_argument("--focused-params", action="store_true", help="Use the historical focused 16-parameter subset.")
     parser.add_argument("--params", nargs="+", default=None, help="Explicit parameter names to analyze.")

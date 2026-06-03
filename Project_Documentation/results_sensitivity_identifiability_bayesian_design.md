@@ -23,6 +23,7 @@ For technical definitions and formulas, see:
 | Compensation | Which parameters compensate each other? | results_final/figures/identifiability_compensation_network_core.png, results_final/figures/identifiability_parameter_scenario_map.png | results_final/figures/identifiability_compensation_edges.png, results_final/figures/identifiability_nullspace_participation_all_parameters.png, results_final/figures/identifiability_sensitivity_vs_nullspace_all_parameters.png, results_final/figures/identifiability_sensitivity_ranked_by_class.png |
 | Profile likelihood | Do selected parameters remain identifiable under nonlinear profiling? | results_final/figures/profile_likelihood_representative_3x3.png, results_final/tables/profile_50d_balanced_relaxed_summary.csv | results_final/figures/profile_50d_balanced_synthetic_outputs.png |
 | Surrogate BED pilot | Which sampling day/species panel is informative, and how much faster is the surrogate? | Bayesian_Experimental_Design/surrogate_bed/run_outputs/figures/surrogate_bed_thesis_style_summary.png | Bayesian_Experimental_Design/surrogate_bed/run_outputs/figures/surrogate_bed_ode_vs_surrogate_speed.png |
+| Dexa perturbation | Does the optional Dexa extension produce a pharmacological perturbation response? | results_final/figures/dexa_non_lactating_standard_3d_summary.png, results_final/tables/dexa_non_lactating_standard_3d_response_summary.csv | MATLAB reference: MetRep_Matlab/BovSys_run_dexa_v3.m |
 
 ---
 
@@ -199,10 +200,34 @@ Identifiability analysis diagnoses where the model is weakly informed. Bayesian 
 
 In practical terms, parameters classified as weakly identifiable, boundary-limited, or strongly involved in nullspace compensation should not automatically be discarded. Instead, BED provides a principled strategy to improve their estimability by selecting more informative sampling times and measured species. This turns identifiability analysis from a purely diagnostic exercise into a constructive experimental-design workflow.
 
+## 9. Dexa Perturbation Validation
 
+![Dexa non-lactating standard response](../results_final/figures/dexa_non_lactating_standard_3d_summary.png)
 
+The Python Dexa runner implements the optional 25-state extension from the
+MATLAB v3 Dexa model. The first 22 states remain the MetRep core model; the
+additional states represent the intramuscular depot amount, central/systemic
+amount, and effect-site concentration of dexamethasone.
 
-## 9. Surrogate BED thesis-style summary
+The curated example uses the non-lactating standard scenario with a day-0 dose
+of 0.02 mg/kg in a 600 kg cow, matching the MATLAB reference dose logic. The
+figure compares the Dexa trajectory with the matching no-Dexa baseline. The
+short response table reports the largest Dexa-baseline differences for the
+plotted states.
+
+In this 3-day perturbation, the Dexa PK/PD module produces a rapid effect-site
+concentration peak and a clear metabolic response. Glucose, insulin, and
+glucagon deviate from the no-Dexa baseline after dosing, while reproductive
+states such as P4 change only modestly over this short window. This is
+consistent with using Dexa as a pharmacological metabolic challenge rather
+than as a replacement for the baseline reproductive-cycle simulation.
+
+Dexa is intentionally separated from identifiability analysis. Local
+sensitivity, SVD, and profile-likelihood workflows use the 98-parameter
+non-Dexa core model. The Dexa PK/PD constants are fixed in the optional Dexa
+runner and are not included in the SVD/nullspace parameter list.
+
+## 10. Surrogate BED thesis-style summary
 
 ![Surrogate BED thesis-style summary](Bayesian_Experimental_Design/surrogate_bed/run_outputs/figures/surrogate_bed_thesis_style_summary.png)
 
