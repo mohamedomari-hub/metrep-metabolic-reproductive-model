@@ -6,9 +6,9 @@ The full biological scenario simulations are reported in the MetRep model paper,
 
 For technical definitions and formulas, see:
 
-- docs/sensitivity_identifiability_bayesian_design.md
-- docs/plot_interpretation_guide.md
-- docs/bayesian_experimental_design.md
+- Project_Documentation/sensitivity_identifiability_bayesian_design.md
+- Project_Documentation/plot_interpretation_guide.md
+- Project_Documentation/Bayesian_Experimental_Design/
 
 ---
 

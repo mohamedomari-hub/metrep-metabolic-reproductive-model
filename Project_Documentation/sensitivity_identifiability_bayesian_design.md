@@ -199,7 +199,7 @@ The key SVD outputs are:
   `Fix (irrelevant)` classification.
 
 For a plot-by-plot explanation of the technical terms and conclusions, see
-`docs/plot_interpretation_guide.md`.
+`Project_Documentation/plot_interpretation_guide.md`.
 
 It classifies parameters into:
 
@@ -665,8 +665,8 @@ BED asks which new measurements would reduce those weaknesses
 
 The original PhD BED implementation is retained in MATLAB for provenance and methodological traceability. For public presentation, the repository uses the cleaner v3 baseline BED port:
 
-- `docs/Bayesian_Experimental_Design/matlab_original/BED_1M_ALL.m`
-- `docs/Bayesian_Experimental_Design/matlab_original/BovSys_run_v3_baseline.m`
+- `Project_Documentation/Bayesian_Experimental_Design/matlab_original/BED_1M_ALL.m`
+- `Project_Documentation/Bayesian_Experimental_Design/matlab_original/BovSys_run_v3_baseline.m`
 
 This version uses the published v3 MetRep equations with Dexa PK/PD switched off, so it should be interpreted as BED for the baseline metabolic-reproductive model, not as a Dexa simulation.
 
@@ -680,7 +680,7 @@ The preferred approach is to keep the ODE model as the reference model and use
 a surrogate only as an accelerator. The implemented script and detailed
 mathematical documentation are in:
 
-`docs/Bayesian_Experimental_Design/surrogate_bed/`
+`Project_Documentation/Bayesian_Experimental_Design/surrogate_bed/`
 
 The surrogate workflow should include:
 

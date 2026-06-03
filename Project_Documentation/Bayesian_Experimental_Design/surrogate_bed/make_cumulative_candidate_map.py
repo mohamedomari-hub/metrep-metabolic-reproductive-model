@@ -25,7 +25,7 @@ DAY_PATTERN = re.compile(r"^(?P<species>.+)_day_(?P<day>[0-9]+(?:p[0-9]+)?)$")
 
 
 def parse_args() -> argparse.Namespace:
-    base = Path("docs/Bayesian_Experimental_Design/surrogate_bed/input_tables_large")
+    base = Path("Project_Documentation/Bayesian_Experimental_Design/surrogate_bed/input_tables_large")
     parser = argparse.ArgumentParser(description="Build a cumulative BED candidate map from existing output columns.")
     parser.add_argument("--outputs-csv", type=Path, default=base / "ode_output_features.csv")
     parser.add_argument("--output-csv", type=Path, default=base / "candidate_map_cumulative.csv")

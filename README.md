@@ -51,14 +51,16 @@ endpoint.
   plotting functions.
 - `MetRep_Python/model_running/` contains runnable scripts for validation,
   baseline simulation, sensitivity, identifiability, and profile likelihood.
-- `docs/sensitivity_identifiability_bayesian_design.md` summarizes sensitivity,
-  SVD identifiability, profile likelihood, and the link to BED.
-- `docs/Bayesian_Experimental_Design/` documents BED, including a
+- `Project_Documentation/sensitivity_identifiability_bayesian_design.md`
+  summarizes sensitivity, SVD identifiability, profile likelihood, and the
+  link to BED.
+- `Project_Documentation/Bayesian_Experimental_Design/` documents BED, including a
   GitHub-facing v3 baseline MATLAB port and historical PhD provenance files.
-- `docs/dexa_extension_plan.md` documents the Dexa extension status and plan.
+- `Project_Documentation/dexa_extension_plan.md` documents the Dexa extension
+  status and plan.
 - `results_final/` contains curated tables and figures for public reporting.
-- `docs/` contains reproducibility, method notes, BED materials, and result
-  interpretation pages.
+- `Project_Documentation/` contains simulation instructions, method notes, BED
+  materials, and result interpretation pages.
 
 ## Repository Status
 
@@ -105,8 +107,8 @@ selected parameters.
 The mathematical definitions for sensitivity, SVD/nullspace identifiability,
 profile likelihood, and Bayesian experimental design are documented in:
 
-- `docs/sensitivity_identifiability_bayesian_design.md`
-- `docs/results_sensitivity_identifiability_bayesian_design.md`
+- `Project_Documentation/sensitivity_identifiability_bayesian_design.md`
+- `Project_Documentation/results_sensitivity_identifiability_bayesian_design.md`
 
 ## Quick Start
 
@@ -128,6 +130,39 @@ Run the baseline non-Dexa simulation:
 
 ```bash
 python MetRep_Python/model_running/02_run_baseline.py
+```
+
+List all built-in Python model scenarios:
+
+```bash
+python MetRep_Python/model_running/08_run_model_scenarios.py --list
+```
+
+Run all built-in non-Dexa Python scenarios:
+
+```bash
+python MetRep_Python/model_running/08_run_model_scenarios.py --scenario all
+```
+
+Run the standard scenario simulation plus sensitivity, SVD identifiability, and
+uncertainty analyses:
+
+```bash
+python MetRep_Python/model_running/09_run_standard_analysis.py
+```
+
+Run the Dexa reference simulation:
+
+```text
+Open MATLAB from the repository root and run:
+BovSys_run_dexa_v3
+```
+
+The Python Dexa script currently documents the planned extension and is kept as
+a placeholder:
+
+```bash
+python MetRep_Python/model_running/07_run_dexa_scenarios.py
 ```
 
 Run the main identifiability screen:
@@ -181,14 +216,15 @@ inside the tested range. Six had best fits at the edge of the tested range, one
 was only weakly bounded, and two stayed too flat to support reliable estimation
 from the current output panel.
 
-See `docs/sensitivity_identifiability_bayesian_design.md`, `docs/results_sensitivity_identifiability_bayesian_design.md`,
-`docs/plot_interpretation_guide.md`, and `results_final/` for the curated
-summary.
+See `Project_Documentation/sensitivity_identifiability_bayesian_design.md`,
+`Project_Documentation/results_sensitivity_identifiability_bayesian_design.md`,
+`Project_Documentation/plot_interpretation_guide.md`, and `results_final/` for
+the curated summary.
 
 ## Bayesian Experimental Design
 
 The BED implementation is kept as MATLAB reference code in
-`docs/Bayesian_Experimental_Design/matlab_original/`. For GitHub, the
+`Project_Documentation/Bayesian_Experimental_Design/matlab_original/`. For GitHub, the
 single recommended entry point is `BED_1M_ALL.m`, which calls
 `BovSys_run_v3_baseline.m` and uses the published v3 model equations with Dexa
 PK/PD switched off.
@@ -198,6 +234,9 @@ MATLAB BED code and methodology notes, but does not currently include BED/RF
 surrogate figures in `results_final` because that workflow still needs a
 documented public validation path. A compact Python BED reproduction can be
 added later using the translated Python model.
+
+For all simulation and analysis commands, see
+`Project_Documentation/simulation_and_analysis_reproducibility.md`.
 
 ## Dexa Perturbation Validation
 

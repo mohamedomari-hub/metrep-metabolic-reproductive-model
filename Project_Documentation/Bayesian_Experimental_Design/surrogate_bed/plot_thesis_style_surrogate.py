@@ -49,7 +49,7 @@ SPECIES_LABELS = {
 
 
 def parse_args() -> argparse.Namespace:
-    base = Path("docs/Bayesian_Experimental_Design/surrogate_bed")
+    base = Path("Project_Documentation/Bayesian_Experimental_Design/surrogate_bed")
     parser = argparse.ArgumentParser(description="Create thesis-style surrogate BED plots.")
     parser.add_argument("--input-dir", type=Path, default=base / "input_tables")
     parser.add_argument("--run-dir", type=Path, default=base / "run_outputs")
