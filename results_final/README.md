@@ -44,20 +44,15 @@ This folder contains selected result files for public reporting.
   with node size and outline indicating local sensitivity
 - `identifiability_class_counts.png`: Estimate / Fix class counts
 - `identifiability_decision_map.png`: sensitivity vs nullspace decision map
-- `profile_50d_balanced_relaxed_combined_profiles.png`: combined profile
-  likelihood result
+- `profile_likelihood_representative_3x3.png`: representative profile
+  likelihood examples for practically identifiable, boundary-limited, weakly
+  identifiable, and flat/non-identifiable classes
 - `profile_50d_balanced_synthetic_outputs.png`: synthetic measurable outputs
   used for profile likelihood
-- `bed_MI.png`: BED mutual information by candidate sampling day
-- `bed_MI_Individual_Species.png`: BED per-species information
-- `bed_Posteriors.png`: posterior comparison
-- `bed_Posteriors_Combinations.png`: posterior combinations by species set
-- `bed_Time_Comparison_3000_ite.png`: BED timing comparison
 
 ## Scope
 
 The published MetRep scenario simulations, Dexa perturbation simulation, and
 full BED analysis are primarily reported in the associated paper/thesis
 materials. This curated folder focuses on GitHub-facing summaries for the
-Python sensitivity and identifiability workflow, plus selected BED figures for
-context.
+Python sensitivity, identifiability, and profile-likelihood workflow.

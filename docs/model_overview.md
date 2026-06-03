@@ -46,7 +46,8 @@ validation.
 - Sensitivity, identifiability, and profile likelihood are implemented on the
   Python core model.
 - MetRep scenario simulations are reported in the MetRep model paper.
-- BED is reported in the PhD thesis; selected figures are retained here for
-  context, and the MATLAB BED folder contains one clean v3 baseline BED port.
+- BED is reported in the PhD thesis. The MATLAB BED folder contains one clean
+  v3 baseline BED port, while surrogate-assisted BED figures are excluded from
+  `results_final` until the validation workflow is documented.
 - Dexa perturbation behavior is reported in the Dexa paper. The MATLAB
   reference code is retained here; Python Dexa implementation is planned.

@@ -356,11 +356,11 @@ Interpretation:
 - The model is not simply identifiable or non-identifiable as a whole. Instead,
   different parameter groups have different levels of information support.
 
-## Profile Likelihood: Combined Profiles
+## Profile Likelihood: Representative Classes
 
 Figure:
 
-- `profile_50d_balanced_relaxed_combined_profiles.png`
+- `profile_likelihood_representative_3x3.png`
 
 Tables:
 
@@ -369,9 +369,13 @@ Tables:
 
 What it shows:
 
-- Profile likelihood curves for selected parameters after the SVD screen.
+- Representative profile likelihood curves for the four profile classes after
+  the SVD screen.
 - Each curve shows how model fit changes when one parameter is fixed at
   different values while nuisance parameters are allowed to compensate.
+- The panel does not show all 60 profiles. It shows selected examples for:
+  practically identifiable, boundary-limited, weakly identifiable, and
+  flat/non-identifiable classes.
 
 Technical terms:
 
@@ -399,6 +403,9 @@ Interpretation:
   - 6 boundary-limited
   - 1 weakly identifiable
   - 2 flat/non-identifiable
+- The 3x3 panel should be read together with the profile summary table. The
+  table gives the complete count; the figure provides interpretable examples
+  of each class.
 
 ## How The Plots Fit Together
 
@@ -415,7 +422,7 @@ sensitivity_top_parameters.png
 -> identifiability_compensation_network_sensitivity.png
 -> identifiability_decision_map.png
 -> identifiability_class_counts.png
--> profile_50d_balanced_relaxed_combined_profiles.png
+-> profile_likelihood_representative_3x3.png
 ```
 
 Together they show:

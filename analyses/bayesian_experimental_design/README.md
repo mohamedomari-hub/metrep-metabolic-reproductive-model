@@ -11,10 +11,10 @@ line while presenting BED as a baseline MetRep design analysis.
 
 The current curated story should focus on:
 
-- mutual information across candidate sampling days
-- informative species ranking
-- posterior narrowing under informative measurements
-- timing or surrogate comparison, where relevant
+- BED as the experimental-design response to weak or compensatory
+  identifiability findings
+- the original MATLAB implementation as PhD provenance
+- the future Python surrogate workflow as a reproducibility extension
 
 Method summary:
 
@@ -25,6 +25,11 @@ Method summary:
   informative.
 - Use posterior narrowing to show how informative measurements reduce
   uncertainty.
+
+The current RF/surrogate comparison figures are not included in
+`results_final/`. They should be reported only after the surrogate validation,
+mutual-information convergence, and biological admissibility checks are
+documented.
 
 Posterior summary:
 
@@ -49,4 +54,5 @@ Within the full project logic, BED is the proposed way to improve information
 about parameters or model directions that classical identifiability analysis
 shows are weakly informed.
 
-A compact Python BED reproduction can still be treated as future work.
+A compact Python BED reproduction can still be treated as future work. The
+recommended scaffold is in `surrogate_bed/`.

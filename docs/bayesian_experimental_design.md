@@ -34,6 +34,9 @@ because:
 - it saves intermediate `.mat` files in the working directory
 - exact repeatability is limited because the original script does not define a
   clean public random-seed/output convention
+- the existing BED figures used a surrogate comparison that should not be
+  reported publicly until surrogate validation, convergence, and biological
+  admissibility checks are documented
 
 ## Methodology
 
@@ -154,8 +157,8 @@ $$
 with clipping away from zero so that nearly zero outputs do not give a zero
 measurement error.
 
-The same fixed observation vector was used when comparing the full ODE model
-and surrogate calculations, so both workflows were evaluated against the same
+The same fixed observation vector can be used when comparing a full ODE model
+and a surrogate calculation, so both workflows are evaluated against the same
 synthetic data.
 
 4. Compute the Gaussian likelihood for each prior sample:
@@ -318,16 +321,35 @@ Present v3 as the canonical model line. Use the single clean MATLAB BED script
 `analyses/bayesian_experimental_design/matlab_original/BED_1M_ALL.m`, which is
 the v3 baseline port.
 
-The full BED result is reported in the PhD thesis. This repository includes
-selected BED figures for context:
-
-- mutual information by candidate sampling day
-- per-species information ranking
-- posterior narrowing for informative designs
-- timing/surrogate comparison, if included
+The full BED result is reported in the PhD thesis. The current public GitHub
+repository does not include BED result figures in `results_final` because the
+available figures rely on an ODE-versus-surrogate comparison that still needs a
+documented public validation workflow.
 
 A compact Python reproduction can be added later. It should reproduce the main
 BED story rather than port the original MATLAB file line by line.
+
+## Future Surrogate BED Workflow
+
+The preferred future approach is to keep the ODE model as the reference model
+and use a surrogate only as an accelerator. The recommended scaffold is in:
+
+`analyses/bayesian_experimental_design/surrogate_bed/`
+
+The surrogate workflow should include:
+
+- held-out ODE validation for the surrogate predictions;
+- mutual-information convergence checks across increasing Monte Carlo sample
+  sizes;
+- biological admissibility filtering before posterior or mutual-information
+  summaries are reported;
+- repeated-seed or bootstrap uncertainty for candidate ranking stability.
+
+The recommended first surrogate is a PCA-compressed multi-output emulator with
+a tree ensemble regressor. This is more suitable than reporting a simple RF
+comparison alone because it treats the multi-species output vector as a
+correlated object and requires explicit validation before BED conclusions are
+claimed.
 
 ## Interpretation In The Project
 

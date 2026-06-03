@@ -189,8 +189,10 @@ single recommended entry point is `BED_1M_ALL.m`, which calls
 `BovSys_run_v3_baseline.m` and uses the published v3 model equations with Dexa
 PK/PD switched off.
 
-The full BED result is reported in the PhD thesis, and this repository includes
-selected BED figures for context. A compact Python BED reproduction can be
+The full BED result is reported in the PhD thesis. This repository keeps the
+MATLAB BED code and methodology notes, but does not currently include BED/RF
+surrogate figures in `results_final` because that workflow still needs a
+documented public validation path. A compact Python BED reproduction can be
 added later using the translated Python model.
 
 ## Dexa Perturbation Validation

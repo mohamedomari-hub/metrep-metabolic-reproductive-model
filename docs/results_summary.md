@@ -22,8 +22,7 @@ For technical definitions and formulas, see:
 | SVD identifiability | Which parameter directions are informed or weak? | `results_final/figures/identifiability_singular_values.png`, `results_final/figures/identifiability_svd_ranking.png` |
 | SVD classes | Which parameters should be estimated, anchored, or fixed? | `results_final/tables/structid_50d_measurable_holistic_table.csv`, `results_final/figures/identifiability_decision_map.png`, `results_final/figures/identifiability_class_counts.png` |
 | Compensation | Which parameters can compensate each other? | `results_final/tables/structid_50d_measurable_compensation_edges.csv`, `results_final/figures/identifiability_compensation_edges.png`, `results_final/figures/identifiability_compensation_network_sensitivity.png` |
-| Profile likelihood | Which selected parameters remain practically identifiable after nonlinear profiling? | `results_final/tables/profile_50d_balanced_relaxed_summary.csv`, `results_final/figures/profile_50d_balanced_relaxed_combined_profiles.png` |
-| BED context | Which sampling days/species are expected to be informative? | `results_final/figures/bed_MI.png`, `results_final/figures/bed_MI_Individual_Species.png`, `results_final/figures/bed_Posteriors.png` |
+| Profile likelihood | Which selected parameters remain practically identifiable after nonlinear profiling? | `results_final/tables/profile_50d_balanced_relaxed_summary.csv`, `results_final/figures/profile_likelihood_representative_3x3.png` |
 
 ## Baseline And Sensitivity
 
@@ -154,7 +153,7 @@ for anchoring, prior constraints, or Bayesian experimental design.
 
 ![Synthetic measurable outputs](../results_final/figures/profile_50d_balanced_synthetic_outputs.png)
 
-![Combined profile likelihood](../results_final/figures/profile_50d_balanced_relaxed_combined_profiles.png)
+![Representative profile likelihood classes](../results_final/figures/profile_likelihood_representative_3x3.png)
 
 Profile likelihood was used as a nonlinear confirmation step after the local
 SVD screen. The 60 selected `Estimate` parameters were profiled against
@@ -168,18 +167,20 @@ The profile-likelihood classes were:
 - 1 weakly identifiable
 - 2 flat/non-identifiable
 
-The 51 practically identifiable parameters have profile curves with clear
-enough minima inside the tested range. This supports the SVD decision that a
-substantial subset of the selected parameters is estimable from the current
-output panel.
+The 3x3 panel shows representative examples from each class rather than all 60
+profiles in one crowded figure. The top row shows practically identifiable
+examples with clear profile minima. These examples support the SVD decision
+that a substantial subset of the selected parameters is estimable from the
+current output panel.
 
-The 6 boundary-limited parameters had their best profile point at the edge of
-the tested range: `blood_to_liver_glucose_threshold`,
+The middle row shows boundary-limited examples. Across the full table, the 6
+boundary-limited parameters were `blood_to_liver_glucose_threshold`,
 `igf_lh_sensitivity_threshold`, `hp_enz_pg_threshold`, `gnrh_clearance`,
-`hp_p4_enz_scale`, and `hp_iof_threshold`. These parameters should not be
-claimed as fully bounded without either a wider profile range or additional
-information.
+`hp_p4_enz_scale`, and `hp_iof_threshold`. Their best profile point occurred at
+the edge of the tested range, so they should not be claimed as fully bounded
+without either a wider profile range or additional information.
 
+The bottom row shows the weakly identifiable and flat/non-identifiable cases.
 The weakly identifiable parameter was `insulin_igf_threshold`. Its profile had
 some curvature, but a broad part of the tested range remained acceptable. The
 flat/non-identifiable parameters were `feed_direct_blood_fraction` and
@@ -188,25 +189,17 @@ support reliable estimation under the current output panel.
 
 ## Bayesian Experimental Design Link
 
-![BED mutual information](../results_final/figures/bed_MI.png)
+BED should be read as the planned constructive follow-up to the
+identifiability analysis. Sensitivity, SVD, compensation, and profile
+likelihood identify which parameters or directions are insufficiently
+informed; BED evaluates which candidate sampling days and measured species are
+expected to reduce that uncertainty.
 
-![BED individual species information](../results_final/figures/bed_MI_Individual_Species.png)
-
-![BED posterior comparison](../results_final/figures/bed_Posteriors.png)
-
-The BED figures are included as context from the PhD workflow. They should be
-read as the constructive follow-up to the identifiability analysis. Sensitivity,
-SVD, compensation, and profile likelihood identify which parameters or
-directions are insufficiently informed; BED evaluates which candidate sampling
-days and measured species are expected to reduce that uncertainty.
-
-In the BED workflow, posterior distributions were obtained by reweighting prior
-parameter samples with a Gaussian likelihood from a fixed synthetic
-observation. Mutual information was then used to rank candidate observations by
-their expected information about the target. The posterior plots therefore
-show how an informative measurement can narrow uncertainty, while the mutual
-information plots rank which candidate measurements are expected to be most
-useful before collecting new data.
+The current BED figures are not included in `results_final` because they rely
+on an ODE-versus-surrogate comparison that has not yet been fully documented
+and validated in the public Python workflow. A future surrogate-assisted BED
+result should be reported only after the surrogate validation, mutual
+information convergence, and biological admissibility checks are documented.
 
 Scientifically, this makes the workflow sequential: the classical analysis
 defines the information gap, and BED proposes how future experiments could
@@ -216,5 +209,6 @@ reduce that gap.
 
 - MetRep scenario simulations: reported in the MetRep model paper.
 - Dexa perturbation simulation/validation: reported in the Dexa paper.
-- Bayesian experimental design: reported in the PhD thesis; selected figures
-  are included in `results_final/figures/` for context.
+- Bayesian experimental design: reported in the PhD thesis; BED/RF surrogate
+  figures are not included in `results_final` until the validation workflow is
+  documented.
