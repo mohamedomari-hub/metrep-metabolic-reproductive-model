@@ -177,9 +177,14 @@ The bottom row demonstrates two qualitatively different failure modes. insulin_i
 
 Overall, the comparison between SVD and profile likelihood supports a sequential interpretation of identifiability. The local SVD screen acts as an efficient screening tool that identifies promising parameter candidates and weak directions, whereas profile likelihood provides the nonlinear confirmation step needed to determine whether parameters are truly bounded by the available data. In this workflow, SVD efficiently reduced the candidate parameter space, while profile likelihood refined these candidates into practically identifiable, boundary-limited, weakly identifiable, and non-identifiable classes. This combination increases confidence that selected calibration targets are scientifically defensible and highlights where additional experimental information would be most valuable.
 
-## 8. Bayesian Experimental Design Link
+## 8. Bayesian Experimental Design
 
 Sensitivity, SVD, compensation analysis, and profile likelihood identify where the current measurement panel is informative and where it leaves uncertainty. Bayesian experimental design is the constructive follow-up: it asks which future sampling days and measured species are expected to reduce uncertainty most efficiently.
+
+
+<img width="4014" height="2186" alt="image" src="https://github.com/user-attachments/assets/a999d3bd-1582-4ab1-abb7-7afa22ef9f58" />
+
+
 
 Surrogate BED thesis-style summary
 
