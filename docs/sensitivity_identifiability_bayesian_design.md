@@ -384,36 +384,6 @@ measurements should be chosen to improve those directions.
 The classical analysis says where the model is under-informed; BED says how a
 future experiment could improve that information.
 
-
-## Current Repository Status
-
-The original PhD BED implementation is MATLAB code. It is retained for
-provenance and methodological traceability.
-
-For a clearer GitHub presentation, the repository also includes a v3 baseline
-port:
-
-- `analyses/bayesian_experimental_design/matlab_original/BED_1M_ALL.m`
-- `analyses/bayesian_experimental_design/matlab_original/BovSys_run_v3_baseline.m`
-
-This port uses the published v3 model equations with Dexa PK/PD switched off.
-It should be interpreted as BED on the baseline MetRep model, not as a Dexa
-simulation.
-
-The BED workflow is still not the recommended lightweight reproducibility path,
-because:
-
-- the original script is large and combines several analysis variants
-- it uses MATLAB parallel loops
-- it depends on Statistics and Machine Learning Toolbox functions
-- it contains hardcoded historical cluster paths
-- it saves intermediate `.mat` files in the working directory
-- exact repeatability is limited because the original script does not define a
-  clean public random-seed/output convention
-- the existing BED figures used a surrogate comparison that should not be
-  reported publicly until surrogate validation, convergence, and biological
-  admissibility checks are documented
-
 ## Methodology
 
 BED asks which future measurements would be most useful before collecting the
@@ -691,20 +661,18 @@ identifiability finds weak or compensatory directions
 BED asks which new measurements would reduce those weaknesses
 ```
 
-## Recommended Public Presentation
+## Current Repository Status
 
-Present v3 as the canonical model line. Use the single clean MATLAB BED script
-`analyses/bayesian_experimental_design/matlab_original/BED_1M_ALL.m`, which is
-the v3 baseline port.
+The original PhD BED implementation is retained in MATLAB for provenance and methodological traceability. For public presentation, the repository uses the cleaner v3 baseline BED port:
 
-The full BED result is reported in the PhD thesis. The current public GitHub
-repository does not include BED result figures in `results_final` because the
-available thesis-style figures rely on an ODE-versus-surrogate comparison that
-should be rechecked with a documented public validation workflow.
+- `analyses/bayesian_experimental_design/matlab_original/BED_1M_ALL.m`
+- `analyses/bayesian_experimental_design/matlab_original/BovSys_run_v3_baseline.m`
 
-The Python surrogate workflow is now implemented as a reproducible comparison
-pipeline. It is intended to reproduce the main BED story from precomputed ODE
-tables rather than port the original MATLAB file line by line.
+This version uses the published v3 MetRep equations with Dexa PK/PD switched off, so it should be interpreted as BED for the baseline metabolic-reproductive model, not as a Dexa simulation.
+
+The MATLAB BED workflow is not presented as the lightweight reproducibility path because it combines historical analysis variants, uses MATLAB parallel/toolbox functions, contains hardcoded legacy paths, and does not define a clean public random-seed/output convention.
+
+For reproducibility, the Python surrogate BED workflow is now used as the cleaner public pipeline. It is intended to reproduce the main BED logic from precomputed ODE simulation tables rather than port the original MATLAB file line by line. The full BED result remains reported in the PhD thesis; public BED figures should be interpreted as pilot reproductions unless surrogate validation, mutual-information convergence, and biological admissibility checks are documented.
 
 # Surrogate BED Workflow
 
