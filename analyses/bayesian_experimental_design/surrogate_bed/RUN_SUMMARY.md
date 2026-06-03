@@ -80,6 +80,42 @@ Posterior effective sample size for the top candidate:
 37.45 / 389 = 0.096
 ```
 
+## Thesis-Style Surrogate Figures
+
+The thesis-style summary figure was generated with:
+
+```bash
+python analyses/bayesian_experimental_design/surrogate_bed/plot_thesis_style_surrogate.py \
+  --benchmark-samples 12 \
+  --surrogate-benchmark-repeats 200
+```
+
+Generated files:
+
+| File | Content |
+|---|---|
+| `run_outputs/figures/surrogate_bed_thesis_style_summary.png` | Nominal follicle/P4 trajectory, all-species MI by day, per-species MI at the best day, and posterior curves for selected measurement designs |
+| `run_outputs/figures/surrogate_bed_ode_vs_surrogate_speed.png` | Local ODE-versus-surrogate prediction timing comparison |
+| `run_outputs/thesis_style_posterior_curves.csv` | Prior and posterior density curves used in the summary plot |
+| `run_outputs/thesis_style_posterior_diagnostics.csv` | Effective sample size for each plotted posterior curve |
+| `run_outputs/thesis_style_speed_benchmark.csv` | Timing values for ODE simulation, surrogate prediction, and surrogate training |
+
+The thesis-style plot selected day 88 as the best all-species candidate and
+day 56 as the lowest all-species candidate for the target
+`insulin_glucose_threshold`.
+
+Local timing benchmark:
+
+| Method | Seconds per sample |
+|---|---:|
+| ODE | 0.327 |
+| Surrogate prediction | 0.00152 |
+
+This corresponds to an observed surrogate prediction speedup of about `215x`
+per parameter sample on this machine. Surrogate training took `0.313` seconds
+for the 389 admissible pilot samples; training is a one-time cost, while
+prediction is the repeated operation used during candidate exploration.
+
 ## Interpretation
 
 This run is useful for comparing the Python surrogate workflow against the

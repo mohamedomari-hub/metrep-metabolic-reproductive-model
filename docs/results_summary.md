@@ -23,6 +23,7 @@ For technical definitions and formulas, see:
 | SVD classes | Which parameters should be estimated, anchored, or fixed? | `results_final/tables/structid_50d_measurable_holistic_table.csv`, `results_final/figures/identifiability_decision_map.png`, `results_final/figures/identifiability_class_counts.png` |
 | Compensation | Which parameters can compensate each other? | `results_final/tables/structid_50d_measurable_compensation_edges.csv`, `results_final/figures/identifiability_compensation_edges.png`, `results_final/figures/identifiability_compensation_network_all_parameters.png` |
 | Profile likelihood | Which selected parameters remain practically identifiable after nonlinear profiling? | `results_final/tables/profile_50d_balanced_relaxed_summary.csv`, `results_final/figures/profile_likelihood_representative_3x3.png` |
+| Surrogate BED pilot | Which sampling day/species panel is expected to be informative, and how much faster is the surrogate than ODE simulation? | `analyses/bayesian_experimental_design/surrogate_bed/run_outputs/figures/surrogate_bed_thesis_style_summary.png`, `analyses/bayesian_experimental_design/surrogate_bed/run_outputs/figures/surrogate_bed_ode_vs_surrogate_speed.png` |
 
 ## Baseline And Sensitivity
 
@@ -198,11 +199,40 @@ likelihood identify which parameters or directions are insufficiently
 informed; BED evaluates which candidate sampling days and measured species are
 expected to reduce that uncertainty.
 
-The current BED figures are not included in `results_final` because they rely
-on an ODE-versus-surrogate comparison that has not yet been fully documented
-and validated in the public Python workflow. A future surrogate-assisted BED
-result should be reported only after the surrogate validation, mutual
-information convergence, and biological admissibility checks are documented.
+![Surrogate BED thesis-style summary](../analyses/bayesian_experimental_design/surrogate_bed/run_outputs/figures/surrogate_bed_thesis_style_summary.png)
+
+The surrogate BED pilot uses the translated Python ODE model to generate a
+local Monte Carlo prior around the nominal parameter set, retains biologically
+admissible trajectories, trains an ExtraTrees surrogate on the ODE output
+features, and then evaluates candidate measurements using mutual information
+and posterior reweighting.
+
+In this pilot run, 389 biologically admissible samples remained from 500 ODE
+simulations. For the target parameter `insulin_glucose_threshold`, the highest
+all-species candidate was day 88, while the lowest all-species candidate was
+day 56. The top trajectory panel places these candidate days in the nominal
+follicle/P4 cycle. The middle panel ranks candidate sampling days by estimated
+mutual information. The lower-left panel decomposes the day-88 information by
+species; insulin contributed the largest single-species MI in this pilot. The
+lower-right panel shows how different measurement choices reshape the prior
+into posterior densities by likelihood-weighted reweighting of the prior
+samples.
+
+![ODE versus surrogate speed](../analyses/bayesian_experimental_design/surrogate_bed/run_outputs/figures/surrogate_bed_ode_vs_surrogate_speed.png)
+
+The speed comparison was measured locally using 12 ODE simulations and 200
+repeated surrogate predictions on the same number of parameter samples. The ODE
+solver required `0.327` seconds per sample, while surrogate prediction required
+`0.00152` seconds per sample, giving an observed prediction speedup of about
+`215x`. This is the practical reason for using the surrogate: candidate
+ranking, posterior curves, and convergence checks can be explored much more
+quickly after the ODE training library has been generated.
+
+This BED result should still be labeled as a surrogate pilot, not as the final
+thesis result. The current pilot is useful for reproducing the structure of the
+PhD analysis in Python, but a final public BED claim should use more ODE
+training samples and demonstrate stable surrogate validation, mutual
+information convergence, and candidate ranking.
 
 Scientifically, this makes the workflow sequential: the classical analysis
 defines the information gap, and BED proposes how future experiments could
@@ -212,6 +242,6 @@ reduce that gap.
 
 - MetRep scenario simulations: reported in the MetRep model paper.
 - Dexa perturbation simulation/validation: reported in the Dexa paper.
-- Bayesian experimental design: reported in the PhD thesis; BED/RF surrogate
-  figures are not included in `results_final` until the validation workflow is
-  documented.
+- Bayesian experimental design: reported in the PhD thesis; the Python
+  surrogate BED figures here are pilot reproductions of the thesis-style
+  workflow and should be interpreted with the validation caveat above.

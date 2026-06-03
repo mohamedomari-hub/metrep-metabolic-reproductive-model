@@ -384,6 +384,27 @@ With `--make-plots`, the script also writes:
 | `mi_convergence.png` | Stability of MI estimates with increasing Monte Carlo size |
 | `posterior_comparison.png` | Prior versus posterior density for the selected candidate |
 
+## Thesis-Style Summary Plot
+
+After the surrogate BED pipeline has been run, create a thesis-style summary
+figure and an ODE-versus-surrogate speed comparison with:
+
+```bash
+python analyses/bayesian_experimental_design/surrogate_bed/plot_thesis_style_surrogate.py \
+  --benchmark-samples 12 \
+  --surrogate-benchmark-repeats 200
+```
+
+This writes:
+
+| Figure or table | Meaning |
+|---|---|
+| `run_outputs/figures/surrogate_bed_thesis_style_summary.png` | Nominal follicle/P4 trajectory, all-species MI by day, per-species MI, and posterior comparison curves |
+| `run_outputs/figures/surrogate_bed_ode_vs_surrogate_speed.png` | Measured ODE solve time versus surrogate prediction time |
+| `run_outputs/thesis_style_speed_benchmark.csv` | Timing values behind the speed plot |
+| `run_outputs/thesis_style_posterior_curves.csv` | Density curves behind the posterior panel |
+| `run_outputs/thesis_style_posterior_diagnostics.csv` | Effective sample size for each posterior curve |
+
 ## Reporting Rule
 
 Do not include surrogate BED figures in `results_final/` until these checks are
