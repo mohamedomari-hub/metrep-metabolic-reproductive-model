@@ -39,7 +39,12 @@ import matplotlib.pyplot as plt
 
 from metrep.analysis import structural_identifiability_svd
 from metrep.parameters import PARAMETERS
-from metrep.plotting import plot_compensation_network
+from metrep.plotting import (
+    parameter_scenario_classes,
+    plot_compensation_network,
+    plot_parameter_scenario_map,
+    plot_sensitivity_ranked_by_class,
+)
 from metrep.scenarios import constant_non_lactating
 
 
@@ -461,9 +466,9 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--network-all-nodes", action="store_true", help="Show all analyzed parameters in the compensation network.")
     parser.add_argument(
         "--network-layout",
-        choices=["filtered", "all-zones"],
+        choices=["filtered", "all-zones", "diagnostic"],
         default="filtered",
-        help="Compensation network layout: filtered strongest-edge network or all analyzed parameters in zones.",
+        help="Compensation network layout: filtered strongest-edge network, all analyzed parameters in zones, or diagnostic multi-figure output.",
     )
     parser.add_argument("--robust", action="store_true", help="Run robust identifiability consensus across multiple horizons.")
     parser.add_argument("--horizons", default="42,100,224", help="Comma-separated horizons for --robust.")
@@ -614,25 +619,52 @@ def run_identifiability_once(
         holistic,
         thresholds,
     )
+    core_network_path = figure_dir / (
+        f"{prefix}_compensation_network_core.png"
+        if args.network_layout == "diagnostic"
+        else f"{prefix}_compensation_network_filtered.png"
+    )
     network_path = plot_compensation_network(
         result["compensation_edges"],
         nullspace,
         parameter_names,
-        figure_dir / f"{prefix}_compensation_network_filtered.png",
+        core_network_path,
         holistic_table=holistic,
         threshold_relative=args.null_thr_rel,
         topk=args.null_topk,
         max_edges=args.edges_top,
         include_all_nodes=False,
         layout_mode="filtered",
+        include_singletons=args.network_layout != "diagnostic",
+        title="Core compensation network: strongest parameter trade-offs"
+        if args.network_layout == "diagnostic"
+        else None,
     )
     all_network_path = None
+    scenario_map_path = None
+    sensitivity_rank_path = None
+    scenario_classes_path = None
+    if args.network_layout == "diagnostic":
+        scenario_map_path = plot_parameter_scenario_map(
+            holistic,
+            figure_dir / f"{prefix}_parameter_scenario_map.png",
+            thresholds=thresholds,
+        )
+        sensitivity_rank_path = plot_sensitivity_ranked_by_class(
+            holistic,
+            figure_dir / f"{prefix}_sensitivity_ranked_by_class.png",
+        )
+        scenario_classes_path = table_dir / f"{prefix}_parameter_scenario_classes.csv"
+        parameter_scenario_classes(holistic, thresholds=thresholds).to_csv(
+            scenario_classes_path,
+            index=False,
+        )
     if args.network_layout == "all-zones" or args.network_all_nodes:
         all_network_path = plot_compensation_network(
             result["compensation_edges"],
             nullspace,
             parameter_names,
-            figure_dir / f"{prefix}_compensation_network_all_parameters.png",
+            figure_dir / f"{prefix}_compensation_network_all_parameters_supplement.png",
             holistic_table=holistic,
             threshold_relative=args.null_thr_rel,
             topk=args.null_topk,
@@ -657,7 +689,13 @@ def run_identifiability_once(
     else:
         print("Compensation network filtered: skipped (empty graph or networkx unavailable)")
     if all_network_path is not None:
-        print(f"Compensation network all parameters: {all_network_path}")
+        print(f"Compensation network all-parameter supplement: {all_network_path}")
+    if scenario_map_path is not None:
+        print(f"Parameter scenario map: {scenario_map_path}")
+    if sensitivity_rank_path is not None:
+        print(f"Sensitivity ranked by class: {sensitivity_rank_path}")
+    if scenario_classes_path is not None:
+        print(f"Parameter scenario classes: {scenario_classes_path}")
     print()
     print("Top holistic recommendations")
     print(holistic.head(12).to_string(index=False))

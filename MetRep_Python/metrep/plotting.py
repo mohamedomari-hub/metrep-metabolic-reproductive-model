@@ -213,6 +213,8 @@ def plot_compensation_network(
     include_all_nodes: bool = False,
     holistic_table: pd.DataFrame | None = None,
     layout_mode: str = "filtered",
+    include_singletons: bool = True,
+    title: str | None = None,
 ) -> Path | None:
     """Plot a parameter compensation network from nullspace edge weights.
 
@@ -297,8 +299,9 @@ def plot_compensation_network(
 
     core_nodes = {node for edge in graph.edges() for node in edge}
     singleton_only = sorted(set(singleton_null_params()) - core_nodes)
-    for name in singleton_only:
-        graph.add_node(name)
+    if include_singletons:
+        for name in singleton_only:
+            graph.add_node(name)
     if include_all_nodes:
         for name in parameter_names:
             graph.add_node(name)
@@ -388,16 +391,41 @@ def plot_compensation_network(
         pos.update(circular_positions(zone_other, center=(0.0, 5.8), radius=max(1.2, 0.18 * len(zone_other))))
         layout_name = "all-zones"
     else:
-        try:
-            pos = nx.nx_agraph.graphviz_layout(graph, prog="neato")
-            layout_name = "graphviz:neato"
-        except Exception:
+        components = [sorted(component) for component in nx.weakly_connected_components(graph)]
+        components = sorted(components, key=len, reverse=True)
+        if len(components) > 1 and graph.number_of_edges() > 0:
+            pos = {}
+            ncols = min(3, len(components))
+            x_spacing = 5.2
+            y_spacing = 3.9
+            for component_index, component in enumerate(components):
+                subgraph = graph.subgraph(component).copy()
+                local = nx.spring_layout(
+                    subgraph,
+                    seed=42 + component_index,
+                    k=0.9 / np.sqrt(max(len(component), 1)),
+                    iterations=300,
+                    weight="weight",
+                )
+                row = component_index // ncols
+                col = component_index % ncols
+                x_offset = (col - (ncols - 1) / 2.0) * x_spacing
+                y_offset = -row * y_spacing
+                for node, (x_coord, y_coord) in local.items():
+                    scale = 2.2 if len(component) > 3 else 1.4
+                    pos[node] = (scale * float(x_coord) + x_offset, scale * float(y_coord) + y_offset)
+            layout_name = "component-spring"
+        else:
             try:
-                pos = nx.nx_pydot.graphviz_layout(graph, prog="neato")
-                layout_name = "pydot:neato"
+                pos = nx.nx_agraph.graphviz_layout(graph, prog="neato")
+                layout_name = "graphviz:neato"
             except Exception:
-                pos = nx.kamada_kawai_layout(graph)
-                layout_name = "kamada-kawai"
+                try:
+                    pos = nx.nx_pydot.graphviz_layout(graph, prog="neato")
+                    layout_name = "pydot:neato"
+                except Exception:
+                    pos = nx.kamada_kawai_layout(graph)
+                    layout_name = "kamada-kawai"
 
     node_colors = [node_color(node) for node in graph.nodes()]
     node_sizes = [node_size(node) for node in graph.nodes()]
@@ -496,7 +524,7 @@ def plot_compensation_network(
     ax.legend(
         handles=legend_handles,
         loc="upper left",
-        bbox_to_anchor=(0.01, 0.99),
+        bbox_to_anchor=(1.01, 0.99),
         frameon=True,
         framealpha=0.94,
         facecolor="white",
@@ -505,11 +533,18 @@ def plot_compensation_network(
         title_fontsize=12,
         fontsize=10,
     )
-    explanation = (
-        "Node color = estimate/fix recommendation; node size = sensitivity;\n"
-        "edge width = compensation strength. Isolated parameters are shown\n"
-        "in peripheral zones when all-zones layout is used."
-    )
+    if layout_mode == "all-zones" and include_all_nodes:
+        explanation = (
+            "Node color = estimate/fix recommendation; node size = sensitivity;\n"
+            "edge width = compensation strength. Isolated parameters are shown\n"
+            "in peripheral zones."
+        )
+    else:
+        explanation = (
+            "Node color = estimate/fix recommendation; node size = sensitivity;\n"
+            "edge width = compensation strength. This core view shows only\n"
+            "parameters connected by the strongest compensation edges."
+        )
     ax.text(
         0.01,
         0.01,
@@ -521,13 +556,14 @@ def plot_compensation_network(
         bbox={"boxstyle": "round,pad=0.45", "fc": "white", "ec": "0.85", "alpha": 0.94},
     )
 
-    title = "Parameter compensation network from nullspace"
+    title = "Parameter compensation network from nullspace" if title is None else title
     if layout_mode == "all-zones" and include_all_nodes:
         title = "Compensation network across all analyzed parameters"
     ax.set_title(
         f"{title}\n"
         f"layout={layout_name}, edges drawn={graph.number_of_edges()}, "
-        f"singleton nodes={len(singleton_only)}, analyzed parameters={len(parameter_names)}"
+        f"singleton nodes={len(singleton_only) if include_singletons else 0}, "
+        f"analyzed parameters={len(parameter_names)}"
     )
     if layout_mode == "all-zones" and include_all_nodes:
         ax.text(
@@ -559,6 +595,186 @@ def plot_compensation_network(
             )
     ax.axis("off")
     fig.tight_layout()
+    fig.savefig(output_path, dpi=220, bbox_inches="tight")
+    plt.close(fig)
+    return output_path
+
+
+def parameter_scenario_classes(
+    holistic_table: pd.DataFrame,
+    thresholds: dict[str, float] | None = None,
+) -> pd.DataFrame:
+    """Return practical scenario labels for sensitivity/nullspace diagnostics."""
+
+    thresholds = {} if thresholds is None else thresholds
+    table = holistic_table.copy()
+    class_column = "recommendation_3class" if "recommendation_3class" in table.columns else "recommendation"
+    sens_hi = float(thresholds.get("sens_hi", table["sensitivity_0to1"].quantile(0.75)))
+    sens_lo = float(thresholds.get("sens_lo", table["sensitivity_0to1"].quantile(0.25)))
+    null_hi = float(thresholds.get("null_hi", table["nullspace_0to1"].quantile(0.75)))
+
+    def classify(row: pd.Series) -> str:
+        sensitivity = float(row["sensitivity_0to1"])
+        nullspace = float(row["nullspace_0to1"])
+        recommendation = str(row[class_column])
+        if recommendation == "Fix (anchor)" and sensitivity >= sens_hi:
+            return "Anchor candidate: high sensitivity but should be fixed"
+        if sensitivity >= sens_hi and nullspace >= null_hi:
+            return "Risky estimate: sensitive but compensated"
+        if recommendation == "Estimate" and sensitivity >= sens_hi and nullspace < null_hi:
+            return "Estimate candidate: sensitive and weakly compensated"
+        if recommendation == "Fix (irrelevant)" or sensitivity <= sens_lo:
+            return "Fix candidate: low sensitivity"
+        return "Weak/isolated parameter"
+
+    table["scenario_label"] = table.apply(classify, axis=1)
+    columns = [
+        "parameter",
+        "sensitivity_0to1",
+        "nullspace_0to1",
+        "identifiable_0to1",
+        class_column,
+        "scenario_label",
+    ]
+    result = table[columns].rename(columns={class_column: "recommendation_3class"})
+    return result.sort_values(["sensitivity_0to1", "nullspace_0to1"], ascending=[False, False])
+
+
+def plot_parameter_scenario_map(
+    holistic_table: pd.DataFrame,
+    output_path: Path,
+    thresholds: dict[str, float] | None = None,
+) -> Path:
+    """Plot sensitivity vs nullspace involvement for all analyzed parameters."""
+
+    _apply_plot_style()
+    thresholds = {} if thresholds is None else thresholds
+    output_path.parent.mkdir(parents=True, exist_ok=True)
+    table = holistic_table.copy()
+    class_column = "recommendation_3class" if "recommendation_3class" in table.columns else "recommendation"
+    sens_hi = float(thresholds.get("sens_hi", table["sensitivity_0to1"].quantile(0.75)))
+    null_hi = float(thresholds.get("null_hi", table["nullspace_0to1"].quantile(0.75)))
+
+    color_map = {
+        "Estimate": "#1f77b4",
+        "Fix (anchor)": "#ff7f0e",
+        "Fix (irrelevant)": "#8c8c8c",
+    }
+    fig, (ax, label_ax) = plt.subplots(
+        1,
+        2,
+        figsize=(16, 9),
+        constrained_layout=True,
+        gridspec_kw={"width_ratios": [3.2, 1.15]},
+    )
+    for recommendation, group in table.groupby(class_column):
+        ax.scatter(
+            group["nullspace_0to1"],
+            group["sensitivity_0to1"],
+            s=58,
+            alpha=0.84,
+            color=color_map.get(str(recommendation), "#9467bd"),
+            edgecolor="white",
+            linewidth=0.6,
+            label=str(recommendation),
+        )
+
+    ax.axhline(sens_hi, color="0.25", linestyle="--", linewidth=1.2)
+    ax.axvline(null_hi, color="0.25", linestyle="--", linewidth=1.2)
+    left_x = max(0.03, null_hi * 0.45)
+    right_x = min(0.98, null_hi + (1.0 - null_hi) * 0.50)
+    low_y = max(0.05, sens_hi * 0.45)
+    high_y = min(0.98, sens_hi + (1.0 - sens_hi) * 0.45)
+    quadrant_style = {"fontsize": 10.5, "color": "0.25", "ha": "center", "va": "center"}
+    ax.text(left_x, high_y, "Good estimate\ncandidates", **quadrant_style)
+    ax.text(right_x, high_y, "Sensitive but\ncompensated", **quadrant_style)
+    ax.text(left_x, low_y, "Low sensitivity /\nfix", **quadrant_style)
+    ax.text(right_x, low_y, "Compensatory but\nweakly sensitive", **quadrant_style)
+
+    important = set(table.nlargest(10, "sensitivity_0to1")["parameter"])
+    important.update(table.nlargest(10, "nullspace_0to1")["parameter"])
+    estimate_names = table.loc[table[class_column] == "Estimate", "parameter"].tolist()
+    labels = table[table["parameter"].isin(important)].copy()
+    labels = labels.sort_values(["sensitivity_0to1", "nullspace_0to1"], ascending=[False, False])
+    for index, row in enumerate(labels.itertuples(index=False)):
+        x_value = float(getattr(row, "nullspace_0to1"))
+        y_value = float(getattr(row, "sensitivity_0to1"))
+        offset_x = 0.010 if index % 2 == 0 else -0.010
+        offset_y = 0.012 if index % 3 else -0.014
+        ax.annotate(
+            getattr(row, "parameter"),
+            (x_value, y_value),
+            xytext=(x_value + offset_x, y_value + offset_y),
+            textcoords="data",
+            fontsize=7.2,
+            color="0.15",
+            arrowprops={"arrowstyle": "-", "color": "0.70", "linewidth": 0.45},
+            bbox={"boxstyle": "round,pad=0.12", "fc": "white", "ec": "none", "alpha": 0.72},
+        )
+
+    ax.set_xlim(-0.03, 1.04)
+    ax.set_ylim(-0.03, 1.04)
+    ax.set_xlabel("Nullspace involvement / compensation involvement (0..1)")
+    ax.set_ylabel("Sensitivity (0..1)")
+    ax.set_title("Parameter scenario map: sensitivity versus compensation involvement")
+    ax.grid(alpha=0.22, linewidth=0.8)
+    label_ax.axis("off")
+    handles, labels_legend = ax.get_legend_handles_labels()
+    label_ax.legend(
+        handles,
+        labels_legend,
+        loc="lower left",
+        frameon=True,
+        framealpha=0.92,
+        title="Recommendation",
+    )
+    wrapped = "\n".join(f"- {name}" for name in estimate_names)
+    label_ax.text(
+        0.0,
+        1.0,
+        "Estimate-class parameters\n(listed to avoid label overlap)\n\n" + wrapped,
+        ha="left",
+        va="top",
+        fontsize=7.4,
+        linespacing=1.18,
+        bbox={"boxstyle": "round,pad=0.45", "fc": "white", "ec": "0.85", "alpha": 0.96},
+    )
+    fig.savefig(output_path, dpi=220, bbox_inches="tight")
+    plt.close(fig)
+    return output_path
+
+
+def plot_sensitivity_ranked_by_class(holistic_table: pd.DataFrame, output_path: Path) -> Path:
+    """Plot all parameters ranked by sensitivity and colored by recommendation."""
+
+    _apply_plot_style()
+    output_path.parent.mkdir(parents=True, exist_ok=True)
+    table = holistic_table.sort_values("sensitivity_0to1", ascending=True).copy()
+    class_column = "recommendation_3class" if "recommendation_3class" in table.columns else "recommendation"
+    color_map = {
+        "Estimate": "#1f77b4",
+        "Fix (anchor)": "#ff7f0e",
+        "Fix (irrelevant)": "#8c8c8c",
+    }
+    fig_height = max(13.0, 0.18 * len(table))
+    fig, ax = plt.subplots(figsize=(13, fig_height), constrained_layout=True)
+    ax.barh(
+        table["parameter"],
+        table["sensitivity_0to1"],
+        color=[color_map.get(str(value), "#9467bd") for value in table[class_column]],
+        height=0.76,
+    )
+    ax.set_xlabel("Sensitivity (0..1)")
+    ax.set_ylabel("Parameter")
+    ax.set_title("All analyzed parameters ranked by sensitivity")
+    ax.grid(axis="x", alpha=0.25, linewidth=0.8)
+    handles = [
+        Patch(facecolor=color_map[label], label=label)
+        for label in ["Estimate", "Fix (anchor)", "Fix (irrelevant)"]
+        if label in set(table[class_column])
+    ]
+    ax.legend(handles=handles, loc="lower right", frameon=True, framealpha=0.92)
+    ax.tick_params(axis="y", labelsize=7.5)
     fig.savefig(output_path, dpi=220, bbox_inches="tight")
     plt.close(fig)
     return output_path
