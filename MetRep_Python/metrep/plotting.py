@@ -211,12 +211,16 @@ def plot_compensation_network(
     topk: int = 10,
     max_edges: int = 50,
     include_all_nodes: bool = False,
+    holistic_table: pd.DataFrame | None = None,
+    layout_mode: str = "filtered",
 ) -> Path | None:
     """Plot a parameter compensation network from nullspace edge weights.
 
     Nodes are parameters. Edges are dominant opposite-sign compensation pairs
-    extracted from nullspace directions. Isolated orange nodes are parameters
-    that dominate a nullspace direction alone.
+    extracted from nullspace directions. When ``layout_mode="all-zones"`` and
+    ``include_all_nodes=True``, all analyzed parameters are shown: compensated
+    nodes are placed in the central spring-layout graph and no-edge parameters
+    are placed in peripheral recommendation zones.
     """
 
     if edges.empty and nullspace.size == 0:
@@ -302,36 +306,105 @@ def plot_compensation_network(
     if graph.number_of_nodes() == 0:
         return None
 
-    try:
-        pos = nx.nx_agraph.graphviz_layout(graph, prog="neato")
-        layout_name = "graphviz:neato"
-    except Exception:
-        try:
-            pos = nx.nx_pydot.graphviz_layout(graph, prog="neato")
-            layout_name = "pydot:neato"
-        except Exception:
-            pos = nx.kamada_kawai_layout(graph)
-            layout_name = "kamada-kawai"
+    class_column = None
+    metadata = pd.DataFrame()
+    if holistic_table is not None and not holistic_table.empty:
+        parameter_column = "parameter" if "parameter" in holistic_table.columns else "param"
+        if parameter_column in holistic_table.columns:
+            metadata = holistic_table.set_index(parameter_column, drop=False)
+            if "recommendation_3class" in metadata.columns:
+                class_column = "recommendation_3class"
+            elif "recommendation" in metadata.columns:
+                class_column = "recommendation"
 
-    node_colors = []
-    node_sizes = []
-    node_alphas = []
-    for node in graph.nodes():
+    recommendation_colors = {
+        "Estimate": "#1f77b4",
+        "Fix (anchor)": "#ff7f0e",
+        "Fix (irrelevant)": "#8c8c8c",
+    }
+
+    def recommendation_for(node: str) -> str:
+        if class_column and node in metadata.index:
+            value = str(metadata.loc[node, class_column])
+            if value in recommendation_colors:
+                return value
         if node in singleton_only:
-            node_colors.append("tab:orange")
-            node_sizes.append(3200)
-            node_alphas.append(0.95)
-        elif graph.degree(node) > 0:
-            node_colors.append("tab:blue")
-            node_sizes.append(3400)
-            node_alphas.append(0.95)
-        else:
-            node_colors.append("lightgray")
-            node_sizes.append(850 if include_all_nodes else 2400)
-            node_alphas.append(0.28 if include_all_nodes else 0.75)
+            return "Fix (anchor)"
+        return "Estimate" if graph.degree(node) > 0 else "Fix (irrelevant)"
+
+    def sensitivity_for(node: str) -> float:
+        if "sensitivity_0to1" in metadata.columns and node in metadata.index:
+            value = float(metadata.loc[node, "sensitivity_0to1"])
+            return float(np.clip(value, 0.0, 1.0)) if np.isfinite(value) else 0.0
+        return 0.65 if graph.degree(node) > 0 else 0.20
+
+    def node_color(node: str) -> str:
+        return recommendation_colors.get(recommendation_for(node), "#8c8c8c")
+
+    def node_size(node: str) -> float:
+        sensitivity = sensitivity_for(node)
+        return 420.0 + 2600.0 * np.sqrt(max(sensitivity, 0.0))
+
+    def circular_positions(nodes: list[str], center: tuple[float, float], radius: float) -> dict[str, tuple[float, float]]:
+        if not nodes:
+            return {}
+        if len(nodes) == 1:
+            return {nodes[0]: center}
+        angles = np.linspace(0, 2 * np.pi, len(nodes), endpoint=False)
+        return {
+            node: (
+                center[0] + radius * np.cos(angle),
+                center[1] + 0.58 * radius * np.sin(angle),
+            )
+            for node, angle in zip(nodes, angles)
+        }
+
+    if layout_mode not in {"filtered", "all-zones"}:
+        raise ValueError("layout_mode must be either 'filtered' or 'all-zones'.")
+
+    if layout_mode == "all-zones" and include_all_nodes:
+        edge_nodes = sorted({node for edge in graph.edges() for node in edge})
+        isolated_nodes = sorted([node for node in graph.nodes() if graph.degree(node) == 0])
+        pos: dict[str, tuple[float, float]] = {}
+        if edge_nodes:
+            central_graph = graph.subgraph(edge_nodes).copy()
+            central_pos = nx.spring_layout(
+                central_graph,
+                seed=42,
+                k=1.2 / np.sqrt(max(len(edge_nodes), 1)),
+                iterations=300,
+                weight="weight",
+            )
+            for node, (x_coord, y_coord) in central_pos.items():
+                pos[node] = (4.2 * float(x_coord), 3.4 * float(y_coord))
+
+        zone_estimate = [node for node in isolated_nodes if recommendation_for(node) == "Estimate"]
+        zone_anchor = [node for node in isolated_nodes if recommendation_for(node) == "Fix (anchor)"]
+        zone_irrelevant = [node for node in isolated_nodes if recommendation_for(node) == "Fix (irrelevant)"]
+        zone_other = sorted(set(isolated_nodes) - set(zone_estimate) - set(zone_anchor) - set(zone_irrelevant))
+        pos.update(circular_positions(zone_estimate, center=(-6.6, 3.8), radius=max(1.2, 0.18 * len(zone_estimate))))
+        pos.update(circular_positions(zone_anchor, center=(6.6, 3.8), radius=max(1.2, 0.18 * len(zone_anchor))))
+        pos.update(circular_positions(zone_irrelevant, center=(0.0, -5.2), radius=max(2.2, 0.13 * len(zone_irrelevant))))
+        pos.update(circular_positions(zone_other, center=(0.0, 5.8), radius=max(1.2, 0.18 * len(zone_other))))
+        layout_name = "all-zones"
+    else:
+        try:
+            pos = nx.nx_agraph.graphviz_layout(graph, prog="neato")
+            layout_name = "graphviz:neato"
+        except Exception:
+            try:
+                pos = nx.nx_pydot.graphviz_layout(graph, prog="neato")
+                layout_name = "pydot:neato"
+            except Exception:
+                pos = nx.kamada_kawai_layout(graph)
+                layout_name = "kamada-kawai"
+
+    node_colors = [node_color(node) for node in graph.nodes()]
+    node_sizes = [node_size(node) for node in graph.nodes()]
+    node_alphas = [0.95 if graph.degree(node) > 0 else (0.82 if layout_mode == "all-zones" else 0.42) for node in graph.nodes()]
     if graph.number_of_edges() > 0:
         weights = np.array([graph[u][v]["weight"] for u, v in graph.edges()], dtype=float)
-        widths = 1.5 + 7.0 * weights / weights.max()
+        widths = 1.2 + 6.0 * weights / weights.max()
     else:
         widths = []
 
@@ -341,7 +414,12 @@ def plot_compensation_network(
         if (label := edge_sign_label(source, target))
     }
 
-    fig, ax = plt.subplots(figsize=(22, 13))
+    if layout_mode == "all-zones" and include_all_nodes:
+        fig_width = max(22.0, min(34.0, 15.0 + 0.18 * graph.number_of_nodes()))
+        fig_height = max(15.0, min(26.0, 10.0 + 0.11 * graph.number_of_nodes()))
+    else:
+        fig_width, fig_height = 22.0, 13.0
+    fig, ax = plt.subplots(figsize=(fig_width, fig_height))
     nx.draw_networkx_nodes(
         graph,
         pos,
@@ -365,17 +443,17 @@ def plot_compensation_network(
         min_target_margin=20,
         connectionstyle="arc3,rad=0.16",
     )
-    labels = {
-        node: node
-        for node in graph.nodes()
-        if graph.degree(node) > 0 or node in singleton_only
-    }
+    labels = {node: node for node in graph.nodes() if graph.degree(node) > 0 or node in singleton_only}
+    if layout_mode == "all-zones" and include_all_nodes:
+        labels = {node: node for node in graph.nodes()}
+    central_font = max(7, min(11, int(145 / max(len(labels), 1))))
+    isolated_font = max(5, min(8, int(115 / max(len(labels), 1))))
     nx.draw_networkx_labels(
         graph,
         pos,
         labels=labels,
         ax=ax,
-        font_size=11,
+        font_size=central_font if layout_mode != "all-zones" else isolated_font,
         bbox={"boxstyle": "round,pad=0.25", "fc": "white", "ec": "none", "alpha": 0.82},
     )
     if edge_labels:
@@ -391,29 +469,11 @@ def plot_compensation_network(
         )
 
     legend_handles = [
-        Patch(
-            facecolor="tab:blue",
-            edgecolor="white",
-            label="Compensation parameter: appears in at least one nullspace pair.",
-        ),
-        Patch(
-            facecolor="tab:orange",
-            edgecolor="white",
-            label="Singleton nullspace parameter: dominates a weakly identifiable direction alone.",
-        ),
-        Patch(
-            facecolor="lightgray",
-            edgecolor="white",
-            alpha=0.35,
-            label="Other analyzed parameter: included in SVD, not highlighted in this network.",
-        ),
-        Line2D(
-            [0],
-            [0],
-            color="black",
-            linewidth=3.5,
-            label="Edge: parameters can compensate for each other while preserving similar outputs.",
-        ),
+        Patch(facecolor=recommendation_colors["Estimate"], edgecolor="white", label="Estimate"),
+        Patch(facecolor=recommendation_colors["Fix (anchor)"], edgecolor="white", label="Fix (anchor)"),
+        Patch(facecolor=recommendation_colors["Fix (irrelevant)"], edgecolor="white", label="Fix (irrelevant)"),
+        Line2D([0], [0], color="black", linewidth=4.5, label="Thicker edge = stronger compensation"),
+        Line2D([0], [0], color="black", linewidth=0, marker="o", markersize=12, label="Larger node = higher sensitivity"),
         Line2D(
             [0],
             [0],
@@ -446,11 +506,9 @@ def plot_compensation_network(
         fontsize=10,
     )
     explanation = (
-        "All selected parameters are still used in the identifiability SVD.\n"
-        "For readability, only blue/orange nodes are labeled; gray nodes are\n"
-        "background parameters that were analyzed but not emphasized by the\n"
-        "dominant nullspace compensation structure. Thicker edges indicate\n"
-        "larger aggregate compensation weight."
+        "Node color = estimate/fix recommendation; node size = sensitivity;\n"
+        "edge width = compensation strength. Isolated parameters are shown\n"
+        "in peripheral zones when all-zones layout is used."
     )
     ax.text(
         0.01,
@@ -463,11 +521,42 @@ def plot_compensation_network(
         bbox={"boxstyle": "round,pad=0.45", "fc": "white", "ec": "0.85", "alpha": 0.94},
     )
 
+    title = "Parameter compensation network from nullspace"
+    if layout_mode == "all-zones" and include_all_nodes:
+        title = "Compensation network across all analyzed parameters"
     ax.set_title(
-        "Parameter compensation network from nullspace\n"
-        f"layout={layout_name}, edges={graph.number_of_edges()}, "
+        f"{title}\n"
+        f"layout={layout_name}, edges drawn={graph.number_of_edges()}, "
         f"singleton nodes={len(singleton_only)}, analyzed parameters={len(parameter_names)}"
     )
+    if layout_mode == "all-zones" and include_all_nodes:
+        ax.text(
+            0.5,
+            0.96,
+            f"All {len(parameter_names)} parameters shown; only strongest compensation edges drawn.",
+            transform=ax.transAxes,
+            ha="center",
+            va="top",
+            fontsize=11,
+            bbox={"boxstyle": "round,pad=0.35", "fc": "white", "ec": "0.85", "alpha": 0.92},
+        )
+        zone_labels = [
+            (-6.6, 5.9, "Estimated parameters\nwith weak/no compensation"),
+            (6.6, 5.9, "Fixed anchor parameters\nwith weak/no compensation"),
+            (0.0, -7.2, "Fixed irrelevant / low-sensitivity\nparameters"),
+            (0.0, 3.2, "Central network:\nstrongest compensation edges"),
+        ]
+        for x_coord, y_coord, text in zone_labels:
+            ax.text(
+                x_coord,
+                y_coord,
+                text,
+                ha="center",
+                va="center",
+                fontsize=10,
+                color="0.25",
+                bbox={"boxstyle": "round,pad=0.30", "fc": "white", "ec": "0.88", "alpha": 0.86},
+            )
     ax.axis("off")
     fig.tight_layout()
     fig.savefig(output_path, dpi=220, bbox_inches="tight")

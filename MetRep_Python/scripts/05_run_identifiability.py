@@ -459,6 +459,12 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--null-topk", type=int, default=10, help="Top-k coefficients per null vector to report if threshold keeps too many.")
     parser.add_argument("--edges-top", type=int, default=60, help="Maximum compensation edges to show in the network plot.")
     parser.add_argument("--network-all-nodes", action="store_true", help="Show all analyzed parameters in the compensation network.")
+    parser.add_argument(
+        "--network-layout",
+        choices=["filtered", "all-zones"],
+        default="filtered",
+        help="Compensation network layout: filtered strongest-edge network or all analyzed parameters in zones.",
+    )
     parser.add_argument("--robust", action="store_true", help="Run robust identifiability consensus across multiple horizons.")
     parser.add_argument("--horizons", default="42,100,224", help="Comma-separated horizons for --robust.")
     parser.add_argument("--prefix", default="structid_svd_refactored", help="Output filename prefix.")
@@ -612,12 +618,28 @@ def run_identifiability_once(
         result["compensation_edges"],
         nullspace,
         parameter_names,
-        figure_dir / f"{prefix}_compensation_network.png",
+        figure_dir / f"{prefix}_compensation_network_filtered.png",
+        holistic_table=holistic,
         threshold_relative=args.null_thr_rel,
         topk=args.null_topk,
         max_edges=args.edges_top,
-        include_all_nodes=args.network_all_nodes,
+        include_all_nodes=False,
+        layout_mode="filtered",
     )
+    all_network_path = None
+    if args.network_layout == "all-zones" or args.network_all_nodes:
+        all_network_path = plot_compensation_network(
+            result["compensation_edges"],
+            nullspace,
+            parameter_names,
+            figure_dir / f"{prefix}_compensation_network_all_parameters.png",
+            holistic_table=holistic,
+            threshold_relative=args.null_thr_rel,
+            topk=args.null_topk,
+            max_edges=args.edges_top,
+            include_all_nodes=True,
+            layout_mode="all-zones",
+        )
 
     print("SVD identifiability summary")
     print(f"parameters: {len(parameter_names)}")
@@ -631,9 +653,11 @@ def run_identifiability_once(
     print(f"holistic summary: {holistic_summary_path}")
     print()
     if network_path is not None:
-        print(f"Compensation network: {network_path}")
+        print(f"Compensation network filtered: {network_path}")
     else:
-        print("Compensation network: skipped (empty graph or networkx unavailable)")
+        print("Compensation network filtered: skipped (empty graph or networkx unavailable)")
+    if all_network_path is not None:
+        print(f"Compensation network all parameters: {all_network_path}")
     print()
     print("Top holistic recommendations")
     print(holistic.head(12).to_string(index=False))
