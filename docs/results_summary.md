@@ -152,10 +152,6 @@ This figure is especially useful because it summarizes the practical modelling d
 
 ## 7. Profile Likelihood Confirmation
 
-Representative profile likelihood classes
-
-![Representative profile likelihood classes](../results_final/figures/profile_likelihood_representative_3x3.png)
-
 Profile likelihood was used as a nonlinear confirmation step after the local SVD identifiability screen. The SVD analysis provides a local linear approximation of parameter identifiability near the nominal parameter set, whereas profile likelihood evaluates whether parameters remain practically identifiable when varied over a broader range while nuisance parameters are allowed to re-optimize.
 
 The 60 parameters classified as Estimate candidates by the SVD screen were profiled against synthetic measurable outputs (FSH, PGF, P4, E2, INH, IGF1, Insulin, Glucose, Glucagon). The resulting practical identifiability classes were:
@@ -166,6 +162,10 @@ The 60 parameters classified as Estimate candidates by the SVD screen were profi
 - 2 flat/non-identifiable
 
 The representative 3×3 panel summarizes the main practical outcomes of nonlinear profiling.
+
+Representative profile likelihood classes:
+
+![Representative profile likelihood classes](../results_final/figures/profile_likelihood_representative_3x3.png)
 
 The top row shows representative practically identifiable parameters (insulin_glucose_threshold, inhibin_clearance, hp_p4_follicle_scale) with clear profile minima and likelihood increases on both sides of the optimum. These parameters appear sufficiently constrained by the current measurement panel and support the SVD prediction that a substantial subset of selected parameters is estimable.
 
