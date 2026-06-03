@@ -106,7 +106,6 @@ The mathematical definitions for sensitivity, SVD/nullspace identifiability,
 profile likelihood, and Bayesian experimental design are documented in:
 
 - `docs/sensitivity_identifiability_bayesian_design.md`
-- `docs/bayesian_experimental_design.md`
 - `docs/results_sensitivity_identifiability_bayesian_design.md`
 
 ## Quick Start
