@@ -113,6 +113,11 @@ def parse_args() -> argparse.Namespace:
 
 
 def read_table(path: Path) -> pd.DataFrame:
+    if not path.exists():
+        raise FileNotFoundError(
+            f"Input table not found: {path}. Replace the example path with a real CSV file "
+            "containing precomputed ODE samples."
+        )
     table = pd.read_csv(path)
     if table.empty:
         raise ValueError(f"Empty table: {path}")

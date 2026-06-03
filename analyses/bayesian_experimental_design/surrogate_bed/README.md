@@ -13,6 +13,10 @@ The ODE model remains the reference. The surrogate is only an accelerator.
 
 Use:
 
+The paths below are placeholders. Replace them with real CSV files containing
+your precomputed ODE prior samples, ODE output features, candidate definitions,
+nominal output, and admissibility flags.
+
 ```bash
 python analyses/bayesian_experimental_design/surrogate_bed/surrogate_bed_pipeline.py \
   --parameters-csv path/to/prior_parameter_samples.csv \
