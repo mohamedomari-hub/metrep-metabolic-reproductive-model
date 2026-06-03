@@ -51,6 +51,20 @@ Run one named scenario:
 python MetRep_Python/model_running/08_run_model_scenarios.py --scenario baseline_non_lactating
 ```
 
+Additional non-Dexa scenario simulations can be run separately from the
+baseline analysis workflow:
+
+```bash
+python MetRep_Python/model_running/08_run_model_scenarios.py --scenario acute_negative_energy_balance
+python MetRep_Python/model_running/08_run_model_scenarios.py --scenario chronic_negative_energy_balance
+python MetRep_Python/model_running/08_run_model_scenarios.py --scenario lactating_c0_20
+python MetRep_Python/model_running/08_run_model_scenarios.py --scenario lactating_c0_25
+```
+
+These acute, chronic, and lactating cases are model-behavior scenarios. They
+do not replace the baseline scenario used for the standard sensitivity,
+SVD identifiability, and profile-likelihood workflows below.
+
 Run a custom feeding schedule from CSV:
 
 ```bash
@@ -68,8 +82,8 @@ time_days,DMI,Milk
 
 ## Standard Analysis Workflow
 
-Run scenario simulations plus all-parameter local sensitivity, SVD
-identifiability, and uncertainty analysis:
+Run the standard baseline analysis workflow: baseline simulation plus
+all-parameter local sensitivity, SVD identifiability, and uncertainty analysis:
 
 ```bash
 python MetRep_Python/model_running/09_run_standard_analysis.py

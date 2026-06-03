@@ -39,6 +39,12 @@ additional measurements would make the model more informative. The Dexa
 extension provides an external pharmacological perturbation scenario for model
 validation.
 
+The baseline non-Dexa scenario is the reference case for sensitivity,
+SVD identifiability, and profile-likelihood analysis. Acute negative energy
+balance, chronic negative energy balance, and lactating `c0` cases are kept as
+separate scenario simulations for checking model behavior under different
+physiological conditions.
+
 ## Implementation Roles
 
 - MATLAB is the original reference implementation.

@@ -144,6 +144,12 @@ Run all built-in non-Dexa Python scenarios:
 python MetRep_Python/model_running/08_run_model_scenarios.py --scenario all
 ```
 
+These additional scenarios include acute negative energy balance, chronic
+negative energy balance, and lactating `c0` cases. They are scenario
+simulations for model behavior checking. They are not mixed into the default
+sensitivity, SVD identifiability, or profile-likelihood workflow, which uses
+the baseline non-Dexa scenario unless another scenario is explicitly chosen.
+
 Run the optional Python Dexa perturbation:
 
 ```bash
@@ -156,8 +162,8 @@ python MetRep_Python/model_running/07_run_dexa_scenarios.py \
   --prefix dexa_non_lactating_standard_3d
 ```
 
-Run the standard scenario simulation plus sensitivity, SVD identifiability, and
-uncertainty analyses:
+Run the standard baseline analysis workflow: baseline simulation plus
+sensitivity, SVD identifiability, and uncertainty analyses:
 
 ```bash
 python MetRep_Python/model_running/09_run_standard_analysis.py
