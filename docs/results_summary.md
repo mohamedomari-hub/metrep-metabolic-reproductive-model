@@ -154,7 +154,7 @@ This figure is especially useful because it summarizes the practical modelling d
 
 Representative profile likelihood classes
 
-Representative profile likelihood classes
+![Representative profile likelihood classes](../results_final/figures/profile_likelihood_representative_3x3.png)
 
 Profile likelihood was used as a nonlinear confirmation step after the local SVD identifiability screen. The SVD analysis provides a local linear approximation of parameter identifiability near the nominal parameter set, whereas profile likelihood evaluates whether parameters remain practically identifiable when varied over a broader range while nuisance parameters are allowed to re-optimize.
 
