@@ -52,6 +52,66 @@ The selected-state baseline panel should be used in the main report because it g
 
 ---
 
+## X. Biological Admissibility Filtering
+
+Before uncertainty propagation, global sensitivity analysis, and surrogate Bayesian experimental design (BED), the Monte Carlo simulation bank was filtered for biological admissibility.
+
+The purpose of this step is to ensure that downstream analyses are based on physiologically plausible model behavior rather than arbitrary parameter combinations that produce unrealistic endocrine or metabolic dynamics.
+
+Rather than treating every Monte Carlo simulation equally, the workflow first evaluates whether simulated trajectories satisfy biologically meaningful constraints. Simulations that violate expected endocrine-metabolic behavior are excluded before uncertainty summaries or parameter-association analyses are calculated.
+
+### Why admissibility filtering is needed
+
+Mechanistic endocrine-metabolic systems are highly nonlinear. Even small parameter perturbations can occasionally produce unrealistic oscillations, biologically impossible hormone levels, failed cyclic behavior, or unstable metabolic responses.
+
+Without filtering, downstream analyses may become misleading:
+
+- uncertainty bands may reflect unrealistic trajectories rather than plausible physiology;
+- global sensitivity measures may overemphasize pathological parameter regions;
+- surrogate models may learn unrealistic system behavior;
+- Bayesian experimental design may rank sampling strategies using simulations that would never occur biologically.
+
+Admissibility filtering therefore acts as a physiology-aware quality control step for the simulation ensemble.
+
+### Admissibility logic
+
+Each Monte Carlo simulation is evaluated against a set of biological plausibility rules derived from expected reproductive and metabolic behavior.
+
+These checks include:
+
+- expected cyclic endocrine dynamics;
+- plausible reproductive biomarker amplitudes;
+- stable metabolic trajectories;
+- absence of numerical instability or biologically unrealistic oscillations;
+- trajectory consistency with the calibrated reference behavior.
+
+Only simulations satisfying these admissibility rules are retained for downstream analyses.
+
+### Representative admissible trajectories
+
+Representative admissible trajectories are shown below. For readability, only a subset of retained simulations is displayed.
+
+<img width="1028" height="600" alt="image" src="https://github.com/user-attachments/assets/5ee4c7d8-4e79-46e0-94f4-077b24563dcb" />
+
+The figure illustrates that retained simulations preserve the expected endocrine-metabolic cycle structure while still expressing biologically plausible variability around the nominal model behavior.
+
+### Admissibility outcome
+
+The filtering step substantially reduces unrealistic parameter combinations while retaining meaningful biological variability.
+
+The final admissible simulation bank is then used for:
+
+1. Global sensitivity analysis (PRCC and Spearman)  
+   to identify parameter-biomarker associations across plausible biological variability.
+
+2. Uncertainty propagation  
+   to quantify trajectory robustness under admissible parameter variation.
+
+3. Surrogate Bayesian experimental design (BED)  
+   to rank informative sampling strategies using only physiologically meaningful simulations.
+
+In this way, admissibility filtering connects mechanistic realism with statistical analysis and helps ensure that downstream conclusions remain biologically interpretable.
+
 ## 2. Local Sensitivity Screening
 
 Top local sensitivity parameters
