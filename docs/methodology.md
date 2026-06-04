@@ -23,28 +23,28 @@ How it is calculated:
 
 The result is a local sensitivity score. In simple terms:
 
-$$
+```math
 S =
 \frac{\Delta O}{\Delta \theta}
-$$
+```
 
 where $O$ is a model output summary and $\theta$ is a parameter.
 
 More specifically, the public sensitivity table uses one-at-a-time relative
 sensitivity of output AUC values. For parameter $\theta_j$ and output $y_k(t)$:
 
-$$
+```math
 \mathrm{AUC}_k(\theta) =
 \int y_k(t; \theta)\,dt
-$$
+```
 
-$$
+```math
 S_{kj} =
 \frac{
   \left(\mathrm{AUC}_k(\theta_j(1+h)) - \mathrm{AUC}_k(\theta_j)\right)
   / \mathrm{AUC}_k(\theta_j)
 }{h}
-$$
+```
 
 where $h = 0.01$ in the sensitivity script by default. This is a forward local
 perturbation. Each parameter is changed separately while all other parameters
@@ -82,20 +82,20 @@ The implemented SVD screen uses a stacked trajectory sensitivity matrix. For a
 parameter $\theta_j$, selected output vector $Y(\theta)$, and step size $h_j$, the
 central-difference column is:
 
-$$
+```math
 S_{:,j} =
 \frac{
   Y(\theta_j + h_j) - Y(\theta_j - h_j)
 }{2h_j}
-$$
+```
 
-$$
+```math
 h_j =
 \max\left(
   \mathrm{absoluteStepMin},
   \mathrm{relativeStep}\cdot |\theta_j|
 \right)
-$$
+```
 
 $Y(\theta)$ is made by stacking all selected output trajectories over the
 simulation time points. In the default identifiability script,
@@ -104,9 +104,9 @@ simulation time points. In the default identifiability script,
 
 The matrix is then decomposed as:
 
-$$
+```math
 S = U \Sigma V^T
-$$
+```
 
 where:
 
@@ -117,16 +117,16 @@ where:
 
 The numerical rank is calculated using a relative threshold:
 
-$$
+```math
 \tau = c\,\sigma_1
-$$
+```
 
-$$
+```math
 r =
 \left|
   \{\sigma_i : \sigma_i > \tau\}
 \right|
-$$
+```
 
 where $\tau$ is the rank threshold, $c$ is the tolerance value, and
 $\sigma_1$ is the largest singular value. The default tolerance value is
@@ -144,34 +144,34 @@ their separate values difficult to estimate from the current measurements.
 
 The nullspace basis is taken from the rows of $V^T$ after the numerical rank:
 
-$$
+```math
 \mathcal{N} =
 \{v_i^T : i > r\}
-$$
+```
 
 where $r$ is the numerical rank and $\mathcal{N}$ is the nullspace basis.
 
 Nullspace participation for each parameter is summarized as the Euclidean norm
 of that parameter's coefficients across all nullspace directions:
 
-$$
+```math
 n_j =
 \sqrt{
   \sum_q \mathcal{N}_{qj}^2
 }
-$$
+```
 
 where $n_j$ is the nullspace participation score for parameter $j$.
 
 The local SVD ranking score used in the curated result is `rel2_colnorm`:
 
-$$
+```math
 s_j =
 \left\|
   \frac{\theta_j}{\max(|Y|,\epsilon)}
   S_{:,j}
 \right\|_2
-$$
+```
 
 where $s_j$ is the local SVD ranking score.
 
@@ -211,24 +211,24 @@ The three-class decision uses normalized sensitivity and normalized nullspace
 scores. The high and low thresholds are quantiles of the analyzed parameter
 set:
 
-$$
+```math
 \bar{s}_j =
 \frac{s_j-\min(s)}{\max(s)-\min(s)}
-$$
+```
 
-$$
+```math
 \bar{n}_j =
 \frac{n_j-\min(n)}{\max(n)-\min(n)}
-$$
+```
 
-$$
+```math
 \begin{aligned}
 s_{hi} &= Q_{0.75}(\bar{s}) \\
 s_{lo} &= Q_{0.25}(\bar{s}) \\
 n_{hi} &= Q_{0.75}(\bar{n}) \\
 n_{lo} &= Q_{0.25}(\bar{n})
 \end{aligned}
-$$
+```
 
 The practical rule is:
 
@@ -293,41 +293,41 @@ The calculation uses synthetic observations from the reference simulation. For
 observation $z_i$, model prediction $m_i(\theta)$, and assumed standard
 deviation $\sigma_i$, the fit loss is:
 
-$$
+```math
 L(\theta) =
 \frac{1}{2}
 \sum_i
 \left(
   \frac{m_i(\theta)-z_i}{\sigma_i}
 \right)^2
-$$
+```
 
 The profile for parameter $\theta_j$ fixes $\theta_j$ on a grid of multipliers
 and re-optimizes selected nuisance parameters $\eta$:
 
-$$
+```math
 P_j(a) =
 \min_{\eta}
 \left[
   L(\theta_j = a\theta_{j,\mathrm{ref}}, \eta)
   + A(\theta)
 \right]
-$$
+```
 
 where $A(\theta)$ is the biological admissibility penalty.
 
 The plotted profile is the increase from the best value:
 
-$$
+```math
 \Delta L_j(a)
 = P_j(a) - \min_a P_j(a)
-$$
+```
 
 The horizontal cutoff used in the plots is:
 
-$$
+```math
 c_{\mathrm{profile}} = 1.92
-$$
+```
 
 This is an approximate 95% cutoff for one profiled parameter. The script can
 plot `log1p(delta_loss)` to keep very large curves readable, but the
@@ -408,7 +408,7 @@ measurement tells us about the target.
 Mathematically, for a target quantity $W$ and a candidate future measurement
 $Z$, mutual information is:
 
-$$
+```math
 I(W; Z) =
 \iint
 p(w,z)
@@ -417,13 +417,13 @@ p(w,z)
   \frac{p(w,z)}{p(w)p(z)}
 \right)
 \,dw\,dz
-$$
+```
 
 Equivalently:
 
-$$
+```math
 I(W; Z) = H(W) - H(W \mid Z)
-$$
+```
 
 where $H(W)$ is the uncertainty before observing $Z$, and $H(W \mid Z)$ is the
 remaining uncertainty after observing $Z$. Therefore, a high mutual information
@@ -465,10 +465,10 @@ The steps are:
 
 1. Draw Monte Carlo parameter samples from the prior:
 
-$$
+```math
 \theta_i \sim p(\theta),
 \qquad i=1,\ldots,N
-$$
+```
 
 In this workflow, the prior was uniform over the selected uncertain
 parameters.
@@ -476,9 +476,9 @@ parameters.
 2. For each parameter sample, run the model and store the predicted measured
 species at the candidate sampling day:
 
-$$
+```math
 y_i = y(\theta_i)
-$$
+```
 
 Here, $y_i$ can contain measured species such as FSH, PGF, P4, E2, INH, IGF1,
 insulin, and glucose.
@@ -486,19 +486,19 @@ insulin, and glucose.
 3. Generate one fixed synthetic observation vector from the nominal/reference
 simulation. If $\mu$ is the nominal model prediction at that sampling day, then:
 
-$$
+```math
 z_{\mathrm{obs}}
 = \mu + \sigma \odot \varepsilon,
 \qquad
 \varepsilon \sim \mathcal{N}(0,I)
-$$
+```
 
 The observation standard deviation is defined from a relative noise level:
 
-$$
+```math
 \sigma_j =
 \mathrm{relSigma}\,|\mu_j|
-$$
+```
 
 with clipping away from zero so that nearly zero outputs do not give a zero
 measurement error.
@@ -509,7 +509,7 @@ synthetic data.
 
 4. Compute the Gaussian likelihood for each prior sample:
 
-$$
+```math
 p(z_{\mathrm{obs}} \mid \theta_i)
 \propto
 \exp
@@ -520,36 +520,36 @@ p(z_{\mathrm{obs}} \mid \theta_i)
     \frac{z_{\mathrm{obs},j}-y_{i,j}}{\sigma_j}
   \right)^2
 \right]
-$$
+```
 
 Equivalently, the log-likelihood is:
 
-$$
+```math
 \ell_i =
 -\frac{1}{2}
 \sum_j
 \left(
   \frac{z_{\mathrm{obs},j}-y_{i,j}}{\sigma_j}
 \right)^2
-$$
+```
 
 5. Stabilize and normalize the likelihood weights:
 
-$$
+```math
 \tilde{w}_i =
 \exp(\ell_i - \max_k \ell_k)
-$$
+```
 
-$$
+```math
 w_i =
 \frac{\tilde{w}_i}{\sum_k \tilde{w}_k}
-$$
+```
 
 The normalized weights satisfy:
 
-$$
+```math
 \sum_i w_i = 1
-$$
+```
 
 These weights measure how compatible each parameter sample is with the
 synthetic observation under the assumed Gaussian measurement noise.
@@ -557,13 +557,13 @@ synthetic observation under the assumed Gaussian measurement noise.
 6. Estimate the posterior for the parameter of interest, for example
 $\theta_p$, using a weighted distribution of the prior samples:
 
-$$
+```math
 p(\theta_p \mid z_{\mathrm{obs}})
 \approx
 \sum_i
 w_i
 K_h(\theta_p - \theta_{i,p})
-$$
+```
 
 where $K_h$ is a kernel density estimate with bandwidth $h$. Practically, this
 means that samples with higher likelihood contribute more strongly to the
@@ -571,11 +571,11 @@ posterior density.
 
 This is Bayes' rule written in an importance-sampling form:
 
-$$
+```math
 p(\theta \mid z_{\mathrm{obs}})
 \propto
 p(\theta)\,p(z_{\mathrm{obs}}\mid\theta)
-$$
+```
 
 Because the samples were already drawn from the prior, the likelihood becomes
 the weight that reshapes the prior sample cloud into the posterior.
@@ -594,35 +594,35 @@ For a candidate sampling day and species set:
 
 1. Use the prior parameter samples to generate paired samples:
 
-$$
+```math
 (W_i, Z_i)
-$$
+```
 
 where $W_i$ is the target quantity for sample $i$ and $Z_i$ is the simulated
 candidate measurement for the same sample.
 
 2. Estimate the marginal and joint densities from the Monte Carlo cloud:
 
-$$
+```math
 p(w), \qquad p(z), \qquad p(w,z)
-$$
+```
 
 In the MATLAB workflow these densities are estimated with KDE/Gaussian density
 tools such as `ksdensity`, `mvksdensity`, `normpdf`, and `mvnpdf`.
 
 3. Compute the information contribution:
 
-$$
+```math
 \log
 \left(
   \frac{p(W_i,Z_i)}
        {p(W_i)p(Z_i)}
 \right)
-$$
+```
 
 4. Average this quantity across the Monte Carlo samples:
 
-$$
+```math
 \widehat{I}(W;Z)
 =
 \frac{1}{N}
@@ -632,7 +632,7 @@ $$
   \frac{p(W_i,Z_i)}
        {p(W_i)p(Z_i)}
 \right)
-$$
+```
 
 A candidate sampling day/species combination receives a high mutual information
 score when the simulated measurement $Z$ is strongly informative about the
@@ -643,12 +643,12 @@ before collecting new data.
 
 The posterior is based on Bayes' rule:
 
-$$
+```math
 p(w \mid z^*) =
 \frac{
   p(z^* \mid w)p(w)
 }{p(z^*)}
-$$
+```
 
 where $z^*$ is a hypothetical or selected observation. In practical terms, the
 BED result asks whether observing $z^*$ would make the distribution of $W$
@@ -708,14 +708,14 @@ parameter vector. The analysis uses the observable biomarker panel:
 
 `FSH, PGF, P4, E2, INH, IGF1, Insulin, Glucose`.
 
-For biomarker $b$, each simulation is summarized using the stored-trajectory
-AUC endpoint:
+For biomarker $b$ and parameter vector $\boldsymbol{\theta}$, each simulation
+is summarized using the stored-trajectory AUC endpoint:
 
-$$
-AUC_b(\theta_j)
+```math
+\operatorname{AUC}_b(\boldsymbol{\theta})
 =
-\int_{t_0}^{t_f} y_b(t;\theta_j)\,dt,
-$$
+\int_{t_0}^{t_f} y_b(t;\boldsymbol{\theta})\,dt .
+```
 
 which is evaluated numerically using the trapezoidal rule over the stored
 sampling days.
@@ -725,14 +725,18 @@ sampling days.
 The unfiltered parameter bank was generated using ordinary independent uniform
 Monte Carlo sampling. For each parameter, the screening statistic estimates:
 
-$$
-S^{screen}_{i,b}
+```math
+S^{\mathrm{screen}}_{i,b}
 =
 \frac{\operatorname{Var}\left[
-\operatorname{E}(AUC_b\mid\theta_i)
+\operatorname{E}\left(
+\operatorname{AUC}_b \mid \theta_i
+\right)
 \right]}
-{\operatorname{Var}(AUC_b)}.
-$$
+{\operatorname{Var}\left(
+\operatorname{AUC}_b
+\right)} .
+```
 
 The conditional mean is approximated with equal-count parameter bins. This is
 a variance-based importance screen, but it is **not a strict Sobol index**:
@@ -744,15 +748,15 @@ does not support formal Sobol variance decomposition.
 Spearman rank correlation measures the direction and strength of monotonic
 association between a parameter and biomarker AUC:
 
-$$
-\rho^{S}_{i,b}
+```math
+\rho^{\mathrm{S}}_{i,b}
 =
 \operatorname{Corr}
 \left[
 \operatorname{rank}(\theta_i),
-\operatorname{rank}(AUC_b)
+\operatorname{rank}\left(\operatorname{AUC}_b\right)
 \right].
-$$
+```
 
 Positive values indicate that larger parameter values tend to accompany
 larger biomarker AUC; negative values indicate the opposite relationship.
@@ -760,15 +764,19 @@ larger biomarker AUC; negative values indicate the opposite relationship.
 ## Admissible-Bank PRCC Screening
 
 Partial rank correlation coefficients evaluate the association between
-$\theta_i$ and $AUC_b$ after linearly removing the ranked effects of the
-other sampled parameters. If $r_{\theta_i}$ and $r_{AUC_b}$ are residuals
+$\theta_i$ and $\operatorname{AUC}_b$ after linearly removing the ranked
+effects of the other sampled parameters. If $r_{\theta_i}$ and
+$r_{\operatorname{AUC}_b}$ are residuals
 from those rank-based regressions, then:
 
-$$
-PRCC_{i,b}
+```math
+\operatorname{PRCC}_{i,b}
 =
-\operatorname{Corr}(r_{\theta_i}, r_{AUC_b}).
-$$
+\operatorname{Corr}\left(
+r_{\theta_i},
+r_{\operatorname{AUC}_b}
+\right).
+```
 
 PRCC values summarize parameter-biomarker AUC associations across biologically
 admissible simulations. They indicate direction and strength of monotonic
@@ -780,15 +788,15 @@ Uncertainty propagation summarizes trajectory variability across the
 biologically admissible `+/-0.5%` Monte Carlo bank. For each biomarker $b$
 and stored time $t$, the reported ensemble summaries are:
 
-$$
+```math
 \tilde y_b(t)=Q_{0.50}\{y_b(t;\theta_j)\},
-$$
+```
 
-$$
+```math
 y^{low}_b(t)=Q_{0.05}\{y_b(t;\theta_j)\},
 \qquad
 y^{high}_b(t)=Q_{0.95}\{y_b(t;\theta_j)\}.
-$$
+```
 
 The figures show the 5th-95th percentile interval as a shaded band, the
 ensemble median $\tilde y_b(t)$ as a solid blue line, and the nominal
