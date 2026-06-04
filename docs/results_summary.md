@@ -238,7 +238,7 @@ In practical terms, parameters classified as weakly identifiable, boundary-limit
 
 ## 9. Dexa Perturbation Validation
 
-<img width="342" height="220" alt="image" src="https://github.com/user-attachments/assets/99259b8b-f4b2-4e2a-ae6a-aba17fb599f7" />
+<img width="1342" height="1220" alt="image" src="https://github.com/user-attachments/assets/99259b8b-f4b2-4e2a-ae6a-aba17fb599f7" />
 
 
 The Python Dexa runner implements the optional 25-state extension from the
