@@ -1,26 +1,25 @@
 # Results Summary
 
-## Main Modelling Diagnostics
+This document summarizes the main modelling diagnostics and curated results for the BovSys/MetRep metabolic-reproductive model repository.
 
-- Local sensitivity identifies nominal mechanistic influence.
-- Profile likelihood evaluates practical estimability.
-- PRCC and Spearman summarize global parameter-biomarker associations across
-  biologically admissible simulations.
-- Uncertainty propagation quantifies local robustness around the calibrated
-  model.
-- Bayesian experimental design identifies informative measurement choices.
+The repository focuses on the reproducible Python workflow around the mechanistic ODE model: baseline simulation, local sensitivity analysis, identifiability diagnostics, profile-likelihood confirmation, global sensitivity screening, uncertainty propagation, and Bayesian experimental design.
 
-# Results Summary
+The full biological scenario simulations are described in the MetRep model paper, the dexamethasone perturbation workflow is described in the Dexa model paper, and the original Bayesian experimental design analysis is reported in the PhD thesis. This repository does not attempt to replace those original reports. Instead, it curates the model code, reproducible analysis scripts, and selected figures that demonstrate the modelling workflow.
 
-This repository curates the Python sensitivity, identifiability, profile-likelihood, and surrogate Bayesian experimental design outputs for the MetRep metabolic-reproductive model.
+The analyses are complementary:
 
-The full biological scenario simulations are reported in the MetRep model paper, the dexamethasone perturbation scenario is reported in the Dexa paper, and the full Bayesian experimental design analysis is reported in the PhD thesis. The purpose of this repository is to show the reproducible Python workflow: model validation, local sensitivity screening, SVD-based identifiability analysis, compensation diagnostics, nonlinear profile-likelihood confirmation, and a surrogate BED pilot.
+- Local sensitivity identifies parameters with strong nominal influence on output trajectories.
+- SVD identifiability and compensation analysis reveal which parameter directions are informed or weakly informed by the selected outputs.
+- Profile likelihood confirms nonlinear practical identifiability for selected parameters.
+- Global sensitivity / PRCC-Spearman screening evaluates parameter-biomarker associations across simulation-bank ensembles.
+- Uncertainty propagation quantifies local robustness under biologically admissible parameter variability.
+- Bayesian experimental design identifies informative future measurements for reducing parameter uncertainty.
 
 For technical definitions and formulas, see:
 
-- Project_Documentation/sensitivity_identifiability_bayesian_design.md
-- Project_Documentation/plot_interpretation_guide.md
-- Project_Documentation/Bayesian_Experimental_Design/
+- `docs/methodology.md`
+- `docs/plot_interpretation_guide.md`
+- `analyses/bayesian_experimental_design/`
 
 ---
 
