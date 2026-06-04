@@ -290,17 +290,8 @@ The scientific workflow is therefore sequential:
 
 The following figures are useful for technical checking and transparency, but they are not needed in the main narrative.
 
-## Appendix A. Full Baseline State Panel
 
-Baseline all model states
-
-![Baseline all model states](../results_final/figures/baseline_all_states.png)
-
-The all-state baseline panel shows every model state in the translated 22-state Python implementation. This figure is useful for confirming that no state is silently missing, unstable, or incorrectly mapped. It is placed in the appendix because it is too dense for the main results.
-
----
-
-## Appendix B. SVD Sensitivity Ranking
+## Appendix A. SVD Sensitivity Ranking
 
 SVD ranking
 
@@ -316,7 +307,7 @@ Therefore, parameters that change pulse timing, oscillation shape, or trajectory
 
 ---
 
-## Appendix C. Full Nullspace Participation Ranking
+## Appendix B. Full Nullspace Participation Ranking
 
 All-parameter nullspace participation
 
@@ -328,7 +319,7 @@ The figure is useful for model debugging and detailed parameter review, but it c
 
 ---
 
-## Appendix D. Strongest Compensation Pairs
+## Appendix C. Strongest Compensation Pairs
 
 Compensation pairs
 
