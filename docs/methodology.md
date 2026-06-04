@@ -698,95 +698,46 @@ correlated object and requires explicit validation before BED conclusions are
 claimed.
 
 
-
-# Global Sensitivity And Admissible-Bank Association
-
-Global sensitivity screening asks which parameters are associated with
-variability across a simulation ensemble rather than only near the nominal
-parameter vector. The analysis uses the observable biomarker panel:
-
-`FSH, PGF, P4, E2, INH, IGF1, Insulin, Glucose`.
-
-For biomarker $begin:math:text$b$end:math:text$ and parameter vector $begin:math:text$\\boldsymbol\{\\theta\}$end:math:text$, each simulation
-is summarized using the stored-trajectory AUC endpoint:
-
-$$
-\operatorname{AUC}_b(\boldsymbol{\theta})
+markdown # Global Sensitivity And Admissible-Bank Association  Global sensitivity screening asks which parameters are associated with variability across a simulation ensemble rather than only near the nominal parameter vector. The analysis uses the observable biomarker panel:  `FSH, PGF, P4, E2, INH, IGF1, Insulin, Glucose`.  For biomarker \(b\) and parameter vector \(\theta\), each simulation is summarized using the stored-trajectory AUC endpoint:  math
+\mathrm{AUC}b(\theta)
 =
-\int_{t_0}^{t_f} y_b(t;\boldsymbol{\theta})\,dt .
-$$
-
-This is evaluated numerically using the trapezoidal rule over the stored
-sampling days.
-
-## Full-Prior Variance-Based Screening
-
-The unfiltered parameter bank was generated using ordinary independent uniform
-Monte Carlo sampling. For each parameter, the screening statistic estimates:
-
-$$
-S^{\mathrm{screen}}_{i,b}
+\int{t_0}^{t_f}
+y_b(t;\theta),dt
+ This is evaluated numerically using the trapezoidal rule over the stored sampling days.  ## Full-Prior Variance-Based Screening  The unfiltered parameter bank was generated using ordinary independent uniform Monte Carlo sampling. For each parameter, the screening statistic estimates: math
+S^{screen}{i,b}
 =
 \frac{
-\operatorname{Var}
+\mathrm{Var}
 \left[
-\operatorname{E}
+\mathrm{E}
 \left(
-\operatorname{AUC}_b \mid \theta_i
+\mathrm{AUC}b \mid \theta_i
 \right)
 \right]
 }{
-\operatorname{Var}
+\mathrm{Var}
 \left(
-\operatorname{AUC}_b
+\mathrm{AUC}b
 \right)
-}.
-$$
-
-The conditional mean is approximated with equal-count parameter bins. This is
-a variance-based importance screen, but it is **not a strict Sobol index**:
-the simulation bank does not use a Saltelli/Sobol sampling design and therefore
-does not support formal Sobol variance decomposition.
-
-## Admissible-Bank Spearman Screening
-
-Spearman rank correlation measures the direction and strength of monotonic
-association between a parameter and biomarker AUC:
-
-$$
-\rho^{\mathrm{S}}_{i,b}
+}
+ The conditional mean is approximated with equal-count parameter bins. This is a variance-based importance screen, but it is **not a strict Sobol index**: the simulation bank does not use a Saltelli/Sobol sampling design and therefore does not support formal Sobol variance decomposition.  ## Admissible-Bank Spearman Screening  Spearman rank correlation measures the direction and strength of monotonic association between a parameter and biomarker AUC: math
+\rho^S{i,b}
 =
-\operatorname{Corr}
+\mathrm{Corr}
 \left(
-\operatorname{rank}(\theta_i),
-\operatorname{rank}\left(\operatorname{AUC}_b\right)
-\right).
-$$
-
-Positive values indicate that larger parameter values tend to accompany
-larger biomarker AUC; negative values indicate the opposite relationship.
-
-## Admissible-Bank PRCC Screening
-
-Partial rank correlation coefficients evaluate the association between
-$begin:math:text$\\theta\_i$end:math:text$ and $begin:math:text$\\operatorname\{AUC\}\_b$end:math:text$ after linearly removing the ranked
-effects of the other sampled parameters. If $begin:math:text$r\_\{\\theta\_i\}$end:math:text$ and
-$begin:math:text$r\_\{\\operatorname\{AUC\}\_b\}$end:math:text$ are residuals from those rank-based regressions,
-then:
-
-$$
-\operatorname{PRCC}_{i,b}
+\mathrm{rank}(\theta_i),
+\mathrm{rank}(\mathrm{AUC}b)
+\right)
+ Positive values indicate that larger parameter values tend to accompany larger biomarker AUC; negative values indicate the opposite relationship.  ## Admissible-Bank PRCC Screening  Partial rank correlation coefficients evaluate the association between \(\theta_i\) and \(\mathrm{AUC}_b\) after linearly removing the ranked effects of the other sampled parameters.  If \(r_{\theta_i}\) and \(r_{\mathrm{AUC}_b}\) are residuals from those rank-based regressions, then: math
+\mathrm{PRCC}{i,b}
 =
-\operatorname{Corr}
+\mathrm{Corr}
 \left(
-r_{\theta_i},
-r_{\operatorname{AUC}_b}
-\right).
-$$
-
-PRCC values summarize parameter-biomarker AUC associations across biologically
-admissible simulations. They indicate direction and strength of monotonic
-association, not formal Sobol variance decomposition.
+r{\theta_i},
+r{\mathrm{AUC}_b}
+\right)
+ PRCC values summarize parameter–biomarker AUC associations across biologically admissible simulations. They indicate direction and strength of monotonic association, not formal Sobol variance decomposition.
+:::
 
 # Uncertainty Propagation
 
