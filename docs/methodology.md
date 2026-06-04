@@ -699,94 +699,76 @@ claimed.
 
 # Global Sensitivity And Admissible-Bank Association
 
-Global sensitivity screening asks which parameters are associated with
-variability across a simulation ensemble rather than only near the nominal
-parameter vector. The analysis uses the observable biomarker panel:
+Global sensitivity screening asks which parameters are associated with variability across a simulation ensemble rather than only near the nominal parameter vector. The analysis uses the observable biomarker panel:
 
-FSH, PGF, P4, E2, INH, IGF1, Insulin, Glucose.
+`FSH, PGF, P4, E2, INH, IGF1, Insulin, Glucose`.
 
-For biomarker b and parameter vector θ, each simulation
-is summarized using the stored-trajectory AUC endpoint:
+For biomarker `b` and parameter vector `theta`, each simulation is summarized using the stored-trajectory AUC endpoint:
 
-$$
-\mathrm{AUC}b(\theta)
+```math
+\mathrm{AUC}_b(\theta)
 =
-\int{t_0}^{t_f}
-y_b(t;\theta),dt
-$$
+\int_{t_0}^{t_f} y_b(t;\theta)\,dt
+```
 
-This is evaluated numerically using the trapezoidal rule over the stored
-sampling days.
+This is evaluated numerically using the trapezoidal rule over the stored sampling days.
 
 ## Full-Prior Variance-Based Screening
 
-The unfiltered parameter bank was generated using ordinary independent uniform
-Monte Carlo sampling. For each parameter, the screening statistic estimates:
+The unfiltered parameter bank was generated using ordinary independent uniform Monte Carlo sampling. For each parameter, the screening statistic estimates:
 
-$$
-S^{screen}{i,b}
+```math
+S^{\mathrm{screen}}_{i,b}
 =
 \frac{
 \mathrm{Var}
 \left[
 \mathrm{E}
 \left(
-\mathrm{AUC}b \mid \theta_i
+\mathrm{AUC}_b \mid \theta_i
 \right)
 \right]
 }{
 \mathrm{Var}
 \left(
-\mathrm{AUC}b
+\mathrm{AUC}_b
 \right)
 }
-$$
+```
 
-The conditional mean is approximated with equal-count parameter bins. This is
-a variance-based importance screen, but it is not a strict Sobol index:
-the simulation bank does not use a Saltelli/Sobol sampling design and therefore
-does not support formal Sobol variance decomposition.
+The conditional mean is approximated with equal-count parameter bins. This is a variance-based importance screen, but it is **not a strict Sobol index**: the simulation bank does not use a Saltelli/Sobol sampling design and therefore does not support formal Sobol variance decomposition.
 
 ## Admissible-Bank Spearman Screening
 
-Spearman rank correlation measures the direction and strength of monotonic
-association between a parameter and biomarker AUC:
+Spearman rank correlation measures the direction and strength of monotonic association between a parameter and biomarker AUC:
 
-$$
-\rho^S{i,b}
+```math
+\rho^{\mathrm{S}}_{i,b}
 =
 \mathrm{Corr}
 \left(
 \mathrm{rank}(\theta_i),
-\mathrm{rank}(\mathrm{AUC}b)
+\mathrm{rank}(\mathrm{AUC}_b)
 \right)
-$$
+```
 
-Positive values indicate that larger parameter values tend to accompany
-larger biomarker AUC; negative values indicate the opposite relationship.
+Positive values indicate that larger parameter values tend to accompany larger biomarker AUC; negative values indicate the opposite relationship.
 
 ## Admissible-Bank PRCC Screening
 
-Partial rank correlation coefficients evaluate the association between
-(\theta_i) and (\mathrm{AUC}b) after linearly removing the ranked
-effects of the other sampled parameters.
+Partial rank correlation coefficients evaluate the association between `theta_i` and `AUC_b` after linearly removing the ranked effects of the other sampled parameters. If `r_theta_i` and `r_AUC_b` are residuals from those rank-based regressions, then:
 
-If (r{\theta_i}) and (r{\mathrm{AUC}b}) are residuals from those
-rank-based regressions, then:
-
-$$
-\mathrm{PRCC}{i,b}
+```math
+\mathrm{PRCC}_{i,b}
 =
 \mathrm{Corr}
 \left(
-r{\theta_i},
-r{\mathrm{AUC}_b}
+r_{\theta_i},
+r_{\mathrm{AUC}_b}
 \right)
-$$
+```
 
-PRCC values summarize parameter–biomarker AUC associations across biologically
-admissible simulations. They indicate direction and strength of monotonic
-association, not formal Sobol variance decomposition.
+PRCC values summarize parameter-biomarker AUC associations across biologically admissible simulations. They indicate direction and strength of monotonic association, not formal Sobol variance decomposition.
 
 # Uncertainty Propagation
 
