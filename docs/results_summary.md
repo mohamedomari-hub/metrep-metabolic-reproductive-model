@@ -204,11 +204,16 @@ Two related but distinct analyses were performed:
 
 Because the unfiltered bank was generated using ordinary Monte Carlo sampling rather than a Saltelli/Sobol design, these results are not labelled as strict Sobol indices.
 
-ADD FIGURE HERE:
+![Combined parameter diagnostics](../results_final/figures/combined_parameter_diagnostics.png)
 
-```markdown
-![Global sensitivity representative parameters](../results_final/figures/global_sensitivity_representative_identifiability_parameters.png)
+ ![Global sensitivity representative parameters](../results_final/figures/global_sensitivity_representative_identifiability_parameters.png)
 
+## 9. Uncertainty Analysis
+
+![Uncertainty propagation summary](../results_final/figures/uncertainty_readme_summary.png)
+
+![Uncertainty reproductive biomarkers](../results_final/figures/uncertainty_reproductive.png)
+ 
 ## 8. Bayesian Experimental Design
 
 This figure illustrates how Bayesian experimental design (BED) acts as the constructive follow-up to identifiability analysis. Sensitivity, SVD identifiability, nullspace participation, compensation analysis, and profile likelihood identify which parameter directions remain weakly informed or confounded under the current measurement panel. BED then addresses the next scientific question:
@@ -352,3 +357,11 @@ The speed comparison was measured locally using 12 ODE simulations and 200 repea
 
 This figure is useful for the computational engineering story because it explains why a surrogate is useful for BED candidate exploration. For a biological modelling paper, it can remain in the appendix. For a GitHub or AI-engineering portfolio, it can also be shown in the main text.
 
+
+## Appendix G. Top PRCC Parameter-Biomarker Associations
+
+![Top PRCC associations](../results_final/figures/global_sensitivity_heatmap_top_parameters.png)
+
+## Appendix H. All-Biomarker Uncertainty Propagation
+
+![Uncertainty all biomarkers](../results_final/figures/uncertainty_all_biomarkers.png)
