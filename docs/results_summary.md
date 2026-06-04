@@ -190,6 +190,26 @@ The bottom row demonstrates two qualitatively different failure modes. insulin_i
 
 Overall, the comparison between SVD and profile likelihood supports a sequential interpretation of identifiability. The local SVD screen acts as an efficient screening tool that identifies promising parameter candidates and weak directions, whereas profile likelihood provides the nonlinear confirmation step needed to determine whether parameters are truly bounded by the available data. In this workflow, SVD efficiently reduced the candidate parameter space, while profile likelihood refined these candidates into practically identifiable, boundary-limited, weakly identifiable, and non-identifiable classes. This combination increases confidence that selected calibration targets are scientifically defensible and highlights where additional experimental information would be most valuable.
 
+## 8. Global Sensitivity And Admissible-Bank Association
+
+Global sensitivity was added as a complementary diagnostic after the local sensitivity and identifiability analyses. Local sensitivity tested one-at-a-time effects near the nominal parameter set, while the global screening asks whether the same or different parameters are associated with biomarker variability across simulation-bank ensembles.
+
+The analysis used the same observable biomarker panel as BED:
+
+`FSH, PGF, P4, E2, INH, IGF1, Insulin, Glucose`
+
+Two related but distinct analyses were performed:
+
+1. A full-prior variance-based screening using the 10,000 unfiltered Monte Carlo simulations.
+2. A PRCC/Spearman association analysis using the 7,874 biologically admissible simulations.
+
+Because the unfiltered bank was generated using ordinary Monte Carlo sampling rather than a Saltelli/Sobol design, these results are not labelled as strict Sobol indices.
+
+ADD FIGURE HERE:
+
+```markdown
+![Global sensitivity representative parameters](../results_final/figures/global_sensitivity_representative_identifiability_parameters.png)
+
 ## 8. Bayesian Experimental Design
 
 This figure illustrates how Bayesian experimental design (BED) acts as the constructive follow-up to identifiability analysis. Sensitivity, SVD identifiability, nullspace participation, compensation analysis, and profile likelihood identify which parameter directions remain weakly informed or confounded under the current measurement panel. BED then addresses the next scientific question:
