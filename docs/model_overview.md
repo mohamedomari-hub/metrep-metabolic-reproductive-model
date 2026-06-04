@@ -2,7 +2,7 @@
 
 ## Introduction
 
-The BovSys/MetRep model is a mechanistic systems-biology model describing the coupled metabolic and reproductive physiology of dairy cattle using a system of nonlinear ordinary differential equations (ODEs).
+The MetRep model is a mechanistic systems-biology model describing the coupled metabolic and reproductive physiology of dairy cattle using a system of nonlinear ordinary differential equations (ODEs).
 
 The model was originally developed during a PhD project in applied mathematics and systems biology to investigate the interaction between:
 
