@@ -1,118 +1,107 @@
-# BovSys / MetRep Model
+# MetRep Metabolic-Reproductive Model
 
-Mechanistic metabolic-reproductive modeling, identifiability analysis,
-Bayesian experimental design, and dexamethasone perturbation validation.
+This repository contains a curated Python implementation of a mechanistic
+metabolic-reproductive ODE model originally developed during PhD work, together
+with model diagnostics for sensitivity, identifiability, uncertainty
+propagation, and Bayesian experimental design. The original MATLAB model is
+preserved as a scientific reference.
 
-This repository is a reproducible companion to PhD work on the BovSys/MetRep
-dairy cow model. It preserves the original MATLAB reference implementation,
-provides an open Python translation for users without MATLAB, and organizes the
-analysis logic from model construction through experimental-design improvement
-and Dexa validation.
+## Scientific Motivation
 
-## Scientific Logic
+MetRep links metabolic regulation with reproductive endocrine dynamics. The
+model is used to study which mechanisms control observable biomarkers, which
+parameters can be estimated, how robust the calibrated model is, and which
+future measurements would be most informative.
 
-The project follows this modeling arc:
+## Model And Biomarkers
 
-```text
-1. Build the MetRep mechanistic model
-   -> couple reproductive endocrine dynamics with glucose-insulin metabolism
+The mechanistic ODE model couples reproductive hormone regulation, ovarian
+dynamics, and glucose-insulin-IGF metabolism. GitHub-facing analyses emphasize
+observable biomarkers:
 
-2. Translate the model from MATLAB to Python
-   -> make the model accessible and reproducible without a MATLAB license
+`FSH, PGF, P4, E2, INH, IGF1, Insulin, Glucose, Glucagon`.
 
-3. Run classical model analysis
-   -> local sensitivity analysis
-   -> SVD/local identifiability screening
-   -> profile-likelihood confirmation
-
-4. Identify information gaps
-   -> which parameters are sensitive, estimable, weak, compensatory, or fixed
-
-5. Use Bayesian experimental design
-   -> ask which sampling days and measured species would improve information
-      for weak or non-identifiable model directions
-
-6. Extend and validate with Dexa perturbation
-   -> use the dexamethasone scenario as an external pharmacological challenge
-      to test whether the model reproduces expected metabolic responses
-```
-
-In this structure, Bayesian experimental design is not a separate add-on. It is
-the answer to the identifiability problem: after finding weakly informed
-parameters, BED asks how future experiments should be designed to make the model
-more informative. The Dexa module then acts as a perturbation-based validation
-endpoint.
-
-## What Is Included
-
-- `MetRep_Matlab/` contains the original MATLAB reference implementation.
-- `MetRep_Python/model_definition/` contains the translated 22-state Python
-  core model equations, parameters, scenarios, simulation, analysis, plotting
-  functions, and the optional 25-state Dexa extension.
-- `MetRep_Python/model_running/` contains runnable scripts for validation,
-  baseline simulation, sensitivity, identifiability, and profile likelihood.
-- `Project_Documentation/sensitivity_identifiability_bayesian_design.md`
-  summarizes sensitivity, SVD identifiability, profile likelihood, and the
-  link to BED.
-- `Project_Documentation/Bayesian_Experimental_Design/` documents BED, including a
-  GitHub-facing v3 baseline MATLAB port and historical PhD provenance files.
-- `Project_Documentation/dexa_python_implementation.md` documents the Python
-  Dexa implementation and how it is kept separate from baseline analyses.
-- `results_final/` contains curated tables and figures for public reporting.
-- `Project_Documentation/` contains simulation instructions, method notes, BED
-  materials, and result interpretation pages.
-
-## Repository Status
-
-The Python implementation covers the 22-state metabolic-reproductive core
-model and an optional Dexa perturbation workflow with states 23-25. Ordinary
-scenario simulations, sensitivity analysis, SVD identifiability, and profile
-likelihood use the non-Dexa core parameter set by default. Dexa is activated
-only through the dedicated Dexa runner.
-
-## Core Workflow
-
-The recommended Python workflow is:
+## Analysis Workflow
 
 ```text
-01_validate_against_matlab.py
-  Confirms Python parameters, state order, and initial conditions match MATLAB.
-
-02_run_baseline.py
-  Runs the baseline Python MetRep simulation and saves core model outputs.
-
-04_run_sensitivity.py
-  Measures local parameter influence on selected outputs.
-
-05_run_identifiability.py
-  Uses SVD of the sensitivity matrix to classify Estimate / Fix parameters.
-
-10_run_profile_likelihood.py
-  Confirms practical identifiability for selected parameters.
+Baseline ODE simulation
+-> Local sensitivity
+-> Identifiability analysis
+-> Global sensitivity / admissible-bank association
+-> Uncertainty propagation
+-> Bayesian experimental design
 ```
 
-The analyses are intended as a staged workflow:
+## Key Results
+
+### Baseline Dynamics
+
+![Baseline selected states](results_final/figures/baseline_selected_states.png)
+
+The baseline simulation reproduces coupled metabolic and reproductive
+endocrine dynamics under the non-lactating baseline scenario.
+
+### Local Sensitivity
+
+Local sensitivity uses a `+1%` one-at-a-time parameter perturbation and AUC
+endpoints across all 98 parameters. It identifies mechanisms that strongly
+affect biomarker exposure near the nominal calibrated model.
+
+### Identifiability
+
+![Representative profile likelihood classes](results_final/figures/profile_likelihood_representative_3x3.png)
+
+SVD screening and profile likelihood separate parameters into practically
+identifiable, boundary-limited, and weak/non-identifiable classes.
+
+### Combined Parameter Diagnostics
+
+![Combined parameter diagnostics](results_final/figures/combined_parameter_diagnostics.png)
+
+Representative parameters are compared across local sensitivity, admissible-bank
+global association, and identifiability class. Practically identifiable
+parameters generally show stronger and more consistent diagnostic signal,
+while weak/non-identifiable mechanisms show limited or inconsistent signal.
+
+### Global Sensitivity And Admissible-Bank Association
+
+![Representative global sensitivity](results_final/figures/global_sensitivity_representative_identifiability_parameters.png)
+
+PRCC and Spearman associations summarize parameter-biomarker AUC relationships
+across biologically admissible simulations. They indicate monotonic association,
+not strict Sobol variance decomposition. The full-prior bank uses ordinary
+Monte Carlo sampling, so its variance-based results are labeled screening
+rather than Sobol indices.
+
+### Uncertainty Propagation
+
+![Uncertainty propagation](results_final/figures/uncertainty_readme_summary.png)
+
+Uncertainty propagation uses the biologically admissible `+/-0.5%` simulation
+bank. Shading shows the 5th-95th percentile range, the solid blue line shows the
+ensemble median, and the dashed black line shows the nominal trajectory.
+Because the ensemble is narrow and filtered, these bands represent local
+robustness around the calibrated model rather than full population variability.
+
+### Bayesian Experimental Design
+
+BED scripts and outputs are available under
+`analyses/bayesian_experimental_design/`. Final curated BED figures will be
+added after the expanded prior-based analysis is regenerated.
+
+## Repository Structure
 
 ```text
-sensitivity analysis
--> local SVD identifiability screen
--> profile likelihood confirmation
+MetRep_Matlab/                  Original MATLAB reference implementation
+MetRep_Python/                  Reproducible Python model and core scripts
+analyses/                       Sensitivity, identifiability, uncertainty, and BED workflows
+results_final/                  Curated publication/GitHub-facing figures and tables
+docs/                           Concise model, methodology, results, and reproducibility notes
 ```
 
-Sensitivity analysis identifies high-impact parameters. SVD then evaluates
-whether high-impact parameters are separable or compensatory. Profile
-likelihood provides a nonlinear practical-identifiability confirmation for the
-selected parameters.
+## Reproducibility
 
-The mathematical definitions for sensitivity, SVD/nullspace identifiability,
-profile likelihood, and Bayesian experimental design are documented in:
-
-- `Project_Documentation/sensitivity_identifiability_bayesian_design.md`
-- `Project_Documentation/results_sensitivity_identifiability_bayesian_design.md`
-
-## Quick Start
-
-Create an environment and install dependencies:
+Install dependencies:
 
 ```bash
 python -m venv .venv
@@ -120,148 +109,41 @@ source .venv/bin/activate
 pip install -r requirements.txt
 ```
 
-Validate the Python translation metadata:
+Core model and diagnostics:
 
 ```bash
-python MetRep_Python/model_running/01_validate_against_matlab.py
+python MetRep_Python/scripts/02_run_baseline.py
+python MetRep_Python/scripts/04_run_sensitivity.py
+python MetRep_Python/scripts/05_run_identifiability.py
+python MetRep_Python/scripts/10_run_profile_likelihood.py
+python analyses/global_sensitivity/run_global_sensitivity.py
+python analyses/uncertainty/run_uncertainty_propagation.py
+python analyses/model_diagnostics/build_combined_parameter_summary.py
 ```
 
-Run the baseline non-Dexa simulation:
+See [docs/reproducibility.md](docs/reproducibility.md) for workflow details.
 
-```bash
-python MetRep_Python/model_running/02_run_baseline.py
-```
+## Important Methodological Note
 
-List all built-in Python model scenarios:
+Different analyses use different perturbation scales because they answer
+different questions:
 
-```bash
-python MetRep_Python/model_running/08_run_model_scenarios.py --list
-```
+- Local sensitivity: `+1%` one-at-a-time perturbation near the nominal model.
+- SVD identifiability: small numerical derivative step.
+- Profile likelihood: wider parameter profiling range.
+- Global association and uncertainty: Monte Carlo simulation banks.
+- BED: prior-based information calculation.
 
-Run all built-in non-Dexa Python scenarios:
+Different perturbation scales are used because each analysis answers a
+different question: local sensitivity uses `+1%` one-at-a-time perturbations,
+SVD identifiability uses small finite differences, profile likelihood explores
+a wider parameter range, global sensitivity uses simulation-bank associations,
+uncertainty propagation uses biologically admissible ensembles, and BED uses
+prior-based information calculations.
 
-```bash
-python MetRep_Python/model_running/08_run_model_scenarios.py --scenario all
-```
+## Documentation
 
-These additional scenarios include acute negative energy balance, chronic
-negative energy balance, and lactating `c0` cases. They are scenario
-simulations for model behavior checking. They are not mixed into the default
-sensitivity, SVD identifiability, or profile-likelihood workflow, which uses
-the baseline non-Dexa scenario unless another scenario is explicitly chosen.
-
-Run the optional Python Dexa perturbation:
-
-```bash
-python MetRep_Python/model_running/07_run_dexa_scenarios.py \
-  --scenario baseline_non_lactating \
-  --days 3 \
-  --dose-day 0 \
-  --figure-dir results_final/figures \
-  --table-dir results_final/tables \
-  --prefix dexa_non_lactating_standard_3d
-```
-
-Run the standard baseline analysis workflow: baseline simulation plus
-sensitivity, SVD identifiability, and uncertainty analyses:
-
-```bash
-python MetRep_Python/model_running/09_run_standard_analysis.py
-```
-
-Run the MATLAB Dexa reference simulation:
-
-```text
-Open MATLAB from the repository root and run:
-BovSys_run_dexa_v3
-```
-
-Run the main identifiability screen:
-
-```bash
-python MetRep_Python/model_running/05_run_identifiability.py \
-  --outputs FSH PGF P4 E2 INH IGF1 Insulin Glucose Glucagon \
-  --days 50 \
-  --dt 2 \
-  --prefix structid_50d_measurable
-```
-
-Run the profile likelihood confirmation:
-
-```bash
-python MetRep_Python/model_running/10_run_profile_likelihood.py \
-  --from-identifiability results_final/tables/structid_50d_measurable_holistic_table.csv \
-  --profile-class estimate \
-  --max-profile-params 9 \
-  --max-nuisance-params 8 \
-  --outputs FSH PGF P4 E2 INH IGF1 Insulin Glucose Glucagon \
-  --days 50 \
-  --grid-low 0.80 \
-  --grid-high 1.20 \
-  --grid-points 9 \
-  --maxiter 20 \
-  --admissible-only \
-  --rho-min 0.65 \
-  --gamma-max 0.45 \
-  --kappa-max 0.45 \
-  --max-shift-days 7 \
-  --profile-scale log1p \
-  --trajectory-parameter none \
-  --prefix profile_50d_balanced_relaxed
-```
-
-## Current Identifiability Result
-
-Using measurable outputs
-`FSH, PGF, P4, E2, INH, IGF1, Insulin, Glucose, Glucagon`, the current
-profile-likelihood confirmation gives:
-
-- 60 profiled parameters
-- 51 practically identifiable
-- 6 boundary-limited
-- 1 weakly identifiable
-- 2 flat/non-identifiable
-
-In plain language, 51 parameters had profile curves with clear enough minima
-inside the tested range. Six had best fits at the edge of the tested range, one
-was only weakly bounded, and two stayed too flat to support reliable estimation
-from the current output panel.
-
-See `Project_Documentation/sensitivity_identifiability_bayesian_design.md`,
-`Project_Documentation/results_sensitivity_identifiability_bayesian_design.md`,
-`Project_Documentation/plot_interpretation_guide.md`, and `results_final/` for
-the curated summary.
-
-## Bayesian Experimental Design
-
-The BED implementation is kept as MATLAB reference code in
-`Project_Documentation/Bayesian_Experimental_Design/matlab_original/`. For GitHub, the
-single recommended entry point is `BED_1M_ALL.m`, which calls
-`BovSys_run_v3_baseline.m` and uses the published v3 model equations with Dexa
-PK/PD switched off.
-
-The full BED result is reported in the PhD thesis. This repository keeps the
-MATLAB BED code and methodology notes, but does not currently include BED/RF
-surrogate figures in `results_final` because that workflow still needs a
-documented public validation path. A compact Python BED reproduction can be
-added later using the translated Python model.
-
-For all simulation and analysis commands, see
-`Project_Documentation/simulation_and_analysis_reproducibility.md`.
-
-## Dexa Perturbation Validation
-
-The original MATLAB model includes a dexamethasone PK/PD extension. The Python
-translation implements the same optional three-state PK/PD structure and can
-compare Dexa trajectories against the matching no-Dexa baseline. The Dexa
-simulation result is reported in the Dexa paper; this repository keeps the
-MATLAB reference code and a Python runner for reproducible perturbation tests.
-
-Dexa PK/PD constants are not included in the sensitivity, SVD identifiability,
-or profile-likelihood parameter list. Those analyses remain focused on the
-98-parameter non-Dexa core model.
-
-## License And Citation
-
-Add a license after confirming what can be distributed for code, data, and
-published-paper material.
+- [Model overview](docs/model_overview.md)
+- [Methodology](docs/methodology.md)
+- [Results summary](docs/results_summary.md)
+- [Reproducibility](docs/reproducibility.md)

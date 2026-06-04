@@ -10,3 +10,10 @@ MetRep_Python/**/__pycache__/
 MetRep_Python/**/*.py[cod]
 results/
 MetRep_Python/results/
+
+# Large generated simulation banks and BED result folders remain local.
+analyses/bayesian_experimental_design/surrogate_bed/phd_bed_bank_5pct/
+analyses/bayesian_experimental_design/surrogate_bed/phd_bed_bank_5pct_50k_glucagon/
+analyses/bayesian_experimental_design/surrogate_bed/phd_bed_results/
+analyses/bayesian_experimental_design/surrogate_bed/phd_bed_results_5pct_50k_glucagon/
+analyses/bayesian_experimental_design/surrogate_bed/bed_results_first_bank_05pct/
