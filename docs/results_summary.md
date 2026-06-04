@@ -266,13 +266,13 @@ Because the unfiltered bank was generated using ordinary Monte Carlo sampling ra
 
 ![Combined parameter diagnostics](../results_final/figures/combined_parameter_diagnostics.png)
 
- ![Global sensitivity representative parameters](../results_final/figures/global_sensitivity_representative_identifiability_parameters.png)
+<img width="2420" height="1430" alt="image" src="https://github.com/user-attachments/assets/a460920e-0c21-447f-803f-b3de6fb8aa2f" />
+
 
 ## 9. Uncertainty Analysis
 
-![Uncertainty propagation summary](../results_final/figures/uncertainty_readme_summary.png)
+<img width="3300" height="2772" alt="image" src="https://github.com/user-attachments/assets/6a940007-6be5-4f3c-b380-23a48816b927" />
 
-![Uncertainty reproductive biomarkers](../results_final/figures/uncertainty_reproductive.png)
  
 ## 8. Bayesian Experimental Design
 
@@ -296,7 +296,28 @@ Identifiability analysis diagnoses where the model is weakly informed. Bayesian 
 
 In practical terms, parameters classified as weakly identifiable, boundary-limited, or strongly involved in nullspace compensation should not automatically be discarded. Instead, BED provides a principled strategy to improve their estimability by selecting more informative sampling times and measured species. This turns identifiability analysis from a purely diagnostic exercise into a constructive experimental-design workflow.
 
-## 9. Dexa Perturbation Validation
+# Surrogate BED 
+
+![Surrogate BED thesis-style summary](Bayesian_Experimental_Design/surrogate_bed/run_outputs/figures/surrogate_bed_thesis_style_summary.png)
+
+![ODE versus surrogate speed](Bayesian_Experimental_Design/surrogate_bed/run_outputs/figures/surrogate_bed_ode_vs_surrogate_speed.png)
+
+<img width="2640" height="1210" alt="image" src="https://github.com/user-attachments/assets/8ae4d959-d780-4028-8522-81bb67693c51" />
+
+
+<img width="1980" height="1210" alt="image" src="https://github.com/user-attachments/assets/1a9121b7-e931-4d32-a26b-9855d21068fd" />
+
+
+<img width="3520" height="2640" alt="image" src="https://github.com/user-attachments/assets/af8b31ad-2dc9-4fe6-b502-288efc333653" />
+
+
+The surrogate BED pilot uses the translated Python ODE model to generate a local Monte Carlo prior around the nominal parameter set, retains biologically admissible trajectories, trains an ExtraTrees surrogate on ODE output features, and evaluates candidate measurements using mutual information and posterior reweighting.
+
+In this pilot run, 389 biologically admissible samples remained from 500 ODE simulations. For the target parameter insulin_glucose_threshold, the highest all-species candidate was day 88, while the lowest all-species candidate was day 56. The top trajectory panel places these candidate days in the nominal follicle/P4 cycle. The middle panel ranks candidate sampling days by estimated mutual information. The lower-left panel decomposes the day-88 information by species. The lower-right panel shows how different measurement choices reshape the prior into posterior densities by likelihood-weighted reweighting.
+
+This BED result should be labelled as a surrogate pilot, not as the final thesis-level BED result. It is useful for reproducing the structure of the PhD analysis in Python, but a final public BED claim should use more ODE training samples and demonstrate stable surrogate validation, mutual-information convergence, and candidate-ranking robustness.
+
+## 10. Dexa Perturbation Validation
 
 <img width="1712" height="1141" alt="image" src="https://github.com/user-attachments/assets/e964e3ed-8828-407e-98e1-44b24157bfa9" />
 
@@ -324,25 +345,6 @@ sensitivity, SVD, and profile-likelihood workflows use the 98-parameter
 non-Dexa core model. The Dexa PK/PD constants are fixed in the optional Dexa
 runner and are not included in the SVD/nullspace parameter list.
 
-## 10. Surrogate BED thesis-style summary
-
-![Surrogate BED thesis-style summary](Bayesian_Experimental_Design/surrogate_bed/run_outputs/figures/surrogate_bed_thesis_style_summary.png)
-
-![ODE versus surrogate speed](Bayesian_Experimental_Design/surrogate_bed/run_outputs/figures/surrogate_bed_ode_vs_surrogate_speed.png)
-
-The surrogate BED pilot uses the translated Python ODE model to generate a local Monte Carlo prior around the nominal parameter set, retains biologically admissible trajectories, trains an ExtraTrees surrogate on ODE output features, and evaluates candidate measurements using mutual information and posterior reweighting.
-
-In this pilot run, 389 biologically admissible samples remained from 500 ODE simulations. For the target parameter insulin_glucose_threshold, the highest all-species candidate was day 88, while the lowest all-species candidate was day 56. The top trajectory panel places these candidate days in the nominal follicle/P4 cycle. The middle panel ranks candidate sampling days by estimated mutual information. The lower-left panel decomposes the day-88 information by species. The lower-right panel shows how different measurement choices reshape the prior into posterior densities by likelihood-weighted reweighting.
-
-This BED result should be labelled as a surrogate pilot, not as the final thesis-level BED result. It is useful for reproducing the structure of the PhD analysis in Python, but a final public BED claim should use more ODE training samples and demonstrate stable surrogate validation, mutual-information convergence, and candidate-ranking robustness.
-
-The scientific workflow is therefore sequential:
-
-1. Sensitivity identifies parameters that affect outputs.
-2. SVD identifies informed and weak directions.
-3. Compensation analysis explains which parameters are confounded.
-4. Profile likelihood confirms nonlinear identifiability behaviour.
-5. BED proposes future measurements to reduce uncertainty.
 
 ---
 
@@ -412,7 +414,8 @@ This figure is useful for the computational engineering story because it explain
 
 ## Appendix G. Top PRCC Parameter-Biomarker Associations
 
-![Top PRCC associations](../results_final/figures/global_sensitivity_heatmap_top_parameters.png)
+<img width="2420" height="1408" alt="image" src="https://github.com/user-attachments/assets/a15bb399-b975-4a02-ad5a-9f3db2d18df5" />
+
 
 ## Appendix H. All-Biomarker Uncertainty Propagation
 
