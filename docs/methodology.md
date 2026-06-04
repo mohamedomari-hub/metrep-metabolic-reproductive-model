@@ -1,652 +1,815 @@
-# Model Diagnostics, Identifiability, Uncertainty, and Bayesian Experimental Design
+# Sensitivity And Identifiability
 
-This document describes the analysis workflow used to evaluate the BovSys/MetRep metabolic-reproductive model.
+The analysis workflow uses three complementary stages.
 
-The workflow follows a modelling narrative:
+These stages are the bridge between the model and Bayesian experimental design:
+they reveal which outputs and parameters are well informed, and which parameter
+directions need better experimental measurements.
 
-text Mechanistic ODE model → local sensitivity → SVD identifiability screen → profile likelihood confirmation → global sensitivity / admissible-bank association → uncertainty propagation → Bayesian experimental design 
+## 1. Sensitivity Analysis
 
-The goal is not to use one single diagnostic, but to combine complementary methods:
+Sensitivity analysis asks which parameters have the largest local effect on
+selected model outputs. It is useful as a first screen, but sensitivity alone is
+not identifiability: a parameter can strongly affect outputs and still be hard
+to estimate if another parameter can compensate for it.
 
-- Sensitivity analysis asks which parameters influence outputs.
-- Identifiability analysis asks whether influential parameters can be estimated uniquely.
-- Global sensitivity screening asks which parameters drive variability across simulation ensembles.
-- Uncertainty propagation asks how parameter uncertainty affects model predictions.
-- Bayesian experimental design asks which measurements would reduce uncertainty most.
+How it is calculated:
 
-Different perturbation scales are used because each method answers a different question.
+1. Run the model once with the reference parameter values.
+2. Change one parameter by a small amount while keeping the others fixed.
+3. Run the model again.
+4. Compare how much selected outputs change.
+5. Repeat this for each parameter.
 
----
+The result is a local sensitivity score. In simple terms:
 
-# 1. Local Sensitivity Analysis
+$$
+S =
+\frac{\Delta O}{\Delta \theta}
+$$
 
-Local sensitivity analysis asks:
+where $O$ is a model output summary and $\theta$ is a parameter.
 
-> Which parameters have the largest local effect on selected model outputs near the nominal parameter set?
+More specifically, the public sensitivity table uses one-at-a-time relative
+sensitivity of output AUC values. For parameter $\theta_j$ and output $y_k(t)$:
 
-It is a useful first screen, but sensitivity alone is not identifiability. A parameter can strongly affect outputs and still be difficult to estimate if another parameter can compensate for it.
+$$
+\mathrm{AUC}_k(\theta) =
+\int y_k(t; \theta)\,dt
+$$
 
-## Calculation
-
-The workflow is:
-
-1. Run the model with the reference parameter vector.
-2. Perturb one parameter while keeping all others fixed.
-3. Re-run the model.
-4. Compare the output change.
-5. Repeat for each parameter.
-
-The public sensitivity table uses one-at-a-time relative sensitivity of output AUC values.
-
-For output (y_k(t;\theta)), the area under the curve is
-
-[
-\mathrm{AUC}k(\theta)
-=
-\int{t_0}^{t_f} y_k(t;\theta),dt .
-]
-
-For parameter (\theta_j), the forward relative sensitivity is
-
-[
-S_{kj}
-=
+$$
+S_{kj} =
 \frac{
-\left[
-\mathrm{AUC}k(\theta^{(j,+)})
--
-\mathrm{AUC}k(\theta)
-\right]
-/
-\mathrm{AUC}k(\theta)
-}{h},
-]
+  \left(\mathrm{AUC}_k(\theta_j(1+h)) - \mathrm{AUC}_k(\theta_j)\right)
+  / \mathrm{AUC}_k(\theta_j)
+}{h}
+$$
 
-where
+where $h = 0.01$ in the sensitivity script by default. This is a forward local
+perturbation. Each parameter is changed separately while all other parameters
+are kept at their reference values.
 
-[
-\theta^{(j,+)}j = (1+h)\theta_j,
-\qquad
-\theta^{(j,+)}\ell = \theta\ell
-\quad \text{for } \ell \neq j.
-]
-
-In the current script,
-
-[
-h = 0.01,
-]
-
-corresponding to a (+1%) one-at-a-time perturbation.
-
-This is a local diagnostic because it evaluates model response around the reference parameter set, not across the full biologically plausible parameter space.
+The analysis is called local because it tests changes around the reference
+parameter set, not across all possible biological values. Outputs can be
+summarized by trajectory metrics such as AUC, peak value, mean value, or final
+value. Parameters with high scores are influential for the selected outputs.
 
 Main script:
 
-bash python MetRep_Python/scripts/04_run_sensitivity.py 
+```bash
+python MetRep_Python/scripts/04_run_sensitivity.py
+```
 
----
+## 2. SVD Identifiability Screen
 
-# 2. SVD Identifiability Screen
+The SVD workflow builds a local sensitivity matrix using selected measurable
+outputs and analyzes its singular values and nullspace directions.
 
-The SVD identifiability screen asks:
+How it is calculated:
 
-> Which parameter directions are locally informed by the selected measurable outputs, and which directions are weak or compensatory?
+1. Build a sensitivity matrix.
+2. In that matrix, rows represent output features and columns represent
+   parameters.
+3. Each entry says how much one output feature changes when one parameter is
+   perturbed.
+4. Apply singular value decomposition, or SVD, to the matrix.
 
-This is a fast local-linear diagnostic used before profile likelihood analysis.
+SVD separates the sensitivity matrix into informed directions and weak
+directions.
 
-## Sensitivity Matrix
+The implemented SVD screen uses a stacked trajectory sensitivity matrix. For a
+parameter $\theta_j$, selected output vector $Y(\theta)$, and step size $h_j$, the
+central-difference column is:
 
-The workflow builds a stacked trajectory sensitivity matrix. Rows correspond to output features across time, and columns correspond to parameters.
-
-For parameter (\theta_j), selected output vector (Y(\theta)), and step size (h_j), the central-difference column is
-
-[
-S{:,j}
-=
+$$
+S_{:,j} =
 \frac{
-Y(\theta^{(j,+)})
--
-Y(\theta^{(j,-)})
-}{2h_j},
-]
+  Y(\theta_j + h_j) - Y(\theta_j - h_j)
+}{2h_j}
+$$
 
-where
-
-[
-\theta^{(j,+)}j = \theta_j + h_j,
-\qquad
-\theta^{(j,-)}j = \theta_j - h_j.
-]
-
-The finite-difference step is
-
-[
+$$
 h_j =
-\max
-\left(
-h{\min},
-h{\mathrm{rel}}|\theta_j|
-\right).
-]
+\max\left(
+  \mathrm{absoluteStepMin},
+  \mathrm{relativeStep}\cdot |\theta_j|
+\right)
+$$
 
-In the default identifiability script,
+$Y(\theta)$ is made by stacking all selected output trajectories over the
+simulation time points. In the default identifiability script,
+`relative_step = 1e-3`. If a nominal parameter value is zero, the code uses
+`relative_step * 1.0` before applying the absolute minimum step.
 
-[
-h{\mathrm{rel}} = 10^{-3}.
-]
+The matrix is then decomposed as:
 
-If a nominal parameter value is zero, the implementation uses a nonzero fallback before applying the absolute minimum step.
-
-The vector (Y(\theta)) is formed by stacking all selected output trajectories over sampled time points.
-
-## Singular Value Decomposition
-
-The sensitivity matrix is decomposed as
-
-[
-S = U\Sigma V^\top,
-]
+$$
+S = U \Sigma V^T
+$$
 
 where:
 
-- (S) is the stacked sensitivity matrix,
-- (U) contains output-space directions,
-- (\Sigma) contains singular values,
-- (V^\top) contains parameter-space directions.
+- `S` is the stacked sensitivity matrix.
+- `U` contains output-space directions.
+- $\Sigma$ contains the singular values.
+- $V^T$ contains parameter-space directions.
 
-The numerical rank is defined using
+The numerical rank is calculated using a relative threshold:
 
-[
-\tau = c\sigma_1,
-]
+$$
+\tau = c\,\sigma_1
+$$
 
-[
+$$
 r =
 \left|
-\left{
-\sigma_i : \sigma_i > \tau
-\right}
-\right|,
-]
+  \{\sigma_i : \sigma_i > \tau\}
+\right|
+$$
 
-where (\sigma_1) is the largest singular value and (c) is the relative tolerance. The default tolerance is
+where $\tau$ is the rank threshold, $c$ is the tolerance value, and
+$\sigma_1$ is the largest singular value. The default tolerance value is
+`1e-8`.
 
-[
-c = 10^{-8}.
-]
+Large singular values indicate parameter combinations that strongly affect the
+selected outputs. Very small singular values indicate weak or near-null
+directions: parameter combinations that can change while producing little
+observable change.
 
-Large singular values indicate parameter combinations that strongly affect the selected outputs. Small singular values indicate weakly informed or nearly compensatory parameter directions.
+The nullspace part is used to detect compensation. If two parameters appear
+together in weak directions, they may compensate for each other. That means the
+model can produce similar outputs by changing both parameters together, making
+their separate values difficult to estimate from the current measurements.
 
-## Nullspace Participation
+The nullspace basis is taken from the rows of $V^T$ after the numerical rank:
 
-The approximate nullspace is taken from the right singular vectors after the numerical rank:
+$$
+\mathcal{N} =
+\{v_i^T : i > r\}
+$$
 
-[
-\mathcal{N}
-=
-\left{
-v_i^\top : i > r
-\right}.
-]
+where $r$ is the numerical rank and $\mathcal{N}$ is the nullspace basis.
 
-The nullspace participation score for parameter (j) is
+Nullspace participation for each parameter is summarized as the Euclidean norm
+of that parameter's coefficients across all nullspace directions:
 
-[
-n_j
-=
-\left(
-\sum_q \mathcal{N}{qj}^2
-\right)^{1/2}.
-]
+$$
+n_j =
+\sqrt{
+  \sum_q \mathcal{N}_{qj}^2
+}
+$$
 
-A high (n_j) means that parameter (j) participates strongly in weak or compensatory directions.
+where $n_j$ is the nullspace participation score for parameter $j$.
 
-## Local SVD Ranking Score
+The local SVD ranking score used in the curated result is `rel2_colnorm`:
 
-The curated result uses a relative column-norm score:
+$$
+s_j =
+\left\|
+  \frac{\theta_j}{\max(|Y|,\epsilon)}
+  S_{:,j}
+\right\|_2
+$$
 
-[
-s_j
-=
-\left|
-\frac{\theta_j}{\max(|Y|,\epsilon)}
-S{:,j}
-\right|2 .
-]
+where $s_j$ is the local SVD ranking score.
 
-This scales the sensitivity column by parameter magnitude and output scale, making parameters more comparable.
+This makes the ranking relative to both parameter size and output scale.
 
-## Parameter Classification
+The key SVD outputs are:
 
-The SVD screen combines normalized sensitivity and normalized nullspace participation.
+- `identifiability_singular_values.png`: shows the singular-value spectrum. A
+  wide drop toward small singular values indicates directions in parameter space
+  that are weakly informed by the selected outputs.
+- `identifiability_nullspace_participation.png`: ranks parameters by how much
+  they participate in weak/nullspace directions. High participation means a
+  parameter is involved in compensatory combinations.
+- `identifiability_compensation_edges.png`: shows strong parameter-pair
+  compensation relationships inferred from the nullspace.
+- `identifiability_compensation_network.png`: shows the same compensation
+  structure as a node-link graph, where nodes are parameters and edges indicate
+  compensatory relationships.
+- `identifiability_compensation_network_all_parameters.png`: shows all
+  analyzed parameters in one zoned network. Strongly compensating parameters
+  are central, while parameters with weak or no compensation are still visible
+  in peripheral estimate/fix zones.
+- `identifiability_decision_map.png`: combines normalized sensitivity and
+  nullspace involvement to support the `Estimate`, `Fix (anchor)`, and
+  `Fix (irrelevant)` classification.
 
-[
-\bar{s}j
-=
-\frac{s_j-\min(s)}{\max(s)-\min(s)},
-]
+For a plot-by-plot explanation of the technical terms and conclusions, see
+`docs/plot_interpretation_guide.md`.
 
-[
-\bar{n}j
-=
-\frac{n_j-\min(n)}{\max(n)-\min(n)}.
-]
+It classifies parameters into:
 
-Quantile thresholds are then defined as
+- `Estimate`: sensitive and sufficiently separable
+- `Fix (anchor)`: high-impact but compensatory; useful as an anchor
+- `Fix (irrelevant)`: low-impact in the selected output setting
 
-[
-s{\mathrm{hi}} = Q{0.75}(\bar{s}),
-\qquad
-s{\mathrm{lo}} = Q_{0.25}(\bar{s}),
-]
+The three-class decision uses normalized sensitivity and normalized nullspace
+scores. The high and low thresholds are quantiles of the analyzed parameter
+set:
 
-[
-n_{\mathrm{hi}} = Q_{0.75}(\bar{n}),
-\qquad
-n_{\mathrm{lo}} = Q_{0.25}(\bar{n}).
-]
+$$
+\bar{s}_j =
+\frac{s_j-\min(s)}{\max(s)-\min(s)}
+$$
+
+$$
+\bar{n}_j =
+\frac{n_j-\min(n)}{\max(n)-\min(n)}
+$$
+
+$$
+\begin{aligned}
+s_{hi} &= Q_{0.75}(\bar{s}) \\
+s_{lo} &= Q_{0.25}(\bar{s}) \\
+n_{hi} &= Q_{0.75}(\bar{n}) \\
+n_{lo} &= Q_{0.25}(\bar{n})
+\end{aligned}
+$$
 
 The practical rule is:
 
-text if sensitivity <= sens_lo:     Fix (irrelevant) elif nullspace >= null_hi:     Fix (anchor) else:     Estimate 
+```text
+if sensitivity <= sens_lo:
+    Fix (irrelevant)
+elif nullspace >= null_hi:
+    Fix (anchor)
+else:
+    Estimate
+```
 
-The three classes are:
+This is why a parameter can be sensitive but still fixed as an anchor: it can
+affect outputs, but it also sits strongly in compensatory directions.
 
-| Class | Interpretation | Practical decision |
-|---|---|---|
-| Estimate | Sensitive and sufficiently separable | Include in calibration/profile likelihood |
-| Fix (anchor) | Influential but compensatory | Fix, constrain, or anchor using prior knowledge |
-| Fix (irrelevant) | Weakly influential in this output setting | Keep fixed unless a different experiment makes it informative |
+The class should guide the next modeling step:
 
-A parameter can therefore be sensitive but still classified as an anchor if it lies strongly in compensatory directions.
+| Class | Practical decision |
+|---|---|
+| `Estimate` | Include in calibration/profile likelihood, because the selected outputs carry enough local information. |
+| `Fix (anchor)` | Do not freely estimate together with its compensation partners; fix it, constrain it with prior knowledge, or use it as an anchor. |
+| `Fix (irrelevant)` | Keep fixed for this dataset and scenario; it may need a different experiment or output panel to become informative. |
 
-## Key Outputs
+The compensation network is especially useful for the `Fix (anchor)` group. A
+node is a parameter, and an edge means two parameters appear together in a weak
+direction. Strong edges indicate that the model can preserve similar outputs by
+moving those parameters together. This is why compensation is not a failure of
+the model; it is a design signal that the current measurements cannot separate
+those mechanisms cleanly.
 
-The SVD workflow produces:
+This is a fast local-linear diagnostic and is used to select parameters for
+profile likelihood.
 
-- identifiability_singular_values.png
-- identifiability_nullspace_participation.png
-- identifiability_compensation_edges.png
-- identifiability_compensation_network.png
-- identifiability_decision_map.png
+## 3. Profile Likelihood Confirmation
 
-These plots diagnose rank, weak parameter directions, and compensation structure.
+Profile likelihood fixes one selected parameter over a grid of values and
+allows nuisance parameters to compensate. The resulting loss curve provides a
+nonlinear practical-identifiability confirmation.
 
-For plot-level interpretation, see:
+How it is calculated:
 
-text docs/plot_interpretation_guide.md 
+1. Choose one parameter to test.
+2. Fix that parameter at a sequence of values, for example 80%, 90%, 100%,
+   110%, and 120% of its reference value.
+3. At each fixed value, allow selected nuisance parameters to adjust.
+4. Re-run the model and calculate the loss, meaning the mismatch between the
+   model outputs and the synthetic/reference outputs.
+5. Plot the increase in loss relative to the best fit.
 
----
+The key question is:
 
-# 3. Profile Likelihood Confirmation
+```text
+Does the fit get clearly worse when this parameter moves away from its best value?
+```
 
-Profile likelihood asks:
+If yes, the parameter is practically identifiable. If the curve stays flat, the
+parameter is not well identified because other parameters can compensate. If the
+curve rises only at one end, the result is boundary-limited and the tested range
+may not be wide enough.
 
-> Does the model fit become worse when a parameter is moved away from its best value, after allowing other parameters to compensate?
+The calculation uses synthetic observations from the reference simulation. For
+observation $z_i$, model prediction $m_i(\theta)$, and assumed standard
+deviation $\sigma_i$, the fit loss is:
 
-This is a nonlinear practical-identifiability diagnostic.
-
-## Calculation
-
-For observation (z_i), model prediction (m_i(\theta)), and standard deviation (\sigma_i), the weighted least-squares loss is
-
-[
-L(\theta)
-=
+$$
+L(\theta) =
 \frac{1}{2}
 \sum_i
 \left(
-\frac{m_i(\theta)-z_i}{\sigma_i}
-\right)^2 .
-]
+  \frac{m_i(\theta)-z_i}{\sigma_i}
+\right)^2
+$$
 
-For profiled parameter (\theta_j), the parameter is fixed at a grid value
+The profile for parameter $\theta_j$ fixes $\theta_j$ on a grid of multipliers
+and re-optimizes selected nuisance parameters $\eta$:
 
-[
-\theta_j = a\theta_{j,\mathrm{ref}},
-]
-
-and selected nuisance parameters (\eta) are re-optimized:
-
-[
-P_j(a)
-=
+$$
+P_j(a) =
 \min_{\eta}
 \left[
-L(\theta_j=a\theta_{j,\mathrm{ref}},\eta)
-+
-A(\theta)
-\right],
-]
+  L(\theta_j = a\theta_{j,\mathrm{ref}}, \eta)
+  + A(\theta)
+\right]
+$$
 
-where (A(\theta)) is the biological admissibility penalty.
+where $A(\theta)$ is the biological admissibility penalty.
 
-The plotted profile is the increase from the best profile value:
+The plotted profile is the increase from the best value:
 
-[
+$$
 \Delta L_j(a)
-=
-P_j(a)
--
-\min_a P_j(a).
-]
+= P_j(a) - \min_a P_j(a)
+$$
 
-The profile cutoff used in the plots is
+The horizontal cutoff used in the plots is:
 
-[
-c_{\mathrm{profile}} = 1.92,
-]
+$$
+c_{\mathrm{profile}} = 1.92
+$$
 
-an approximate 95% cutoff for one profiled parameter. Some plots use (\log(1+\Delta L)) for readability, but classification is based on the untransformed loss.
+This is an approximate 95% cutoff for one profiled parameter. The script can
+plot `log1p(delta_loss)` to keep very large curves readable, but the
+classification is based on the untransformed loss values.
 
-## Profile Classes
+The class definitions used by the code are:
 
-| Profile class | Meaning |
-|---|---|
-| practically identifiable | The profile has a finite optimum and sufficient curvature |
-| boundary-limited | The best point lies at the tested range boundary |
-| weakly identifiable | The profile has curvature, but a wide acceptable range |
-| flat/non-identifiable | Moving the parameter does not worsen the fit enough |
+| Profile class | Code rule | Meaning |
+|---|---|---|
+| `flat/non-identifiable` | The total delta-loss span is below the cutoff. This rule is checked first. | Moving the parameter across the tested grid does not worsen the fit enough; nuisance parameters and model structure can compensate. |
+| `boundary-limited` | The best profile point is at the lowest or highest tested multiplier, after excluding flat profiles. | The optimum may lie outside the tested grid, so the parameter is not safely bounded by this profile range. |
+| `weakly identifiable` | At least 80% of the profile grid remains below the cutoff, after excluding flat and boundary-limited profiles. | The profile has some curvature, but the acceptable range is broad. |
+| `practically identifiable` | None of the above warning conditions apply. | The tested data/output setup gives a finite optimum for this parameter. |
 
-Current curated profile-likelihood summary:
+Current profile-likelihood summary:
 
 - 60 profiled parameters
 - 51 practically identifiable
 - 6 boundary-limited
-- 1 weakly identifiable: insulin_igf_threshold
-- 2 flat/non-identifiable: feed_direct_blood_fraction, lh_basal_release
+- 1 weakly identifiable: `insulin_igf_threshold`
+- 2 flat/non-identifiable: `feed_direct_blood_fraction`, `lh_basal_release`
 
-The interpretation is that many selected parameters are practically estimable under the synthetic-output setup, while some metabolic/endocrine feedback parameters require caution, anchoring, or better experimental design.
+This means that, among the 60 parameters selected from the SVD `Estimate`
+group, 51 had a clear enough profile minimum under the synthetic-data setup.
+The other 9 were not failures of the model, but they need caution:
+boundary-limited parameters need a wider or better-supported profile range,
+the weakly identifiable parameter needs more information, and the flat
+parameters should not be interpreted as precisely estimable from this output
+panel.
 
----
+The recommended interpretation is that the selected measurable outputs identify
+a substantial subset of parameters, while some metabolic/endocrine feedback
+parameters require fixing, anchoring, or more informative experimental design.
 
-# 4. Global Sensitivity and Admissible-Bank Association
+# Bayesian Experimental Design
 
-Global sensitivity screening asks:
+The Bayesian experimental design analysis evaluates which sampling times and
+measured species provide the most information about model quantities or
+parameters.
 
-> Across a simulation ensemble, which parameters are associated with biomarker variability?
+In this project, BED is used as the experimental-design answer to the
+identifiability analysis. Sensitivity and identifiability diagnose which model
+directions are weakly informed by existing outputs; BED asks how future
+measurements should be chosen to improve those directions.
 
-This complements local sensitivity. Local sensitivity measures nominal one-at-a-time response, while global screening summarizes variation across many parameter combinations.
+| Identifiability finding | BED interpretation |
+|---|---|
+| Sensitive and separable parameters | Current output panel is informative enough; these can be estimated and checked by profile likelihood. |
+| High-impact compensation pairs | Future designs should target sampling times/species that separate the paired mechanisms. |
+| Strong nullspace participation | Add measurements expected to reduce uncertainty in those weak directions. |
+| `Fix (irrelevant)` parameters | Do not spend estimation effort on them unless BED suggests a different output/time window can make them informative. |
+| Weak, flat, or boundary-limited profiles | Use BED to propose more informative observations before claiming precise estimates. |
 
-The observable biomarker panel is:
+The classical analysis says where the model is under-informed; BED says how a
+future experiment could improve that information.
 
-text FSH, PGF, P4, E2, INH, IGF1, Insulin, Glucose 
+## Methodology
 
-For biomarker (b), each simulation is summarized by an AUC endpoint:
+BED asks which future measurements would be most useful before collecting the
+data. In this project, the useful measurement is the one expected to give the
+most information about a target model quantity or parameter.
 
-[
-\mathrm{AUC}b(\theta)
-=
-\int{t_0}^{t_f}
-y_b(t;\theta),dt.
-]
+The calculation follows this logic:
 
-In practice, AUC is evaluated numerically over stored simulation time points using the trapezoidal rule.
+1. Sample many possible parameter sets around the reference model.
+2. Run the model for each sampled parameter set.
+3. Store simulated outputs for candidate sampling days and measured species.
+4. Treat those simulated outputs as possible future observations.
+5. Estimate how much each candidate observation reduces uncertainty about the
+   target.
+6. Rank sampling days and species by expected information gain.
 
-## Full-Prior Variance-Based Screening
+The main information measure is mutual information.
 
-The unfiltered parameter bank contains ordinary independent Monte Carlo samples. Since the bank was not generated using a Saltelli/Sobol design, this analysis is not reported as strict Sobol sensitivity.
+In simple terms, mutual information measures how much knowing a candidate
+measurement tells us about the target.
 
-A screening statistic is computed as
+Mathematically, for a target quantity $W$ and a candidate future measurement
+$Z$, mutual information is:
 
-[
-S^{\mathrm{screen}}{i,b}
-=
-\frac{
-\operatorname{Var}
-\left(
-\operatorname{E}
-[
-\mathrm{AUC}b
-\mid
-\theta_i
-]
-\right)
-}{
-\operatorname{Var}
-(
-\mathrm{AUC}b
-)
-}.
-]
-
-The conditional expectation is approximated using parameter bins.
-
-This statistic gives a variance-based importance screen for the full prior ensemble, but it should not be interpreted as a formal Sobol index.
-
-## Spearman Association
-
-For the biologically admissible bank, Spearman rank correlation is used to measure monotonic association between a parameter and biomarker AUC:
-
-[
-\rho^{S}{i,b}
-=
-\operatorname{Corr}
-\left(
-\operatorname{rank}(\theta_i),
-\operatorname{rank}(\mathrm{AUC}b)
-\right).
-]
-
-Positive values mean that larger parameter values tend to be associated with larger biomarker AUC. Negative values mean the opposite.
-
-## PRCC Association
-
-Partial rank correlation coefficient (PRCC) measures the association between parameter (\theta_i) and biomarker AUC after accounting for the ranked effects of other parameters.
-
-Let (r{\theta_i}) be the residual from regressing (\operatorname{rank}(\theta_i)) on the ranks of the other parameters. Let (r_b) be the residual from regressing (\operatorname{rank}(\mathrm{AUC}b)) on the ranks of the other parameters. Then
-
-[
-\mathrm{PRCC}{i,b}
-=
-\operatorname{Corr}
-\left(
-r{\theta_i},
-r_b
-\right).
-]
-
-PRCC and Spearman values indicate direction and strength of association, not formal variance decomposition.
-
----
-
-# 5. Uncertainty Propagation
-
-Uncertainty propagation asks:
-
-> How much do predicted biomarker trajectories vary across admissible parameter sets?
-
-The current uncertainty analysis uses the biologically admissible ( \pm 0.5% ) Monte Carlo bank. Therefore, it should be interpreted as local robustness around the calibrated model, not full population-level uncertainty.
-
-For biomarker (b), time (t), and admissible parameter samples (\theta_1,\ldots,\theta_N), the ensemble median is
-
-[
-\tilde{y}b(t)
-=
-Q{0.50}
-\left(
-\left{
-y_b(t;\theta_i)
-\right}{i=1}^{N}
-\right).
-]
-
-The lower and upper uncertainty bands are
-
-[
-y^{\mathrm{low}}b(t)
-=
-Q{0.05}
-\left(
-\left{
-y_b(t;\theta_i)
-\right}{i=1}^{N}
-\right),
-]
-
-[
-y^{\mathrm{high}}b(t)
-=
-Q{0.95}
-\left(
-\left{
-y_b(t;\theta_i)
-\right}{i=1}^{N}
-\right).
-]
-
-Figures show:
-
-- shaded region: 5th–95th percentile interval,
-- solid line: ensemble median,
-- dashed line: nominal trajectory.
-
-Because the ensemble is narrow and biologically filtered, narrow uncertainty bands are expected and should be interpreted as evidence of local robustness near the calibrated parameter regime.
-
----
-
-# 6. Bayesian Experimental Design
-
-Bayesian experimental design asks:
-
-> Which candidate measurements are expected to reduce uncertainty the most?
-
-It naturally follows sensitivity and identifiability analysis. Classical diagnostics identify weakly informed or compensatory model directions; BED proposes future measurements that could improve them.
-
-## Mutual Information
-
-For target quantity (W) and candidate future measurement (Z), mutual information is
-
-[
-I(W;Z)
-=
+$$
+I(W; Z) =
 \iint
 p(w,z)
 \log
+\left(
+  \frac{p(w,z)}{p(w)p(z)}
+\right)
+\,dw\,dz
+$$
+
+Equivalently:
+
+$$
+I(W; Z) = H(W) - H(W \mid Z)
+$$
+
+where $H(W)$ is the uncertainty before observing $Z$, and $H(W \mid Z)$ is the
+remaining uncertainty after observing $Z$. Therefore, a high mutual information
+value means the candidate measurement is expected to reduce uncertainty about
+the target.
+
+In the MATLAB BED script, this is estimated by Monte Carlo simulation and
+density estimation:
+
+```text
+1. sample parameter sets
+2. simulate model outputs for each parameter set
+3. form simulated pairs (target W, candidate measurement Z)
+4. estimate p(w), p(z), and p(w, z)
+5. evaluate log( p(w, z) / (p(w) p(z)) )
+6. average/rank this information over candidate designs
+```
+
+The script uses MATLAB density functions such as `ksdensity`, `mvksdensity`,
+`normpdf`, and `mvnpdf`. Because this is the original PhD MATLAB workflow, the
+repository presents it as methodological provenance and selected results, not
+as a fully lightweight Python reproduction.
+
+Here:
+
+- the target can be ovulation time or a parameter;
+- the measurement can be one species, several species, or a species pair at a
+  candidate sampling day;
+- higher mutual information means the design is more informative.
+
+## Posterior Calculation By Importance Reweighting
+
+The posterior plots were calculated by importance reweighting of prior samples.
+In other words, the workflow first generated parameter samples from the prior,
+then used a synthetic observation and a Gaussian observation model to assign a
+likelihood weight to each sample.
+
+The steps are:
+
+1. Draw Monte Carlo parameter samples from the prior:
+
+$$
+\theta_i \sim p(\theta),
+\qquad i=1,\ldots,N
+$$
+
+In this workflow, the prior was uniform over the selected uncertain
+parameters.
+
+2. For each parameter sample, run the model and store the predicted measured
+species at the candidate sampling day:
+
+$$
+y_i = y(\theta_i)
+$$
+
+Here, $y_i$ can contain measured species such as FSH, PGF, P4, E2, INH, IGF1,
+insulin, and glucose.
+
+3. Generate one fixed synthetic observation vector from the nominal/reference
+simulation. If $\mu$ is the nominal model prediction at that sampling day, then:
+
+$$
+z_{\mathrm{obs}}
+= \mu + \sigma \odot \varepsilon,
+\qquad
+\varepsilon \sim \mathcal{N}(0,I)
+$$
+
+The observation standard deviation is defined from a relative noise level:
+
+$$
+\sigma_j =
+\mathrm{relSigma}\,|\mu_j|
+$$
+
+with clipping away from zero so that nearly zero outputs do not give a zero
+measurement error.
+
+The same fixed observation vector can be used when comparing a full ODE model
+and a surrogate calculation, so both workflows are evaluated against the same
+synthetic data.
+
+4. Compute the Gaussian likelihood for each prior sample:
+
+$$
+p(z_{\mathrm{obs}} \mid \theta_i)
+\propto
+\exp
 \left[
-\frac{p(w,z)}{p(w)p(z)}
+  -\frac{1}{2}
+  \sum_j
+  \left(
+    \frac{z_{\mathrm{obs},j}-y_{i,j}}{\sigma_j}
+  \right)^2
 \right]
-,dw,dz.
-]
+$$
 
-Equivalently,
+Equivalently, the log-likelihood is:
 
-[
-I(W;Z)
-=
-H(W)
--
-H(W\mid Z).
-]
+$$
+\ell_i =
+-\frac{1}{2}
+\sum_j
+\left(
+  \frac{z_{\mathrm{obs},j}-y_{i,j}}{\sigma_j}
+\right)^2
+$$
 
-A high value means that observing (Z) is expected to strongly reduce uncertainty about (W).
+5. Stabilize and normalize the likelihood weights:
 
-The Monte Carlo estimate is
+$$
+\tilde{w}_i =
+\exp(\ell_i - \max_k \ell_k)
+$$
 
-[
+$$
+w_i =
+\frac{\tilde{w}_i}{\sum_k \tilde{w}_k}
+$$
+
+The normalized weights satisfy:
+
+$$
+\sum_i w_i = 1
+$$
+
+These weights measure how compatible each parameter sample is with the
+synthetic observation under the assumed Gaussian measurement noise.
+
+6. Estimate the posterior for the parameter of interest, for example
+$\theta_p$, using a weighted distribution of the prior samples:
+
+$$
+p(\theta_p \mid z_{\mathrm{obs}})
+\approx
+\sum_i
+w_i
+K_h(\theta_p - \theta_{i,p})
+$$
+
+where $K_h$ is a kernel density estimate with bandwidth $h$. Practically, this
+means that samples with higher likelihood contribute more strongly to the
+posterior density.
+
+This is Bayes' rule written in an importance-sampling form:
+
+$$
+p(\theta \mid z_{\mathrm{obs}})
+\propto
+p(\theta)\,p(z_{\mathrm{obs}}\mid\theta)
+$$
+
+Because the samples were already drawn from the prior, the likelihood becomes
+the weight that reshapes the prior sample cloud into the posterior.
+
+The posterior is narrower than the prior when the synthetic measurement is
+informative for the target parameter. If the posterior looks similar to the
+prior, that measurement does not strongly reduce uncertainty.
+
+## Mutual Information Calculation
+
+The mutual-information calculation uses the same Monte Carlo idea, but instead
+of conditioning on one fixed observed vector, it evaluates how informative a
+candidate measurement is on average.
+
+For a candidate sampling day and species set:
+
+1. Use the prior parameter samples to generate paired samples:
+
+$$
+(W_i, Z_i)
+$$
+
+where $W_i$ is the target quantity for sample $i$ and $Z_i$ is the simulated
+candidate measurement for the same sample.
+
+2. Estimate the marginal and joint densities from the Monte Carlo cloud:
+
+$$
+p(w), \qquad p(z), \qquad p(w,z)
+$$
+
+In the MATLAB workflow these densities are estimated with KDE/Gaussian density
+tools such as `ksdensity`, `mvksdensity`, `normpdf`, and `mvnpdf`.
+
+3. Compute the information contribution:
+
+$$
+\log
+\left(
+  \frac{p(W_i,Z_i)}
+       {p(W_i)p(Z_i)}
+\right)
+$$
+
+4. Average this quantity across the Monte Carlo samples:
+
+$$
 \widehat{I}(W;Z)
 =
 \frac{1}{N}
 \sum_{i=1}^{N}
 \log
-\left[
-\frac{
-p(W_i,Z_i)
-}{
-p(W_i)p(Z_i)
-}
-\right].
-]
-
-The MATLAB BED workflow estimates the required densities using KDE/Gaussian density tools such as ksdensity, mvksdensity, normpdf, and mvnpdf.
-
-## Posterior Updating
-
-For a hypothetical observation (z^\ast), Bayes' rule gives
-
-[
-p(w\mid z^\ast)
-=
-\frac{
-p(z^\ast\mid w)p(w)
-}{
-p(z^\ast)
-}.
-]
-
-In the Monte Carlo implementation, samples drawn from the prior are reweighted by their likelihood under the synthetic observation.
-
-For sample (\theta_i), model prediction (y_i), observation (z_{\mathrm{obs}}), and observation standard deviation (\sigma),
-
-[
-\ell_i
-=
--\frac{1}{2}
-\sum_j
 \left(
-\frac{z_{\mathrm{obs},j}-y_{i,j}}{\sigma_j}
-\right)^2.
-]
+  \frac{p(W_i,Z_i)}
+       {p(W_i)p(Z_i)}
+\right)
+$$
 
-Stabilized weights are
+A candidate sampling day/species combination receives a high mutual information
+score when the simulated measurement $Z$ is strongly informative about the
+target $W$. This is why mutual information is used to rank candidate designs
+before collecting new data.
 
-[
-\tilde{w}i
-=
-\exp
-\left(
-\ell_i - \max_k \ell_k
-\right),
-]
+## Posterior Interpretation
 
-[
-w_i
-=
+The posterior is based on Bayes' rule:
+
+$$
+p(w \mid z^*) =
 \frac{
-\tilde{w}i
-}{
-\sum_k \tilde{w}k
-}.
-]
+  p(z^* \mid w)p(w)
+}{p(z^*)}
+$$
 
-The posterior for parameter (\theta_p) is approximated by a weighted kernel density estimate:
+where $z^*$ is a hypothetical or selected observation. In practical terms, the
+BED result asks whether observing $z^*$ would make the distribution of $W$
+narrower or more concentrated than the prior distribution.
 
-[
-p(\theta_p\mid z{\mathrm{obs}})
-\approx
-\sum{i=1}^{N}
-w_i
-K_h(\theta_p-\theta{i,p}),
-]
+This is why BED naturally follows identifiability analysis:
 
-where (K_h) is a kernel with bandwidth (h).
-
-The posterior narrows when the candidate measurement is informative for the target parameter.
+```text
+identifiability finds weak or compensatory directions
+BED asks which new measurements would reduce those weaknesses
+```
 
 ## Current Repository Status
 
-The original PhD BED implementation is retained in MATLAB for methodological provenance. The public repository contains a cleaner v3 baseline BED port using the published MetRep equations with Dexa PK/PD switched off.
+The original PhD BED implementation is retained in MATLAB for provenance and methodological traceability. For public presentation, the repository uses the cleaner v3 baseline BED port:
 
-Relevant files:
+- `analyses/bayesian_experimental_design/matlab_original/BED_1M_ALL.m`
+- `analyses/bayesian_experimental_design/matlab_original/BovSys_run_v3_baseline.m`
 
-text analyses/bayesian_experimental_design/matlab_original/BED_1M_ALL.m analyses/bayesian_experimental_design/matlab_original/BovSys_run_v3_baseline.m 
+This version uses the published v3 MetRep equations with Dexa PK/PD switched off, so it should be interpreted as BED for the baseline metabolic-reproductive model, not as a Dexa simulation.
 
-The BED workflow should be interpreted as baseline metabolic-reproductive BED, not a Dexa perturbation simulation.
+The MATLAB BED workflow is not presented as the lightweight reproducibility path because it combines historical analysis variants, uses MATLAB parallel/toolbox functions, contains hardcoded legacy paths, and does not define a clean public random-seed/output convention.
 
----
+For reproducibility, the Python surrogate BED workflow is now used as the cleaner public pipeline. It is intended to reproduce the main BED logic from precomputed ODE simulation tables rather than port the original MATLAB file line by line. The full BED result remains reported in the PhD thesis; public BED figures should be interpreted as pilot reproductions unless surrogate validation, mutual-information convergence, and biological admissibility checks are documented.
 
-# 7. Cross-Method Perturbation Scales
+# Surrogate BED Workflow
 
-Different perturbation scales are intentional.
+The preferred approach is to keep the ODE model as the reference model and use
+a surrogate only as an accelerator. The implemented script and detailed
+mathematical documentation are in:
 
-| Analysis | Perturbation / ensemble | Purpose |
-|---|---|---|
-| Local sensitivity | (+1%) one-at-a-time | Local nominal influence |
-| SVD identifiability | small central finite difference | Local separability / weak directions |
-| Profile likelihood | wider profiling range | Practical nonlinear estimability |
-| Global association | Monte Carlo banks | Ensemble-level parameter-output associations |
-| Uncertainty propagation | admissible ( \pm 0.5% ) bank | Local robustness around calibrated model |
-| BED | prior-based Monte Carlo ensembles | Expected information gain |
+`analyses/bayesian_experimental_design/surrogate_bed/`
 
-The methods are complementary and should not be interpreted as identical sensitivity measures.
+The surrogate workflow should include:
+
+- held-out ODE validation for the surrogate predictions;
+- mutual-information convergence checks across increasing Monte Carlo sample
+  sizes;
+- biological admissibility filtering before posterior or mutual-information
+  summaries are reported;
+- repeated-seed or bootstrap uncertainty for candidate ranking stability.
+
+The recommended first surrogate is a PCA-compressed multi-output emulator with
+a tree ensemble regressor. This is more suitable than reporting a simple RF
+comparison alone because it treats the multi-species output vector as a
+correlated object and requires explicit validation before BED conclusions are
+claimed.
+
+
+
+
+# Global Sensitivity And Admissible-Bank Association
+
+Global sensitivity screening asks which parameters are associated with
+variability across a simulation ensemble rather than only near the nominal
+parameter vector. The analysis uses the observable biomarker panel:
+
+`FSH, PGF, P4, E2, INH, IGF1, Insulin, Glucose`.
+
+For biomarker $b$, each simulation is summarized using the stored-trajectory
+AUC endpoint:
+
+$$
+AUC_b(\theta_j)
+=
+\int_{t_0}^{t_f} y_b(t;\theta_j)\,dt,
+$$
+
+which is evaluated numerically using the trapezoidal rule over the stored
+sampling days.
+
+## Full-Prior Variance-Based Screening
+
+The unfiltered parameter bank was generated using ordinary independent uniform
+Monte Carlo sampling. For each parameter, the screening statistic estimates:
+
+$$
+S^{screen}_{i,b}
+=
+\frac{\operatorname{Var}\left[
+\operatorname{E}(AUC_b\mid\theta_i)
+\right]}
+{\operatorname{Var}(AUC_b)}.
+$$
+
+The conditional mean is approximated with equal-count parameter bins. This is
+a variance-based importance screen, but it is **not a strict Sobol index**:
+the simulation bank does not use a Saltelli/Sobol sampling design and therefore
+does not support formal Sobol variance decomposition.
+
+## Admissible-Bank Spearman Screening
+
+Spearman rank correlation measures the direction and strength of monotonic
+association between a parameter and biomarker AUC:
+
+$$
+\rho^{S}_{i,b}
+=
+\operatorname{Corr}
+\left[
+\operatorname{rank}(\theta_i),
+\operatorname{rank}(AUC_b)
+\right].
+$$
+
+Positive values indicate that larger parameter values tend to accompany
+larger biomarker AUC; negative values indicate the opposite relationship.
+
+## Admissible-Bank PRCC Screening
+
+Partial rank correlation coefficients evaluate the association between
+$\theta_i$ and $AUC_b$ after linearly removing the ranked effects of the
+other sampled parameters. If $r_{\theta_i}$ and $r_{AUC_b}$ are residuals
+from those rank-based regressions, then:
+
+$$
+PRCC_{i,b}
+=
+\operatorname{Corr}(r_{\theta_i}, r_{AUC_b}).
+$$
+
+PRCC values summarize parameter-biomarker AUC associations across biologically
+admissible simulations. They indicate direction and strength of monotonic
+association, not formal Sobol variance decomposition.
+
+# Uncertainty Propagation
+
+Uncertainty propagation summarizes trajectory variability across the
+biologically admissible `+/-0.5%` Monte Carlo bank. For each biomarker $b$
+and stored time $t$, the reported ensemble summaries are:
+
+$$
+\tilde y_b(t)=Q_{0.50}\{y_b(t;\theta_j)\},
+$$
+
+$$
+y^{low}_b(t)=Q_{0.05}\{y_b(t;\theta_j)\},
+\qquad
+y^{high}_b(t)=Q_{0.95}\{y_b(t;\theta_j)\}.
+$$
+
+The figures show the 5th-95th percentile interval as a shaded band, the
+ensemble median $\tilde y_b(t)$ as a solid blue line, and the nominal
+trajectory $y_b(t;\theta_0)$ as a dashed black line.
+
+Because the ensemble uses a narrow parameter range and biological
+admissibility filtering, these bands should be interpreted as local robustness
+around the calibrated model rather than full population variability.
+
+# Cross-Method Perturbation Scales
+
+Different perturbation scales are used because each analysis answers a
+different question: local sensitivity uses `+1%` one-at-a-time perturbations,
+SVD identifiability uses small finite differences, profile likelihood explores
+a wider parameter range, global sensitivity uses simulation-bank associations,
+uncertainty propagation uses biologically admissible ensembles, and BED uses
+prior-based information calculations.
+
+# Appendix
+
+<img width="1169" height="928" alt="image" src="https://github.com/user-attachments/assets/450ae339-29bf-403c-b5f2-a5865417f19d" />
+
+
+<img width="1326" height="995" alt="image" src="https://github.com/user-attachments/assets/29d46477-d6ec-4d05-baef-975e812575e0" />
