@@ -238,7 +238,8 @@ In practical terms, parameters classified as weakly identifiable, boundary-limit
 
 ## 9. Dexa Perturbation Validation
 
-![Dexa non-lactating standard response](../results_final/figures/dexa_non_lactating_standard_3d_summary.png)
+<img width="342" height="220" alt="image" src="https://github.com/user-attachments/assets/99259b8b-f4b2-4e2a-ae6a-aba17fb599f7" />
+
 
 The Python Dexa runner implements the optional 25-state extension from the
 MATLAB v3 Dexa model. The first 22 states remain the MetRep core model; the
