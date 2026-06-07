@@ -82,9 +82,9 @@ simulation ensemble.
 
 ![Compensation network](../results_final/figures/identifiability_compensation_network_core.png)
 
-![Nullspace participation](../results_final/figures/identifiability_nullspace_participation.png)
 
-![Decision map](../results_final/figures/identifiability_decision_map.png)
+<img width="3545" height="2005" alt="image" src="https://github.com/user-attachments/assets/1de6b7f8-37ee-4602-a24b-39816415d127" />
+
 
 The SVD screen evaluates which local parameter directions are expressed in the
 measured output space. Rapidly decaying singular values indicate weakly
