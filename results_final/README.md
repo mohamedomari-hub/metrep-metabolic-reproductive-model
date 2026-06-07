@@ -30,6 +30,20 @@ This folder contains selected result files for public reporting.
   observable biomarker
 - `uncertainty_summary.csv`: compact uncertainty-band summary
 - `trajectory_quantiles.csv`: median and 5th-95th percentile trajectories
+- `bed_guided_update_traceability.csv`: parameter-specific guided BED audit
+  linking profile class, PRCC/Spearman biomarkers, uncertainty-selected day,
+  MI proxy, posterior narrowing, and effective sample size
+- `bed_guided_parameter_biomarker_mi.csv`: selected parameter-biomarker
+  association / MI proxy table for guided BED
+- `bed_guided_parameter_biomarker_day_mi.csv`: candidate-day MI proxy table
+  for selected parameter-specific biomarkers
+- `bed_guided_selected_observation_scenarios.csv`: compact final
+  biomarker/day observation scenario for each representative parameter
+- `abc_smc_parameter_specific_guided_scenarios.csv`: archive ABC scenarios
+  aligned to the compact BED-guided biomarker/day choices
+- `bayesian_method_comparison.csv`: comparison of posterior reweighting,
+  reduced ODE-archive posterior updates, and archive-based sequential ABC
+  filtering
 
 ## Figures
 
@@ -80,10 +94,33 @@ This folder contains selected result files for public reporting.
 - `uncertainty_readme_summary.png`: compact uncertainty propagation summary
 - `uncertainty_reproductive.png`: reproductive-biomarker uncertainty bands
 - `uncertainty_metabolic.png`: metabolic-biomarker uncertainty bands
+- `bed_targeted_cumulative_biomarker_posteriors_3x3.png`: global cumulative
+  best-1 through best-9 biomarker posterior update from the broad `+/-5%`
+  prior
+- `bed_guided_parameter_biomarker_mi_bars.png`: parameter-specific selected
+  biomarker association / MI proxy bars for the 3x3 representative parameters
+- `bed_guided_day_mi_curves.png`: parameter-specific candidate-day MI proxy
+  points over uncertainty-selected windows
+- `bed_targeted_gsa_uncertainty_guided_posteriors_3x3.png`: compact
+  parameter-specific GSA + uncertainty + MI guided posterior updates from the
+  broad `+/-5%` prior
+- `abc_smc_parameter_specific_gsa_uncertainty_guided_posteriors_3x3.png`:
+  archive-based sequential ABC filtering using the same compact
+  parameter-specific biomarker/day scenarios as guided BED
+- `bayesian_method_comparison_summary.png`: summary comparison of posterior
+  narrowing across the final Bayesian update methods
 
 ## Scope
 
-BED scripts and generated outputs remain under
-`analyses/bayesian_experimental_design/` while the expanded prior-based result
-is being regenerated. This folder contains selected stable GitHub-facing
-outputs only.
+Full BED, Bayesian inference, uncertainty, and enrichment outputs remain under
+their analysis folders. This folder contains selected stable GitHub-facing
+outputs only. The 12,721-row enriched admissible bank is used for global
+sensitivity, uncertainty propagation, MI/BED stability, and admissible ensemble
+coverage. It is not the plotted prior. Prior-to-posterior figures use the broad
+`+/-5%` prior bank.
+
+The global cumulative biomarker update and the parameter-specific guided update
+are distinct. The cumulative plot uses one common best-1 through best-9
+biomarker acquisition order. The guided plot gives each representative
+parameter its own compact biomarker/day scenario selected from profile class,
+GSA links, uncertainty windows, and MI/BED ranking.

@@ -11,9 +11,16 @@ The analyses are complementary:
 - Local sensitivity identifies parameters with strong nominal influence on output trajectories.
 - SVD identifiability and compensation analysis reveal which parameter directions are informed or weakly informed by the selected outputs.
 - Profile likelihood confirms nonlinear practical identifiability for selected parameters.
-- Global sensitivity / PRCC-Spearman screening evaluates parameter-biomarker associations across simulation-bank ensembles.
-- Uncertainty propagation quantifies local robustness under biologically admissible parameter variability.
-- Bayesian experimental design identifies informative future measurements for reducing parameter uncertainty.
+- Global sensitivity / PRCC-Spearman screening evaluates the full 98 x 9
+  parameter-biomarker association structure across ODE-confirmed admissible
+  ensembles.
+- Uncertainty propagation quantifies robustness under biologically admissible
+  parameter variability.
+- Bayesian experimental design identifies informative future measurements for
+  reducing parameter uncertainty, and the Bayesian inference layer compares
+  posterior reweighting, reduced ODE-archive posterior updates, and
+  archive-based sequential ABC filtering on the fixed representative 3x3
+  profile-likelihood parameter set.
 
 For technical definitions and formulas, see:
 
@@ -33,7 +40,8 @@ For technical definitions and formulas, see:
 | Estimate/fix decision | Which parameters should be estimated, anchored, or fixed? | results_final/figures/identifiability_decision_map.png, results_final/tables/structid_50d_measurable_holistic_table.csv | results_final/figures/identifiability_class_counts.png |
 | Compensation | Which parameters compensate each other? | results_final/figures/identifiability_compensation_network_core.png, results_final/figures/identifiability_parameter_scenario_map.png | results_final/figures/identifiability_compensation_edges.png, results_final/figures/identifiability_nullspace_participation_all_parameters.png, results_final/figures/identifiability_sensitivity_vs_nullspace_all_parameters.png, results_final/figures/identifiability_sensitivity_ranked_by_class.png |
 | Profile likelihood | Do selected parameters remain identifiable under nonlinear profiling? | results_final/figures/profile_likelihood_representative_3x3.png, results_final/tables/profile_50d_balanced_relaxed_summary.csv | results_final/figures/profile_50d_balanced_synthetic_outputs.png |
-| Surrogate BED pilot | Which sampling day/species panel is informative, and how much faster is the surrogate? | Bayesian_Experimental_Design/surrogate_bed/run_outputs/figures/surrogate_bed_thesis_style_summary.png | Bayesian_Experimental_Design/surrogate_bed/run_outputs/figures/surrogate_bed_ode_vs_surrogate_speed.png |
+| Bayesian experimental design | Which sampling days and biomarker panels reduce uncertainty? | results_final/figures/bed_targeted_cumulative_biomarker_posteriors_3x3.png, results_final/figures/bed_targeted_high_vs_low_information_day_3x3.png | results_final/tables/bed_targeted_posterior_narrowing_cumulative.csv |
+| Bayesian inference | Do posterior reweighting, reduced ODE-archive updates, and archive-based ABC filtering give consistent selected-parameter learning? | results_final/figures/bayesian_method_comparison_summary.png | results_final/tables/bayesian_method_comparison.csv |
 | Dexa perturbation | Does the optional Dexa extension produce a pharmacological perturbation response? | results_final/figures/dexa_non_lactating_standard_3d_summary.png, results_final/tables/dexa_non_lactating_standard_3d_response_summary.csv | MATLAB reference: MetRep_Matlab/BovSys_run_dexa_v3.m |
 
 ---
@@ -255,12 +263,18 @@ Global sensitivity was added as a complementary diagnostic after the local sensi
 
 The analysis used the same observable biomarker panel as BED:
 
-`FSH, PGF, P4, E2, INH, IGF1, Insulin, Glucose`
+`FSH, PGF, P4, E2, INH, IGF1, Insulin, Glucose, Glucagon`
+
+Glucagon was excluded from the biological admissibility filter but retained as
+an observable biomarker for downstream uncertainty propagation, global
+sensitivity, and Bayesian experimental design.
 
 Two related but distinct analyses were performed:
 
-1. A full-prior variance-based screening using the 10,000 unfiltered Monte Carlo simulations.
-2. A PRCC/Spearman association analysis using the 7,874 biologically admissible simulations.
+1. A full-prior variance-based screening using unfiltered Monte Carlo
+   simulations.
+2. A PRCC/Spearman association analysis using the enriched 12,721-row
+   ODE-confirmed admissible ensemble.
 
 Because the unfiltered bank was generated using ordinary Monte Carlo sampling rather than a Saltelli/Sobol design, these results are not labelled as strict Sobol indices.
 
@@ -273,10 +287,28 @@ Because the unfiltered bank was generated using ordinary Monte Carlo sampling ra
 
 <img width="3300" height="2772" alt="image" src="https://github.com/user-attachments/assets/6a940007-6be5-4f3c-b380-23a48816b927" />
 
+<<<<<<< HEAD
  
 ## 8. Bayesian Experimental Design
+=======
+![Uncertainty reproductive biomarkers](../results_final/figures/uncertainty_reproductive.png)
+>>>>>>> e64bdb0 (Finalize MetRep Bayesian workflow and portfolio results)
 
-This figure illustrates how Bayesian experimental design (BED) acts as the constructive follow-up to identifiability analysis. Sensitivity, SVD identifiability, nullspace participation, compensation analysis, and profile likelihood identify which parameter directions remain weakly informed or confounded under the current measurement panel. BED then addresses the next scientific question:
+The uncertainty figures now include all observable biomarkers available in the
+bank, including Glucagon. The shaded region is the 5th-95th percentile band,
+the solid blue curve is the ensemble median, and the dashed black curve is the
+nominal trajectory. The biological interpretation depends on the bank used:
+narrow `+/-0.5%` banks represent local robustness, while the expanded
+ODE-confirmed `+/-5%` admissible bank is used for final downstream sensitivity,
+uncertainty, and BED analyses.
+ 
+## 10. Bayesian Experimental Design And Bayesian Inference
+
+Bayesian experimental design (BED) acts as the constructive follow-up to
+identifiability analysis. Sensitivity, SVD identifiability, nullspace
+participation, compensation analysis, and profile likelihood identify which
+parameter directions remain weakly informed or confounded under the current
+measurement panel. BED then addresses the next scientific question:
 
 If some parameters are weakly identifiable, which measurements would make them more identifiable? 
 
@@ -290,12 +322,34 @@ The lower-left panel further decomposes information content across measured spec
 
 The lower-right panel demonstrates the practical consequence of informative measurements through prior-to-posterior updating. The blue curve represents the prior uncertainty for the target parameter. Posterior distributions obtained from low-information observations (for example, measurements near day 68) remain broad and similar to the prior, indicating limited uncertainty reduction. In contrast, measurements collected at highly informative sampling times (for example, day 83) and using informative species produce substantially narrower posterior distributions. This corresponds to stronger parameter constraint and improved practical identifiability.
 
+The final GitHub-facing BED layer uses the broad `+/-5%` prior bank for
+posterior density plots, and the 12,721-row SMC+ML enriched ODE-confirmed
+admissible bank for MI ranking stability. It includes:
+
+- independent observation scenarios;
+- global cumulative best-1 through best-9 biomarker updates;
+- highest- versus lowest-information day comparisons;
+- parameter-specific GSA + uncertainty + MI guided posterior updates for the
+  fixed 3x3 representative parameter set.
+
+The Bayesian inference layer uses the same representative parameters. The
+reduced posterior workflow uses likelihood weights on real broad-prior ODE
+archive rows and does not use surrogate predictions. Archive-based sequential
+ABC filtering uses real broad-prior ODE archive rows and does not treat
+surrogate-predicted candidates as truth.
+
 The scientific take-home message is therefore:
 
 Identifiability analysis diagnoses where the model is weakly informed. Bayesian experimental design proposes how future experiments can repair those weaknesses. 
 
-In practical terms, parameters classified as weakly identifiable, boundary-limited, or strongly involved in nullspace compensation should not automatically be discarded. Instead, BED provides a principled strategy to improve their estimability by selecting more informative sampling times and measured species. This turns identifiability analysis from a purely diagnostic exercise into a constructive experimental-design workflow.
+In practical terms, parameters classified as weakly identifiable,
+boundary-limited, or strongly involved in nullspace compensation should not
+automatically be discarded. Instead, BED provides a principled strategy to
+improve their estimability by selecting more informative sampling times and
+measured species. This turns identifiability analysis from a purely diagnostic
+exercise into a constructive experimental-design workflow.
 
+<<<<<<< HEAD
 # Surrogate BED 
 
 ![Surrogate BED thesis-style summary](Bayesian_Experimental_Design/surrogate_bed/run_outputs/figures/surrogate_bed_thesis_style_summary.png)
@@ -320,6 +374,9 @@ This BED result should be labelled as a surrogate pilot, not as the final thesis
 ## 10. Dexa Perturbation Validation
 
 <img width="1712" height="1141" alt="image" src="https://github.com/user-attachments/assets/e964e3ed-8828-407e-98e1-44b24157bfa9" />
+=======
+## 11. Dexa Perturbation Validation
+>>>>>>> e64bdb0 (Finalize MetRep Bayesian workflow and portfolio results)
 
 
 The Python Dexa runner implements the optional 25-state extension from the
@@ -345,6 +402,46 @@ sensitivity, SVD, and profile-likelihood workflows use the 98-parameter
 non-Dexa core model. The Dexa PK/PD constants are fixed in the optional Dexa
 runner and are not included in the SVD/nullspace parameter list.
 
+<<<<<<< HEAD
+=======
+## 12. Final BED/Bayesian Portfolio Outputs
+
+The final BED/Bayesian layer is generated from saved ODE banks rather than from
+new simulations during plotting. The broad `+/-5%` ODE bank defines the plotted
+prior; the SMC+ML enriched 12,721-row ODE-confirmed admissible bank is used for
+stable MI ranking and candidate robustness. The workflow saves independent
+observation posteriors, global cumulative best-1 through best-9 biomarker posterior
+updates, high- versus low-information day comparisons, parameter-specific
+GSA + uncertainty + MI guided posterior updates, reduced ODE-archive posterior
+updates, archive-based sequential ABC filtering posteriors, and a method-comparison table.
+
+The scientific workflow is therefore sequential:
+
+1. Sensitivity identifies parameters that affect outputs.
+2. SVD identifies informed and weak directions.
+3. Compensation analysis explains which parameters are confounded.
+4. Profile likelihood confirms nonlinear identifiability behaviour.
+5. Global sensitivity and uncertainty identify useful biomarkers/time windows.
+6. MI/BED ranks which biomarker/day observations are most informative.
+7. Broad-prior posterior updates test whether those observations actually
+   narrow parameter uncertainty.
+
+The final Bayesian/BED results should be interpreted as follows:
+
+- The 12,721-row ODE-confirmed admissible ensemble stabilizes global
+  sensitivity and MI/BED ranking.
+- Global sensitivity identifies parameter-biomarker links inside biologically
+  plausible model behavior.
+- Uncertainty propagation identifies candidate informative time regions.
+- MI/BED ranks which biomarker/day observations are most informative.
+- Posterior updates from the broad `+/-5%` prior confirm the identifiability
+  diagnosis: practically identifiable parameters show strong posterior
+  narrowing, boundary-limited parameters show partial or one-sided learning,
+  and weak/flat parameters remain broad even under guided observations.
+- BED does not magically rescue structurally or practically weak parameters;
+  it reveals where new measurements are informative and where model or
+  measurement redesign may be needed.
+>>>>>>> e64bdb0 (Finalize MetRep Bayesian workflow and portfolio results)
 
 ---
 
@@ -401,15 +498,21 @@ This plot shows all analyzed parameters ranked by sensitivity and colored by rec
 
 ---
 
-## Appendix F. ODE versus Surrogate Speed
+## Appendix F. Legacy ODE Versus Emulator Speed Check
 
-ODE versus surrogate speed
+Legacy ODE versus emulator speed check
 
-![ODE versus surrogate speed](Bayesian_Experimental_Design/surrogate_bed/run_outputs/figures/surrogate_bed_ode_vs_surrogate_speed.png)
+![ODE versus surrogate speed](../Project_Documentation/Bayesian_Experimental_Design/surrogate_bed/run_outputs/figures/surrogate_bed_ode_vs_surrogate_speed.png)
 
-The speed comparison was measured locally using 12 ODE simulations and 200 repeated surrogate predictions on the same number of parameter samples. The ODE solver required 0.327 seconds per sample, while surrogate prediction required 0.00152 seconds per sample, giving an observed prediction speedup of about 215x.
+This legacy speed comparison was measured locally using 12 ODE simulations and
+200 repeated emulator predictions on the same number of parameter samples. The
+ODE solver required 0.327 seconds per sample, while emulator prediction
+required 0.00152 seconds per sample, giving an observed prediction speedup of
+about 215x.
 
-This figure is useful for the computational engineering story because it explains why a surrogate is useful for BED candidate exploration. For a biological modelling paper, it can remain in the appendix. For a GitHub or AI-engineering portfolio, it can also be shown in the main text.
+This figure is only an engineering note explaining why ML screening is useful
+for candidate exploration. It is not part of the final posterior workflow, and
+surrogate-predicted candidates are never treated as scientific truth.
 
 
 ## Appendix G. Top PRCC Parameter-Biomarker Associations
@@ -419,4 +522,4 @@ This figure is useful for the computational engineering story because it explain
 
 ## Appendix H. All-Biomarker Uncertainty Propagation
 
-![Uncertainty all biomarkers](../results_final/figures/uncertainty_all_biomarkers.png)
+![Uncertainty all biomarkers](../analyses/uncertainty/outputs_smc_enriched_5pct_glucagon/uncertainty_all_biomarkers.png)

@@ -259,6 +259,241 @@ moving those parameters together. This is why compensation is not a failure of
 the model; it is a design signal that the current measurements cannot separate
 those mechanisms cleanly.
 
+## 3. Biological Admissibility Filtering
+
+The broad prior banks are filtered with the historical biological admissibility
+rule before being used as admissible ensembles. The rule is applied to ODE
+outputs, not to surrogate predictions. A simulation is admissible only when the
+outputs are finite and the aggregate trajectory metrics satisfy:
+
+```math
+\mathrm{penalty} \le 0
+```
+
+```math
+\min(\mathrm{correlation}) \ge 0.75
+```
+
+```math
+\max(\mathrm{average\ difference}) \le 0.30
+```
+
+```math
+\max(\mathrm{norm\ difference}) \le 0.30
+```
+
+The admissibility panel follows the historical filter:
+
+```text
+FSH, PGF, P4, E2, INH, IGF1, Insulin, Glucose
+```
+
+Glucagon was excluded from the biological admissibility filter but retained as
+an observable biomarker for downstream uncertainty propagation, global
+sensitivity, and Bayesian experimental design.
+
+## 4. Global Sensitivity And Admissible-Bank Association
+
+Global sensitivity is evaluated on saved simulation banks. The final
+admissible-bank analysis uses the ODE-confirmed enriched ensemble and all
+observable biomarkers:
+
+```text
+FSH, PGF, P4, E2, INH, IGF1, Insulin, Glucose, Glucagon
+```
+
+For parameter `theta_j` and biomarker `y_k(t)`, the scalar endpoint is the
+trajectory AUC:
+
+```math
+\mathrm{AUC}_{ik}
+=
+\int_{t_0}^{t_1} y_k(t; \theta_i)\,dt
+```
+
+The Spearman association is the Pearson correlation of ranks:
+
+```math
+\rho^{S}_{jk}
+=
+\mathrm{corr}
+\left(
+  \mathrm{rank}(\theta_{\cdot j}),
+  \mathrm{rank}(\mathrm{AUC}_{\cdot k})
+\right)
+```
+
+PRCC is computed by removing the linear rank effects of all other parameters
+from both the target parameter and the biomarker endpoint, then correlating the
+residuals:
+
+```math
+\mathrm{PRCC}_{jk}
+=
+\mathrm{corr}
+\left(
+  r_{\theta_j},
+  r_{\mathrm{AUC}_k}
+\right)
+```
+
+where `r_theta_j` and `r_AUC_k` are residuals after regression on the ranks of
+the remaining parameters.
+
+The final output is a `98 x 9` parameter-biomarker matrix for both PRCC and
+Spearman. These values summarize monotonic parameter-biomarker AUC association
+across ODE-confirmed admissible simulations. They are not strict Sobol indices:
+the banks use ordinary Monte Carlo and SMC-enriched admissible sampling rather
+than a Saltelli/Sobol design.
+
+## 5. Uncertainty Propagation
+
+Uncertainty propagation summarizes the ODE-confirmed admissible ensemble at
+each time point and observable biomarker. For biomarker `y_k` at time `t`, the
+reported curves are:
+
+```math
+q_{0.05,k}(t)
+=
+Q_{0.05}\left(\{y_k(t;\theta_i)\}_{i=1}^{N}\right)
+```
+
+```math
+\tilde{y}_k(t)
+=
+Q_{0.50}\left(\{y_k(t;\theta_i)\}_{i=1}^{N}\right)
+```
+
+```math
+q_{0.95,k}(t)
+=
+Q_{0.95}\left(\{y_k(t;\theta_i)\}_{i=1}^{N}\right)
+```
+
+Figures show the 5th-95th percentile band, the ensemble median, and the nominal
+trajectory. Narrow admissible-bank uncertainty bands should be interpreted as
+local robustness around the calibrated regime, not as full population
+variability.
+
+## 6. Bayesian Experimental Design And Posterior Reweighting
+
+The thesis BED target is mutual information between uncertain parameters and
+future measurements. The primary global design quantity is:
+
+```math
+I(\Theta;Y)
+=
+\mathbb{E}
+\left[
+  \log
+  \frac{p(\Theta,Y)}
+       {p(\Theta)\,p(Y)}
+\right]
+```
+
+The Monte Carlo estimator used by the MATLAB thesis workflow is:
+
+```math
+\widehat{I}(\Theta;Y)
+=
+\frac{1}{N}
+\sum_{i=1}^{N}
+\log
+\left(
+  \frac{
+    \widehat{p}(\Theta_i,Y_i)
+  }{
+    \widehat{p}(\Theta_i)\,\widehat{p}(Y_i)
+  }
+\right)
+```
+
+Posterior updates use the broad `+/-5%` prior bank. For a selected synthetic
+observation `z*`, the normalized posterior for a representative parameter is:
+
+```math
+p(\theta_j \mid z^*)
+=
+\frac{
+  p(\theta_j,z^*)
+}{
+  \int p(\theta_j,z^*)\,d\theta_j
+}
+```
+
+The final portfolio reports four posterior-update strategies:
+
+1. independent observation scenarios;
+2. global cumulative biomarker acquisition from best 1 through best 9
+   biomarkers;
+3. highest- versus lowest-information day comparison;
+4. parameter-specific GSA + uncertainty + MI guided updates linking profile
+   likelihood class, global sensitivity biomarkers, uncertainty windows, and
+   BED day ranking.
+
+For the guided update, each representative parameter receives its own
+observation scenario. The workflow first ranks biomarkers for that parameter
+using PRCC/Spearman links, keeps the top 2-3 biomarkers, restricts candidate
+days to high-uncertainty windows, and then ranks those biomarker-day candidates
+with the BED MI proxy. The posterior uses only that parameter-specific
+biomarker/day set, not a common global biomarker order.
+
+The SMC+ML enriched 12,721-row admissible bank is used for stable BED ranking
+and MI robustness. It is not used as the plotted prior distribution.
+
+## 7. Bayesian Inference
+
+Reduced posterior inference and archive-based sequential ABC filtering are
+applied to the same fixed 3x3 profile-likelihood representative parameters
+used for BED. The reduced posterior workflow uses likelihood weights on saved
+broad-prior ODE archive rows and does not use surrogate predictions.
+Archive-based sequential ABC filtering performs likelihood-free thresholding
+over real ODE archive rows and therefore does not use surrogate-predicted
+candidates as posterior truth.
+
+The reduced archive-based posterior uses the Gaussian observation likelihood
+directly on precomputed ODE rows:
+
+```math
+\log p(y^{obs}\mid \theta_i)
+=
+-\frac{1}{2}
+\sum_k
+\left(
+  \frac{y^{obs}_k-y_{i,k}}{\sigma_k}
+\right)^2 .
+```
+
+The normalized archive weights are:
+
+```math
+w_i
+=
+\frac{p(y^{obs}\mid \theta_i)}
+{\sum_j p(y^{obs}\mid \theta_j)} .
+```
+
+This is a reduced archive posterior over simulated rows, not live ODE MCMC.
+No new ODE simulations are run.
+
+Archive-based sequential ABC filtering also uses only precomputed broad-prior
+ODE rows. At round `r`, a row is retained when:
+
+```math
+\rho(S(y_i),S(y^{obs})) \le \epsilon_r .
+```
+
+The tolerance `epsilon_r` is reduced across rounds using archive distance
+quantiles. This is archive-based sequential ABC filtering, not full live ABC:
+particles are not perturbed and ODEs are not rerun.
+
+Different perturbation scales are used because each analysis answers a
+different question: local sensitivity uses `+1%` one-at-a-time perturbations,
+SVD identifiability uses small finite differences, profile likelihood explores
+a wider parameter range, global sensitivity uses simulation-bank associations,
+uncertainty propagation uses biologically admissible ensembles, and BED uses
+prior-based information calculations.
+
 This is a fast local-linear diagnostic and is used to select parameters for
 profile likelihood.
 
@@ -443,9 +678,9 @@ density estimation:
 ```
 
 The script uses MATLAB density functions such as `ksdensity`, `mvksdensity`,
-`normpdf`, and `mvnpdf`. Because this is the original PhD MATLAB workflow, the
-repository presents it as methodological provenance and selected results, not
-as a fully lightweight Python reproduction.
+`normpdf`, and `mvnpdf`. The Python portfolio workflow keeps this density-ratio
+logic conceptually intact while running on saved ODE banks with explicit output
+tables, deterministic paths, and reproducible plotting scripts.
 
 Here:
 
@@ -504,8 +739,9 @@ with clipping away from zero so that nearly zero outputs do not give a zero
 measurement error.
 
 The same fixed observation vector can be used when comparing a full ODE model
-and a surrogate calculation, so both workflows are evaluated against the same
-synthetic data.
+and any optional emulator calculation, so engineering speed checks are
+evaluated against the same synthetic data. These speed checks are not used as
+posterior truth in the final workflow.
 
 4. Compute the Gaussian likelihood for each prior sample:
 
@@ -670,38 +906,53 @@ The original PhD BED implementation is retained in MATLAB for provenance and met
 
 This version uses the published v3 MetRep equations with Dexa PK/PD switched off, so it should be interpreted as BED for the baseline metabolic-reproductive model, not as a Dexa simulation.
 
-The MATLAB BED workflow is not presented as the lightweight reproducibility path because it combines historical analysis variants, uses MATLAB parallel/toolbox functions, contains hardcoded legacy paths, and does not define a clean public random-seed/output convention.
+The MATLAB BED workflow is retained as provenance because it combines
+historical analysis variants, uses MATLAB parallel/toolbox functions, contains
+hardcoded legacy paths, and does not define a clean public random-seed/output
+convention.
 
-For reproducibility, the Python surrogate BED workflow is now used as the cleaner public pipeline. It is intended to reproduce the main BED logic from precomputed ODE simulation tables rather than port the original MATLAB file line by line. The full BED result remains reported in the PhD thesis; public BED figures should be interpreted as pilot reproductions unless surrogate validation, mutual-information convergence, and biological admissibility checks are documented.
+For reproducibility, the Python BED workflow is the public portfolio pipeline.
+It uses precomputed ODE simulation tables, the broad `+/-5%` prior bank for
+posterior curves, and the enriched 12,721-row ODE-confirmed admissible bank for
+stable MI ranking and candidate robustness.
 
-# Surrogate BED Workflow
+# ODE-Bank BED Workflow
 
-The preferred approach is to keep the ODE model as the reference model and use
-a surrogate only as an accelerator. The implemented script and detailed
-mathematical documentation are in:
+The ODE model remains the reference model. SMC+ML enrichment and surrogate
+models are used only to improve admissible-bank coverage or speed candidate
+screening before ODE confirmation. The implemented scripts and detailed command
+documentation are in:
 
 `analyses/bayesian_experimental_design/surrogate_bed/`
 
-The surrogate workflow should include:
+The final workflow includes:
 
-- held-out ODE validation for the surrogate predictions;
+- broad `+/-5%` prior posterior reweighting;
+- enriched-bank full-vector MI ranking;
+- independent observation scenarios;
+- global cumulative best-1 through best-9 biomarker updates;
+- high- versus low-information day comparisons;
+- parameter-specific GSA + uncertainty + MI guided posterior updates;
 - mutual-information convergence checks across increasing Monte Carlo sample
   sizes;
-- biological admissibility filtering before posterior or mutual-information
-  summaries are reported;
-- repeated-seed or bootstrap uncertainty for candidate ranking stability.
+- biological admissibility filtering before admissible-bank summaries are
+  reported;
+- ranking stability comparison between the original and enriched admissible
+  banks.
 
-The recommended first surrogate is a PCA-compressed multi-output emulator with
-a tree ensemble regressor. This is more suitable than reporting a simple RF
-comparison alone because it treats the multi-species output vector as a
-correlated object and requires explicit validation before BED conclusions are
-claimed.
+The defensible Bayesian outputs are ODE-bank posterior reweighting, reduced
+ODE-archive posterior weighting, and archive-based sequential ABC filtering.
+Surrogate models are not used for the final posterior distributions.
 
 # Global Sensitivity And Admissible-Bank Association
 
 Global sensitivity screening asks which parameters are associated with variability across a simulation ensemble rather than only near the nominal parameter vector. The analysis uses the observable biomarker panel:
 
-`FSH, PGF, P4, E2, INH, IGF1, Insulin, Glucose`.
+`FSH, PGF, P4, E2, INH, IGF1, Insulin, Glucose, Glucagon`.
+
+Glucagon was excluded from the biological admissibility filter but retained as
+an observable biomarker for downstream uncertainty propagation, global
+sensitivity, and Bayesian experimental design.
 
 For biomarker `b` and parameter vector `theta`, each simulation is summarized using the stored-trajectory AUC endpoint:
 
@@ -772,9 +1023,9 @@ PRCC values summarize parameter-biomarker AUC associations across biologically a
 
 # Uncertainty Propagation
 
-Uncertainty propagation summarizes trajectory variability across the
-biologically admissible `+/-0.5%` Monte Carlo bank. For each biomarker $b$
-and stored time $t$, the reported ensemble summaries are:
+Uncertainty propagation summarizes trajectory variability across the selected
+biologically admissible ODE-confirmed ensemble. For each biomarker $b$ and
+stored time $t$, the reported ensemble summaries are:
 
 ```math
 \tilde y_b(t)=Q_{0.50}\{y_b(t;\theta_j)\},
@@ -790,9 +1041,9 @@ The figures show the 5th-95th percentile interval as a shaded band, the
 ensemble median $\tilde y_b(t)$ as a solid blue line, and the nominal
 trajectory $y_b(t;\theta_0)$ as a dashed black line.
 
-Because the ensemble uses a narrow parameter range and biological
-admissibility filtering, these bands should be interpreted as local robustness
-around the calibrated model rather than full population variability.
+Because admissibility filtering restricts the ensemble to biologically
+plausible trajectories, the bands should be interpreted as robustness within
+the retained admissible regime rather than full population variability.
 
 # Cross-Method Perturbation Scales
 

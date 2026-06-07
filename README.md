@@ -26,10 +26,16 @@ observable biomarkers:
 ```text
 Baseline ODE simulation
 -> Local sensitivity
+-> Biological admissibility filtering
+-> Global sensitivity on ODE-confirmed admissible ensemble
 -> Identifiability analysis
--> Global sensitivity / admissible-bank association
+-> Profile likelihood
 -> Uncertainty propagation
--> Bayesian experimental design
+-> Bayesian inference and Bayesian experimental design
+   -> posterior reweighting, PhD style
+   -> reduced ODE-archive posterior inference
+   -> archive-based sequential ABC filtering
+   -> SMC+ML admissible-bank enrichment for BED stability
 ```
 
 ## Key Results
@@ -67,27 +73,48 @@ while weak/non-identifiable mechanisms show limited or inconsistent signal.
 
 ![Representative global sensitivity](results_final/figures/global_sensitivity_representative_identifiability_parameters.png)
 
-PRCC and Spearman associations summarize parameter-biomarker AUC relationships
-across biologically admissible simulations. They indicate monotonic association,
-not strict Sobol variance decomposition. The full-prior bank uses ordinary
-Monte Carlo sampling, so its variance-based results are labeled screening
-rather than Sobol indices.
+PRCC and Spearman associations summarize the full 98 x 9
+parameter-biomarker AUC relationships across the enriched 12,721-row
+ODE-confirmed admissible ensemble. They indicate monotonic association, not
+strict Sobol variance decomposition. The full-prior bank uses ordinary Monte
+Carlo sampling, so its variance-based results are labeled screening rather than
+Sobol indices.
 
 ### Uncertainty Propagation
 
 ![Uncertainty propagation](results_final/figures/uncertainty_readme_summary.png)
 
-Uncertainty propagation uses the biologically admissible `+/-0.5%` simulation
-bank. Shading shows the 5th-95th percentile range, the solid blue line shows the
-ensemble median, and the dashed black line shows the nominal trajectory.
-Because the ensemble is narrow and filtered, these bands represent local
-robustness around the calibrated model rather than full population variability.
+Uncertainty propagation uses ODE-confirmed biologically admissible ensembles.
+Shading shows the 5th-95th percentile range, the solid blue line shows the
+ensemble median, and the dashed black line shows the nominal trajectory. Narrow
+admissible banks should be read as local robustness around the calibrated model;
+the expanded `+/-5%` enriched bank is used for the final downstream analyses.
 
 ### Bayesian Experimental Design
 
 BED scripts and outputs are available under
-`analyses/bayesian_experimental_design/`. Final curated BED figures will be
-added after the expanded prior-based analysis is regenerated.
+`analyses/bayesian_experimental_design/`. The final BED layer uses the broad
+`+/-5%` prior for posterior plots and the 12,721-row ODE-confirmed enriched
+bank for MI stability and ranking robustness. It includes independent
+observation scenarios, a global cumulative best-1 through best-9 biomarker
+update, high- versus low-information day comparisons, and parameter-specific
+GSA + uncertainty + MI guided posterior updates for the fixed 3x3
+representative parameter set.
+
+The final Bayesian/BED interpretation is consistent with the profile
+likelihood diagnosis: practically identifiable parameters show stronger
+posterior narrowing, boundary-limited parameters show partial or one-sided
+learning, and weak/flat parameters often remain broad even under guided
+observations. BED identifies informative measurements; it does not by itself
+rescue structurally weak parameter directions.
+
+### Bayesian Inference
+
+Reduced posterior and archive-based sequential ABC workflows are available under
+`analyses/bayesian_inference/`. The reduced posterior script uses likelihood
+weights on real broad-prior ODE archive rows and does not use surrogate
+predictions. Archive-based sequential ABC filtering uses real ODE archive rows
+and does not treat surrogate-predicted candidates as truth.
 
 ## Repository Structure
 
@@ -116,10 +143,15 @@ python MetRep_Python/scripts/02_run_baseline.py
 python MetRep_Python/scripts/04_run_sensitivity.py
 python MetRep_Python/scripts/05_run_identifiability.py
 python MetRep_Python/scripts/10_run_profile_likelihood.py
-python analyses/global_sensitivity/run_global_sensitivity.py
+python analyses/global_sensitivity/run_global_sensitivity_enriched_98x9.py
 python analyses/uncertainty/run_uncertainty_propagation.py
 python analyses/model_diagnostics/build_combined_parameter_summary.py
 ```
+
+Final Bayesian/BED commands are listed in:
+
+- `analyses/bayesian_experimental_design/surrogate_bed/README.md`
+- `analyses/bayesian_inference/README.md`
 
 See [docs/reproducibility.md](docs/reproducibility.md) for workflow details.
 
@@ -133,13 +165,6 @@ different questions:
 - Profile likelihood: wider parameter profiling range.
 - Global association and uncertainty: Monte Carlo simulation banks.
 - BED: prior-based information calculation.
-
-Different perturbation scales are used because each analysis answers a
-different question: local sensitivity uses `+1%` one-at-a-time perturbations,
-SVD identifiability uses small finite differences, profile likelihood explores
-a wider parameter range, global sensitivity uses simulation-bank associations,
-uncertainty propagation uses biologically admissible ensembles, and BED uses
-prior-based information calculations.
 
 ## Documentation
 
