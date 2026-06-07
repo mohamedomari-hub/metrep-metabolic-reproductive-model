@@ -48,13 +48,20 @@ admissible simulations. Only ODE-confirmed rows are treated as scientific
 truth. The admissible ensemble provides the basis for global sensitivity,
 uncertainty propagation, and MI/BED ranking stability.
 
+<img width="3520" height="1650" alt="image" src="https://github.com/user-attachments/assets/86fd9eaf-dced-48f7-86e1-6bda72f8be3e" />
+<img width="3520" height="1650" alt="image" src="https://github.com/user-attachments/assets/9b6f6ad7-e22f-4178-bea6-ec20f9b14c0c" />
+<img width="3520" height="1650" alt="image" src="https://github.com/user-attachments/assets/526e6f1d-12aa-410a-857d-b9b4c30b934b" />
+
+
 ## 3. Global Sensitivity Analysis
 
-![PRCC heatmap](../results_final/figures/global_sensitivity_98x9_prcc_heatmap.png)
 
-![Spearman heatmap](../results_final/figures/global_sensitivity_98x9_spearman_heatmap.png)
+<img width="2640" height="3763" alt="image" src="https://github.com/user-attachments/assets/c3531d43-e1a5-454e-98ca-83e103dc983f" />
+<img width="2640" height="3763" alt="image" src="https://github.com/user-attachments/assets/682e01e0-1ebd-4fee-921e-a5e976a2293a" />
+<img width="2420" height="1408" alt="image" src="https://github.com/user-attachments/assets/dd6c8f1e-992d-4ec7-b8e5-3450a103627c" />
+<img width="2420" height="1430" alt="image" src="https://github.com/user-attachments/assets/927e6a94-8bfa-4949-8fc8-e1c9440ad1f0" />
+<img width="2640" height="1560" alt="image" src="https://github.com/user-attachments/assets/0211ca59-edab-4bc7-acd2-55091a8191ca" />
 
-![Representative global sensitivity](../results_final/figures/global_sensitivity_representative_parameters_heatmap.png)
 
 Global sensitivity evaluates parameter-biomarker AUC associations across the
 ODE-confirmed admissible ensemble. PRCC and Spearman heatmaps show which
