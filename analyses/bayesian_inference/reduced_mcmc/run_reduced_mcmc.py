@@ -344,7 +344,7 @@ def main() -> None:
     pd.DataFrame([diagnostics | {"target_parameters": "|".join(targets), "observable_biomarkers": "|".join(observables)}]).to_csv(args.output_dir / "mcmc_diagnostics.csv", index=False)
 
     if main_samples is not None:
-        plot_prior_vs_posterior(targets, main_samples, lower, upper, args.figure_dir / "mcmc_prior_vs_posterior_3x3.png", "Reduced MCMC prior vs posterior", main_scenario_note)
+        plot_prior_vs_posterior(targets, main_samples, lower, upper, args.figure_dir / "mcmc_prior_vs_posterior_3x3.png", "Reduced ODE-archive posterior", main_scenario_note)
         plot_prior_vs_posterior(targets, main_samples, lower, upper, args.figure_dir / "mcmc_gsa_uncertainty_guided_posteriors_3x3.png", "Reduced ODE-archive posterior", main_scenario_note)
         corr = np.corrcoef(main_samples[targets].to_numpy(float), rowvar=False)
         fig, ax = plt.subplots(figsize=(8, 7), constrained_layout=True)
