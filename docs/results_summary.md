@@ -60,6 +60,13 @@ uncertainty propagation, and MI/BED ranking stability.
 
 ## 3. Global Sensitivity Analysis
 
+The global sensitivity heatmaps should be read as parameter-biomarker maps.
+Each cell summarizes how one model parameter is associated with one observable
+biomarker AUC across the 12,721-row ODE-confirmed admissible ensemble. PRCC
+and Spearman provide complementary monotonic association summaries: PRCC
+adjusts for the other sampled parameters, while Spearman shows the direct rank
+association. Strong links indicate biomarkers that carry interpretable
+information about a parameter within the biologically admissible model region.
 
 <img width="2640" height="3763" alt="image" src="https://github.com/user-attachments/assets/c3531d43-e1a5-454e-98ca-83e103dc983f" />
 <img width="2640" height="3763" alt="image" src="https://github.com/user-attachments/assets/682e01e0-1ebd-4fee-921e-a5e976a2293a" />
@@ -82,6 +89,13 @@ decompositions. They are monotonic screening signals inside the admissible
 simulation ensemble.
 
 ## 4. SVD Identifiability
+
+The SVD figures summarize whether the measured outputs can distinguish
+parameter directions. The singular-value spectrum separates well-informed
+directions from weak directions. The compensation network shows parameters
+that can trade off inside poorly informed directions. The decision map then
+translates these diagnostics into practical estimate, fix, or anchor
+candidates for downstream inference.
 
 ![Singular values](../results_final/figures/identifiability_singular_values.png)
 
@@ -164,6 +178,14 @@ Independent observation scenarios show how individual selected measurements
 reshape representative parameter priors. These plots separate direct
 single-scenario learning from cumulative acquisition effects.
 
+The scientific purpose is to test whether a single biologically plausible
+measurement can move the broad +/-5% prior in the direction expected from the
+profile-likelihood diagnosis. Practically identifiable parameters are expected
+to respond more strongly when the observation targets a linked biomarker.
+Boundary-limited parameters may move mainly toward one side of the prior.
+Weak/flat parameters may remain broad because the selected observation does
+not isolate that parameter from compensating mechanisms.
+
 ### Cumulative Biomarker Acquisition
 
 ![Cumulative biomarker posteriors](../results_final/figures/bed_targeted_cumulative_biomarker_posteriors_3x3.png)
@@ -173,6 +195,14 @@ using a global biomarker ranking. It shows how posterior narrowing changes as
 additional measurements are included. This is intentionally different from the
 parameter-specific guided update.
 
+This panel asks whether information accumulates as additional biomarkers are
+measured. The expected thesis-style behavior is progressive contraction for
+parameters whose profile likelihood already shows practical learnability.
+For boundary-limited parameters, added biomarkers may improve one side of the
+posterior more than the other. For weak/flat parameters, adding biomarkers can
+change the posterior shape without producing a sharply bounded distribution,
+which is consistent with limited identifiability.
+
 ### High Versus Low Information Day
 
 ![High versus low information day](../results_final/figures/bed_targeted_high_vs_low_information_day_3x3.png)
@@ -180,6 +210,13 @@ parameter-specific guided update.
 The high-versus-low day comparison tests whether BED-ranked sampling days
 produce stronger posterior narrowing than less informative days. The result
 connects the MI ranking to posterior behavior.
+
+This comparison links the time component of BED to posterior learning. A
+high-information day should generally produce stronger or more interpretable
+posterior movement than a low-information day for the same biomarker set. When
+the difference is small, it indicates that either the parameter is weakly
+learnable under that observation set or the selected biomarker is informative
+over a broader window rather than at one sharply optimal day.
 
 ### Guided Parameter-Specific Updates
 
@@ -210,6 +247,14 @@ parameters and PGF/FSH/INH/P4-related observations for reproductive endocrine
 parameters. These selections are not random; they reflect the intersection of
 global sensitivity, uncertainty propagation, and MI ranking.
 
+The interpretation is class-dependent. Practically identifiable parameters
+should show the strongest posterior contraction because the profile likelihood
+already indicates that the observable system can constrain them. Boundary-
+limited parameters should show partial or one-sided updates because the data
+constrain only part of the explored range. Weak or flat parameters may remain
+broad even after guided observations, indicating that the chosen biomarkers and
+times do not fully resolve compensating model directions.
+
 ### MI Biomarker Ranking
 
 ![Guided biomarker MI bars](../results_final/figures/bed_guided_parameter_biomarker_mi_bars.png)
@@ -217,6 +262,12 @@ global sensitivity, uncertainty propagation, and MI ranking.
 The biomarker MI bars identify which observable biomarkers are most informative
 for each representative parameter. This helps explain why different parameters
 receive different guided observation scenarios.
+
+These bars connect the GSA links to BED. GSA first identifies biomarkers whose
+AUCs are associated with each parameter across the admissible ensemble. MI then
+asks which of those biomarkers would be most informative as measurements for
+posterior updating. Biomarkers that rank highly in both analyses are strong
+candidates for targeted experimental observation.
 
 ### MI Day Curves
 
@@ -226,6 +277,13 @@ The day curves show candidate-day information scores within
 uncertainty-selected windows. Because each parameter has its own linked
 biomarkers and uncertainty windows, the selected days can differ across
 parameters.
+
+These curves complete the chain from parameter class to observation timing.
+Profile likelihood identifies the parameter class, GSA selects biologically
+linked biomarkers, uncertainty propagation restricts attention to windows
+where admissible trajectories separate, and MI ranks the remaining
+biomarker-day candidates. The resulting posterior update is therefore based on
+parameter-specific measurement logic rather than random observation selection.
 
 ## 8. Bayesian Inference
 
@@ -254,8 +312,12 @@ ODE simulations.
 
 The method comparison summarizes posterior behavior across reweighting,
 reduced archive posterior updates, and archive-based sequential ABC filtering.
-Agreement across these archive-based methods strengthens the final
-interpretation.
+The plot compares posterior contraction behavior across archive-based
+approximations; it is not intended to select a single "best" method. Agreement
+across methods strengthens the interpretation that posterior narrowing is
+driven by the selected observations rather than by one approximation scheme.
+Differences across methods highlight sensitivity to likelihood weighting,
+ABC tolerance, distance metric, and archive coverage.
 
 ## 9. Integrated Scientific Story
 
