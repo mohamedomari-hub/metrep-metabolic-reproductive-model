@@ -1,174 +1,331 @@
-# MetRep Metabolic-Reproductive Model
+# MetRep: Metabolic–Reproductive Mechanistic Model  
+### Mechanistic Systems Biology, Bayesian Inference, and Experimental Design for Complex Endocrine–Metabolic ODE Models
 
-This repository contains a curated Python implementation of a mechanistic
-metabolic-reproductive ODE model originally developed during PhD work, together
-with model diagnostics for sensitivity, identifiability, uncertainty
-propagation, and Bayesian experimental design. The original MATLAB model is
-preserved as a scientific reference.
+## Overview
+
+MetRep is a mechanistic systems-biology framework for studying endocrine–metabolic regulation using a nonlinear ordinary differential equation (ODE) model of bovine physiology.
+
+The model integrates metabolic and reproductive pathways, including glucose–insulin regulation, energy balance, ovarian dynamics, and hormonal feedback mechanisms. It was originally developed during my PhD work and has since been extended into a reproducible computational workflow for sensitivity analysis, identifiability diagnostics, uncertainty propagation, Bayesian inference, and Bayesian experimental design (BED).
+
+This repository focuses on a key scientific challenge in mechanistic modelling:
+
+> Which parameters are learnable, which biomarkers are most informative, and when should measurements be collected to reduce uncertainty in a complex nonlinear biological system?
+
+The workflow combines mechanistic modelling, biological admissibility filtering, global sensitivity analysis, Bayesian posterior updating, and experimental design to study parameter learning in a large nonlinear endocrine–metabolic model.
+
+---
 
 ## Scientific Motivation
 
-MetRep links metabolic regulation with reproductive endocrine dynamics. The
-model is used to study which mechanisms control observable biomarkers, which
-parameters can be estimated, how robust the calibrated model is, and which
-future measurements would be most informative.
+Large mechanistic ODE models are difficult to calibrate because they often contain:
 
-## Model And Biomarkers
+- many parameters,
+- nonlinear feedback loops,
+- threshold and Hill-type mechanisms,
+- correlated effects,
+- practical non-identifiability,
+- expensive experimental measurements.
 
-The mechanistic ODE model couples reproductive hormone regulation, ovarian
-dynamics, and glucose-insulin-IGF metabolism. GitHub-facing analyses emphasize
-observable biomarkers:
+In such systems, it is not enough to ask:
 
-`FSH, PGF, P4, E2, INH, IGF1, Insulin, Glucose, Glucagon`.
+> Which parameters influence the model?
 
-## Analysis Workflow
+We also need to ask:
 
-```text
-Baseline ODE simulation
--> Local sensitivity
--> Biological admissibility filtering
--> Global sensitivity on ODE-confirmed admissible ensemble
--> Identifiability analysis
--> Profile likelihood
--> Uncertainty propagation
--> Bayesian inference and Bayesian experimental design
-   -> posterior reweighting, PhD style
-   -> reduced ODE-archive posterior inference
-   -> archive-based sequential ABC filtering
-   -> SMC+ML admissible-bank enrichment for BED stability
-```
+> Which biomarkers are informative for parameter estimation?  
+> At what time points should measurements be taken?  
+> Can experimental design improve parameter learning?
 
-## Key Results
+MetRep addresses these questions through a biologically constrained Bayesian workflow.
 
-### Baseline Dynamics
+---
 
-![Baseline selected states](results_final/figures/baseline_selected_states.png)
+## Model Scope
 
-The baseline simulation reproduces coupled metabolic and reproductive
-endocrine dynamics under the non-lactating baseline scenario.
+The model describes coupled endocrine–metabolic regulation and includes interactions among:
 
-### Local Sensitivity
+### Reproductive system
+- Follicular growth
+- Corpus luteum dynamics
+- Ovarian regulation
+- Estrous-cycle hormonal feedback
 
-Local sensitivity uses a `+1%` one-at-a-time parameter perturbation and AUC
-endpoints across all 98 parameters. It identifies mechanisms that strongly
-affect biomarker exposure near the nominal calibrated model.
+### Metabolic system
+- Glucose regulation
+- Insulin signaling
+- IGF-1 interactions
+- Energy partitioning
+- Liver–blood nutrient exchange
 
-### Identifiability
+### Hormonal pathways
+- FSH
+- LH
+- Progesterone (P4)
+- Estradiol (E2)
+- Prostaglandin F2α (PGF)
+- Inhibin (INH)
+- IGF1
+- Insulin
+- Glucose
+- Glucagon
 
-![Representative profile likelihood classes](results_final/figures/profile_likelihood_representative_3x3.png)
+---
 
-SVD screening and profile likelihood separate parameters into practically
-identifiable, boundary-limited, and weak/non-identifiable classes.
+## Final Workflow
 
-### Combined Parameter Diagnostics
+The final workflow implemented in this repository is:
 
-![Combined parameter diagnostics](results_final/figures/combined_parameter_diagnostics.png)
+text Mechanistic ODE model     ↓ Local sensitivity analysis     ↓ Biological admissibility filtering     ↓ Global sensitivity analysis (admissible ensemble)     ↓ SVD identifiability     ↓ Profile likelihood     ↓ Uncertainty propagation     ↓ Bayesian inference & experimental design (BED)         ├── PhD-style posterior reweighting         ├── Reduced archive-based Bayesian posterior update         ├── Archive-based sequential ABC filtering         └── SMC+ML admissible-bank enrichment                 for:                 - stable MI/BED ranking                 - smaller MI error bars                 - improved admissible ensemble coverage 
 
-Representative parameters are compared across local sensitivity, admissible-bank
-global association, and identifiability class. Practically identifiable
-parameters generally show stronger and more consistent diagnostic signal,
-while weak/non-identifiable mechanisms show limited or inconsistent signal.
+---
 
-### Global Sensitivity And Admissible-Bank Association
+## Biological Admissibility Filtering
 
-![Representative global sensitivity](results_final/figures/global_sensitivity_representative_identifiability_parameters.png)
+A central feature of this work is the use of biological admissibility filtering.
 
-PRCC and Spearman associations summarize the full 98 x 9
-parameter-biomarker AUC relationships across the enriched 12,721-row
-ODE-confirmed admissible ensemble. They indicate monotonic association, not
-strict Sobol variance decomposition. The full-prior bank uses ordinary Monte
-Carlo sampling, so its variance-based results are labeled screening rather than
-Sobol indices.
+Instead of treating all parameter samples as equally plausible, model simulations are filtered according to biological constraints and expected physiological behavior.
 
-### Uncertainty Propagation
+Only ODE-confirmed biologically plausible simulations are retained.
 
-![Uncertainty propagation](results_final/figures/uncertainty_readme_summary.png)
+### Result
 
-Uncertainty propagation uses ODE-confirmed biologically admissible ensembles.
-Shading shows the 5th-95th percentile range, the solid blue line shows the
-ensemble median, and the dashed black line shows the nominal trajectory. Narrow
-admissible banks should be read as local robustness around the calibrated model;
-the expanded `+/-5%` enriched bank is used for the final downstream analyses.
+- Initial admissible models: 2,957
+- Final enriched admissible ensemble: 12,721 ODE-confirmed simulations
 
-### Bayesian Experimental Design
+This admissible ensemble is used to improve:
 
-BED scripts and outputs are available under
-`analyses/bayesian_experimental_design/`. The final BED layer uses the broad
-`+/-5%` prior for posterior plots and the 12,721-row ODE-confirmed enriched
-bank for MI stability and ranking robustness. It includes independent
-observation scenarios, a global cumulative best-1 through best-9 biomarker
-update, high- versus low-information day comparisons, and parameter-specific
-GSA + uncertainty + MI guided posterior updates for the fixed 3x3
-representative parameter set.
+- global sensitivity robustness,
+- uncertainty propagation,
+- mutual-information (MI) stability,
+- Bayesian experimental design ranking.
 
-The final Bayesian/BED interpretation is consistent with the profile
-likelihood diagnosis: practically identifiable parameters show stronger
-posterior narrowing, boundary-limited parameters show partial or one-sided
-learning, and weak/flat parameters often remain broad even under guided
-observations. BED identifies informative measurements; it does not by itself
-rescue structurally weak parameter directions.
+Importantly:
 
-### Bayesian Inference
+> The enriched 12,721-model ensemble is not used as the plotted Bayesian prior.
 
-Reduced posterior and archive-based sequential ABC workflows are available under
-`analyses/bayesian_inference/`. The reduced posterior script uses likelihood
-weights on real broad-prior ODE archive rows and does not use surrogate
-predictions. Archive-based sequential ABC filtering uses real ODE archive rows
-and does not treat surrogate-predicted candidates as truth.
+Instead:
+
+- Broad ±5% prior → used for prior-to-posterior Bayesian updates
+- 12,721 admissible ensemble → used for robust ranking, MI stability, and ensemble coverage
+
+---
+
+## Global Sensitivity on the Admissible Ensemble
+
+Global sensitivity analysis was performed using the biologically admissible ensemble.
+
+Methods:
+
+- Partial Rank Correlation Coefficient (PRCC)
+- Spearman correlation
+
+across:
+
+- 98 parameters
+- 9 observable biomarkers
+
+### Purpose
+
+This step identifies:
+
+> Which biomarkers are most associated with each parameter within biologically plausible model behavior
+
+rather than over the unconstrained parameter space.
+
+Example use:
+
+text Parameter     ↓ Top associated biomarkers     ↓ Candidate measurements for Bayesian design 
+
+Representative heatmaps are included in:
+
+text results_final/figures/ 
+
+---
+
+## Identifiability Diagnostics
+
+Parameter learnability was assessed using:
+
+### SVD identifiability
+
+to assess local structural identifiability trends.
+
+### Profile likelihood
+
+to evaluate practical identifiability and uncertainty structure.
+
+The analysis revealed three representative parameter classes:
+
+### Practically identifiable
+Strong posterior learning expected.
+
+Examples:
+- insulin_glucose_threshold
+- inhibin_clearance
+- hp_p4_follicle_scale
+
+### Boundary-limited
+Partial learning or one-sided narrowing.
+
+Examples:
+- blood_to_liver_glucose_threshold
+- gnrh_clearance
+- hp_iof_threshold
+
+### Weak / flat
+Limited learning despite measurements.
+
+Examples:
+- insulin_igf_threshold
+- feed_direct_blood_fraction
+- lh_basal_release
+
+These representative parameter classes are later used in Bayesian inference and BED.
+
+---
+
+## Uncertainty Propagation
+
+Uncertainty propagation was used to identify:
+
+> When the model is most informative
+
+by analyzing ensemble variability over time.
+
+Outputs include:
+
+- predictive uncertainty bands,
+- time-varying variability,
+- candidate informative windows for measurement.
+
+This step narrows the search space for Bayesian experimental design.
+
+---
+
+## Bayesian Inference & Experimental Design (BED)
+
+The Bayesian workflow combines:
+
+### 1. Posterior reweighting (PhD-style)
+
+Broad ±5% prior simulations are reweighted according to observational likelihood.
+
+Used to study:
+
+text prior → posterior update 
+
+under different measurement scenarios.
+
+### 2. Guided Bayesian updates
+
+Measurement scenarios are selected through:
+
+text Profile likelihood     ↓ Global sensitivity     ↓ Uncertainty propagation     ↓ Mutual information (MI)     ↓ Bayesian posterior update 
+
+For each representative parameter:
+
+1. top biomarkers are selected from global sensitivity,
+2. informative time windows are selected from uncertainty analysis,
+3. MI/BED ranks candidate biomarker–day observations,
+4. the broad prior is updated accordingly.
+
+This produces:
+
+### Parameter-specific guided posterior updates
+
+rather than one generic observation strategy.
+
+### 3. Archive-based sequential ABC filtering
+
+Approximate Bayesian posterior evidence is generated using:
+
+> archive-based sequential ABC filtering
+
+Important caveat:
+
+This is not full live ABC-SMC.
+
+Instead:
+
+- precomputed ODE simulations are reused,
+- no ODE reruns are performed,
+- no live particle perturbation is used.
+
+The method provides an efficient likelihood-free approximation for expensive ODE systems.
+
+---
+
+## Main Scientific Finding
+
+The key result of this repository is:
+
+> Bayesian posterior learning confirms the identifiability diagnosis rather than rescuing weak parameters.
+
+Observed behavior:
+
+### Practically identifiable parameters
+Strong posterior contraction.
+
+### Boundary-limited parameters
+Partial or one-sided learning.
+
+### Weak/flat parameters
+Remain broad despite guided observations.
+
+This suggests:
+
+> Bayesian experimental design improves learning where information exists, but does not magically solve practical non-identifiability.
+
+---
 
 ## Repository Structure
 
-```text
-MetRep_Matlab/                  Original MATLAB reference implementation
-MetRep_Python/                  Reproducible Python model and core scripts
-analyses/                       Sensitivity, identifiability, uncertainty, and BED workflows
-results_final/                  Curated publication/GitHub-facing figures and tables
-docs/                           Concise model, methodology, results, and reproducibility notes
-```
+text analyses/ │── local_sensitivity/ │── global_sensitivity/ │── uncertainty/ │── bayesian_inference/ │── bayesian_experimental_design/ │── surrogate_admissible_prior_enrichment/  docs/ │── methodology.md │── results_summary.md  results_final/ │── figures/ │── tables/ 
+
+---
 
 ## Reproducibility
 
-Install dependencies:
+Example commands:
 
-```bash
-python -m venv .venv
-source .venv/bin/activate
-pip install -r requirements.txt
-```
+### Global sensitivity (98 × 9)
 
-Core model and diagnostics:
+bash python analyses/global_sensitivity/run_global_sensitivity_enriched_98x9.py 
 
-```bash
-python MetRep_Python/scripts/02_run_baseline.py
-python MetRep_Python/scripts/04_run_sensitivity.py
-python MetRep_Python/scripts/05_run_identifiability.py
-python MetRep_Python/scripts/10_run_profile_likelihood.py
-python analyses/global_sensitivity/run_global_sensitivity_enriched_98x9.py
-python analyses/uncertainty/run_uncertainty_propagation.py
-python analyses/model_diagnostics/build_combined_parameter_summary.py
-```
+### Bayesian target selection
 
-Final Bayesian/BED commands are listed in:
+bash python analyses/bayesian_inference/select_bayesian_targets.py 
 
-- `analyses/bayesian_experimental_design/surrogate_bed/README.md`
-- `analyses/bayesian_inference/README.md`
+### Bayesian/BED workflow
 
-See [docs/reproducibility.md](docs/reproducibility.md) for workflow details.
+bash python analyses/bayesian_experimental_design/surrogate_bed/run_targeted_bed_posterior_portfolio.py 
 
-## Important Methodological Note
+### Archive-based ABC filtering
 
-Different analyses use different perturbation scales because they answer
-different questions:
+bash python analyses/bayesian_inference/abc_smc/run_abc_smc.py 
 
-- Local sensitivity: `+1%` one-at-a-time perturbation near the nominal model.
-- SVD identifiability: small numerical derivative step.
-- Profile likelihood: wider parameter profiling range.
-- Global association and uncertainty: Monte Carlo simulation banks.
-- BED: prior-based information calculation.
+---
+
+## Methodological Caveats
+
+- The 12,721-model admissible ensemble is not the Bayesian prior.
+- Broad ±5% priors are used for prior-to-posterior visualizations.
+- Archive-based ABC filtering is not full live ABC-SMC.
+- Posterior learning is constrained by model identifiability.
+- Profile likelihood results are reused from prior work and are not recalculated.
+
+---
 
 ## Documentation
 
-- [Model overview](docs/model_overview.md)
-- [Methodology](docs/methodology.md)
-- [Results summary](docs/results_summary.md)
-- [Reproducibility](docs/reproducibility.md)
+Additional details are available in:
+
+- docs/methodology.md
+- docs/results_summary.md
+- results_final/README.md
+
+---
+
+## Citation / Context
+
+This repository extends a mechanistic endocrine–metabolic systems model originally developed during my PhD work and expands it with a reproducible workflow for sensitivity analysis, identifiability, uncertainty propagation, Bayesian inference, and Bayesian experimental design.
