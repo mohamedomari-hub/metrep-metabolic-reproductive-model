@@ -119,11 +119,8 @@ posterior comparisons.
 
 ## 6. Uncertainty Propagation
 
-![Uncertainty summary](../results_final/figures/uncertainty_readme_summary.png)
+<img width="3300" height="2772" alt="image" src="https://github.com/user-attachments/assets/1e730211-c338-4336-bfa0-31134330b2c3" />
 
-![Reproductive uncertainty](../results_final/figures/uncertainty_reproductive.png)
-
-![Metabolic uncertainty](../results_final/figures/uncertainty_metabolic.png)
 
 Uncertainty propagation summarizes the 5th-95th percentile range, ensemble
 median, and nominal trajectory across admissible ODE-confirmed simulations.
