@@ -346,6 +346,13 @@ across ODE-confirmed admissible simulations. They are not strict Sobol indices:
 the banks use ordinary Monte Carlo and SMC-enriched admissible sampling rather
 than a Saltelli/Sobol design.
 
+PRCC values should be interpreted as monotonic association measures. They are
+useful for identifying parameter-biomarker links inside the admissible
+ensemble, but they do not capture all possible nonlinear or non-monotonic
+relationships. Strong PRCC/Spearman links are therefore used as interpretable
+screening signals, not as formal causal effects or Sobol variance
+decompositions.
+
 ## 5. Uncertainty Propagation
 
 Uncertainty propagation summarizes the ODE-confirmed admissible ensemble at
@@ -431,12 +438,64 @@ The final portfolio reports four posterior-update strategies:
    likelihood class, global sensitivity biomarkers, uncertainty windows, and
    BED day ranking.
 
+The global cumulative biomarker update and the parameter-specific guided update
+are intentionally different analyses. The cumulative update uses a global
+acquisition order to show how adding biomarkers from 1 to 9 changes the
+posterior. The guided update instead chooses a separate biomarker-day scenario
+for each representative parameter using GSA, uncertainty windows, and MI
+ranking.
+
 For the guided update, each representative parameter receives its own
 observation scenario. The workflow first ranks biomarkers for that parameter
 using PRCC/Spearman links, keeps the top 2-3 biomarkers, restricts candidate
 days to high-uncertainty windows, and then ranks those biomarker-day candidates
 with the BED MI proxy. The posterior uses only that parameter-specific
 biomarker/day set, not a common global biomarker order.
+
+Mathematically, for a representative parameter $\theta_j$, candidate biomarkers
+are first selected from the strongest admissible-bank sensitivity links:
+
+```math
+B_j
+=
+\operatorname{TopK}
+\left(
+  |\mathrm{PRCC}_{jk}|
+\right)
+```
+
+where $B_j$ is the selected biomarker set for parameter $\theta_j$. Candidate
+measurement days are then restricted to high-uncertainty windows:
+
+```math
+T_k
+=
+\left\{
+  t :
+  q_{0.95,k}(t) - q_{0.05,k}(t) > \tau_k
+\right\}
+```
+
+where $T_k$ is the candidate day set for biomarker $k$. Mutual information is
+then evaluated for candidate biomarker-day pairs:
+
+```math
+I_j(t,k)
+=
+I\left(\theta_j;Y_k(t)\right)
+```
+
+The final guided observation scenario is selected as:
+
+```math
+(t^*,k^*)
+=
+\arg\max_{\substack{t \in T_k \\ k \in B_j}}
+I_j(t,k)
+```
+
+This links profile-likelihood class, global sensitivity, uncertainty
+propagation, and BED into one parameter-specific observation-selection rule.
 
 The SMC+ML enriched 12,721-row admissible bank is used for stable BED ranking
 and MI robustness. It is not used as the plotted prior distribution.
@@ -473,8 +532,10 @@ w_i
 {\sum_j p(y^{obs}\mid \theta_j)} .
 ```
 
-This is a reduced archive posterior over simulated rows, not live ODE MCMC.
-No new ODE simulations are run.
+This is a reduced archive-based posterior over simulated rows. It should not be
+described as live ODE MCMC, because no new ODE simulations are proposed or
+accepted during the update. The method is useful as a transparent Bayesian
+posterior approximation over a trusted ODE simulation archive.
 
 Archive-based sequential ABC filtering also uses only precomputed broad-prior
 ODE rows. At round `r`, a row is retained when:
@@ -486,6 +547,12 @@ ODE rows. At round `r`, a row is retained when:
 The tolerance `epsilon_r` is reduced across rounds using archive distance
 quantiles. This is archive-based sequential ABC filtering, not full live ABC:
 particles are not perturbed and ODEs are not rerun.
+
+Therefore, this analysis should be reported as archive-based sequential ABC
+filtering, not full adaptive ABC-SMC. It is a likelihood-free posterior
+approximation over precomputed ODE rows. Its strength is computational
+efficiency and use of trusted simulations; its limitation is that it cannot
+discover posterior regions that were not represented in the original archive.
 
 Different perturbation scales are used because each analysis answers a
 different question: local sensitivity uses `+1%` one-at-a-time perturbations,
@@ -944,115 +1011,24 @@ The defensible Bayesian outputs are ODE-bank posterior reweighting, reduced
 ODE-archive posterior weighting, and archive-based sequential ABC filtering.
 Surrogate models are not used for the final posterior distributions.
 
-# Global Sensitivity And Admissible-Bank Association
+# Final Integrated Interpretation
 
-Global sensitivity screening asks which parameters are associated with variability across a simulation ensemble rather than only near the nominal parameter vector. The analysis uses the observable biomarker panel:
+The final workflow combines classical identifiability diagnostics with
+Bayesian experimental design. Local sensitivity and SVD identify influential
+and compensatory directions. Profile likelihood classifies representative
+parameters as practically identifiable, boundary-limited, weakly identifiable,
+or flat. Biological admissibility filtering restricts ensemble analyses to
+physiologically plausible ODE trajectories. Global sensitivity and uncertainty
+propagation then define candidate biomarkers and time windows for BED.
 
-`FSH, PGF, P4, E2, INH, IGF1, Insulin, Glucose, Glucagon`.
-
-Glucagon was excluded from the biological admissibility filter but retained as
-an observable biomarker for downstream uncertainty propagation, global
-sensitivity, and Bayesian experimental design.
-
-For biomarker `b` and parameter vector `theta`, each simulation is summarized using the stored-trajectory AUC endpoint:
-
-```math
-\mathrm{AUC}_b(\theta)
-=
-\int_{t_0}^{t_f} y_b(t;\theta)\,dt
-```
-
-This is evaluated numerically using the trapezoidal rule over the stored sampling days.
-
-## Full-Prior Variance-Based Screening
-
-The unfiltered parameter bank was generated using ordinary independent uniform Monte Carlo sampling. For each parameter, the screening statistic estimates:
-
-```math
-S^{\mathrm{screen}}_{i,b}
-=
-\frac{
-\mathrm{Var}
-\left[
-\mathrm{E}
-\left(
-\mathrm{AUC}_b \mid \theta_i
-\right)
-\right]
-}{
-\mathrm{Var}
-\left(
-\mathrm{AUC}_b
-\right)
-}
-```
-
-The conditional mean is approximated with equal-count parameter bins. This is a variance-based importance screen, but it is **not a strict Sobol index**: the simulation bank does not use a Saltelli/Sobol sampling design and therefore does not support formal Sobol variance decomposition.
-
-## Admissible-Bank Spearman Screening
-
-Spearman rank correlation measures the direction and strength of monotonic association between a parameter and biomarker AUC:
-
-```math
-\rho^{\mathrm{S}}_{i,b}
-=
-\mathrm{Corr}
-\left(
-\mathrm{rank}(\theta_i),
-\mathrm{rank}(\mathrm{AUC}_b)
-\right)
-```
-
-Positive values indicate that larger parameter values tend to accompany larger biomarker AUC; negative values indicate the opposite relationship.
-
-## Admissible-Bank PRCC Screening
-
-Partial rank correlation coefficients evaluate the association between `theta_i` and `AUC_b` after linearly removing the ranked effects of the other sampled parameters. If `r_theta_i` and `r_AUC_b` are residuals from those rank-based regressions, then:
-
-```math
-\mathrm{PRCC}_{i,b}
-=
-\mathrm{Corr}
-\left(
-r_{\theta_i},
-r_{\mathrm{AUC}_b}
-\right)
-```
-
-PRCC values summarize parameter-biomarker AUC associations across biologically admissible simulations. They indicate direction and strength of monotonic association, not formal Sobol variance decomposition.
-
-# Uncertainty Propagation
-
-Uncertainty propagation summarizes trajectory variability across the selected
-biologically admissible ODE-confirmed ensemble. For each biomarker $b$ and
-stored time $t$, the reported ensemble summaries are:
-
-```math
-\tilde y_b(t)=Q_{0.50}\{y_b(t;\theta_j)\},
-```
-
-```math
-y^{low}_b(t)=Q_{0.05}\{y_b(t;\theta_j)\},
-\qquad
-y^{high}_b(t)=Q_{0.95}\{y_b(t;\theta_j)\}.
-```
-
-The figures show the 5th-95th percentile interval as a shaded band, the
-ensemble median $\tilde y_b(t)$ as a solid blue line, and the nominal
-trajectory $y_b(t;\theta_0)$ as a dashed black line.
-
-Because admissibility filtering restricts the ensemble to biologically
-plausible trajectories, the bands should be interpreted as robustness within
-the retained admissible regime rather than full population variability.
-
-# Cross-Method Perturbation Scales
-
-Different perturbation scales are used because each analysis answers a
-different question: local sensitivity uses `+1%` one-at-a-time perturbations,
-SVD identifiability uses small finite differences, profile likelihood explores
-a wider parameter range, global sensitivity uses simulation-bank associations,
-uncertainty propagation uses biologically admissible ensembles, and BED uses
-prior-based information calculations.
+The Bayesian/BED layer tests whether selected observations reduce parameter
+uncertainty. The main result is that Bayesian updating confirms the
+profile-likelihood diagnosis: practically identifiable parameters narrow
+strongly, boundary-limited parameters show partial or one-sided learning, and
+weak/flat parameters remain broad even under guided observations. This means
+BED improves learning where information exists, but it does not magically
+rescue parameters that are practically non-identifiable under the available
+output panel.
 
 # Appendix
 
