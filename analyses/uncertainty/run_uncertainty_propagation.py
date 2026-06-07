@@ -1,8 +1,9 @@
-"""Uncertainty propagation from the existing admissible 0.5% MetRep bank."""
+"""Uncertainty propagation from an existing admissible MetRep bank."""
 
 from __future__ import annotations
 
 import argparse
+import json
 import os
 from pathlib import Path
 import re
@@ -16,9 +17,9 @@ import pandas as pd
 
 PROJECT_ROOT = Path(__file__).resolve().parents[2]
 DEFAULT_BANK = PROJECT_ROOT / "analyses/bayesian_experimental_design/surrogate_bed/input_tables_large"
-BIOMARKERS = ["FSH", "PGF", "P4", "E2", "INH", "IGF1", "Insulin", "Glucose"]
+DEFAULT_OBSERVABLE_ORDER = ["FSH", "PGF", "P4", "E2", "INH", "IGF1", "Insulin", "Glucose", "Glucagon"]
 REPRODUCTIVE = ["FSH", "PGF", "P4", "E2", "INH"]
-METABOLIC = ["IGF1", "Insulin", "Glucose"]
+METABOLIC = ["IGF1", "Insulin", "Glucose", "Glucagon"]
 README_BIOMARKERS = ["Glucose", "Insulin", "P4", "E2"]
 
 
@@ -26,6 +27,11 @@ def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(description="Propagate uncertainty using stored admissible simulations only.")
     parser.add_argument("--bank-dir", type=Path, default=DEFAULT_BANK)
     parser.add_argument("--output-dir", type=Path, default=Path(__file__).resolve().parent / "outputs")
+    parser.add_argument(
+        "--biomarkers",
+        nargs="+",
+        help="Observable biomarkers to plot. Omit to use all stored observable *_day_* outputs.",
+    )
     return parser.parse_args()
 
 
@@ -34,9 +40,17 @@ def stored_days(outputs: pd.DataFrame, biomarker: str) -> list[int]:
     return sorted(int(match.group(1)) for column in outputs.columns if (match := pattern.match(column)))
 
 
-def trajectory_quantiles(outputs: pd.DataFrame) -> pd.DataFrame:
+def infer_observable_biomarkers(outputs: pd.DataFrame) -> list[str]:
+    pattern = re.compile(r"^(.+)_day_(\d+)$")
+    found = sorted({match.group(1) for column in outputs.columns if (match := pattern.match(column))})
+    ordered = [name for name in DEFAULT_OBSERVABLE_ORDER if name in found]
+    ordered.extend(name for name in found if name not in ordered)
+    return ordered
+
+
+def trajectory_quantiles(outputs: pd.DataFrame, biomarkers: list[str]) -> pd.DataFrame:
     rows = []
-    for biomarker in BIOMARKERS:
+    for biomarker in biomarkers:
         for day in stored_days(outputs, biomarker):
             values = outputs[f"{biomarker}_day_{day}"].to_numpy(dtype=float)
             q05, median, q95 = np.quantile(values, [0.05, 0.5, 0.95])
@@ -60,6 +74,7 @@ def plot_group(
     biomarkers: list[str],
     section_title: str,
     path: Path,
+    prior_percent: float,
     ncols: int = 3,
 ) -> None:
     nrows = int(np.ceil(len(biomarkers) / ncols))
@@ -84,7 +99,7 @@ def plot_group(
     fig.suptitle(
         "Uncertainty propagation under biologically admissible parameter variability\n"
         f"{section_title} | n = {int(quantiles['samples'].iloc[0]):,} admissible simulations | "
-        "narrow +/-0.5% parameter ensemble",
+        f"+/-{prior_percent:g}% parameter ensemble",
         fontsize=15,
     )
     fig.savefig(path, dpi=220)
@@ -98,12 +113,19 @@ def main() -> None:
     outputs = pd.read_csv(args.bank_dir / "ode_output_features.csv")
     nominal = pd.read_csv(args.bank_dir / "nominal_output.csv")
     admissibility = pd.read_csv(args.bank_dir / "admissibility.csv")
+    metadata_path = args.bank_dir / "bank_metadata.json"
+    metadata = json.loads(metadata_path.read_text()) if metadata_path.exists() else {}
+    prior_half_range = float(metadata.get("prior_half_range", 0.005))
+    prior_percent = 100 * prior_half_range
     if not (len(parameters) == len(outputs) == len(admissibility)):
         raise ValueError("Stored bank tables have inconsistent row counts.")
+    biomarkers = args.biomarkers or infer_observable_biomarkers(outputs)
+    if not biomarkers:
+        raise ValueError("No observable biomarker day columns were found.")
     keep = admissibility["admissible"].astype(bool) & outputs.notna().all(axis=1)
     accepted = outputs.loc[keep].reset_index(drop=True)
 
-    quantiles = trajectory_quantiles(accepted)
+    quantiles = trajectory_quantiles(accepted, biomarkers)
     quantiles.to_csv(args.output_dir / "trajectory_quantiles.csv", index=False)
     summary = (
         quantiles.groupby("biomarker", as_index=False)
@@ -122,21 +144,25 @@ def main() -> None:
                 "stored_simulations": len(outputs),
                 "admissible_simulations": len(accepted),
                 "rejected_simulations": len(outputs) - len(accepted),
-                "prior_relative_half_range": 0.005,
+                "prior_relative_half_range": prior_half_range,
                 "ode_simulations_run": 0,
             }
         ]
     ).to_csv(args.output_dir / "accepted_simulation_summary.csv", index=False)
 
-    plot_group(quantiles, nominal, REPRODUCTIVE, "Reproductive biomarkers", args.output_dir / "uncertainty_reproductive.png")
-    plot_group(quantiles, nominal, METABOLIC, "Metabolic biomarkers", args.output_dir / "uncertainty_metabolic.png")
-    plot_group(quantiles, nominal, BIOMARKERS, "All observable biomarkers", args.output_dir / "uncertainty_all_biomarkers.png")
+    reproductive = [name for name in REPRODUCTIVE if name in biomarkers]
+    metabolic = [name for name in METABOLIC if name in biomarkers]
+    readme = [name for name in README_BIOMARKERS if name in biomarkers]
+    plot_group(quantiles, nominal, reproductive, "Reproductive biomarkers", args.output_dir / "uncertainty_reproductive.png", prior_percent)
+    plot_group(quantiles, nominal, metabolic, "Metabolic biomarkers", args.output_dir / "uncertainty_metabolic.png", prior_percent)
+    plot_group(quantiles, nominal, biomarkers, "All observable biomarkers", args.output_dir / "uncertainty_all_biomarkers.png", prior_percent)
     plot_group(
         quantiles,
         nominal,
-        README_BIOMARKERS,
+        readme,
         "Representative observable biomarkers",
         args.output_dir / "uncertainty_readme_summary.png",
+        prior_percent,
         ncols=2,
     )
 
@@ -144,9 +170,11 @@ def main() -> None:
         "Local sensitivity used +1% one-at-a-time perturbations around the nominal model and AUC endpoints. "
         "Global sensitivity screening uses simulation-bank ensembles and AUC endpoints. The admissible-bank "
         "Spearman/PRCC analysis summarizes parameter-biomarker associations across biologically plausible "
-        "simulations. Uncertainty propagation uses the biologically admissible 0.5% simulation bank to generate "
+        f"simulations. Uncertainty propagation uses the biologically admissible +/-{prior_percent:g}% simulation bank to generate "
         "stable trajectory bands. Perturbation scales differ because each method asks a different question. "
         "BED is handled separately.\n"
+        "Glucagon was excluded from the biological admissibility filter but retained as an observable "
+        "biomarker for downstream uncertainty propagation, global sensitivity, and Bayesian experimental design.\n"
     )
     (args.output_dir / "README.md").write_text(note)
     summary_note = (
@@ -154,12 +182,15 @@ def main() -> None:
         "Uncertainty propagation was estimated from the biologically admissible Monte Carlo ensemble "
         "generated around the calibrated parameter regime. The shaded region shows the 5th-95th "
         "percentile range, the blue line shows the ensemble median, and the black dashed line shows "
-        "the nominal trajectory. Because the ensemble uses a narrow +/-0.5% perturbation range and "
+        f"the nominal trajectory. Because the ensemble uses a +/-{prior_percent:g}% perturbation range and "
         "biological admissibility filtering, the bands should be interpreted as local robustness "
-        "around the calibrated model, not as full population variability.\n"
+        "around the calibrated model, not as full population variability.\n\n"
+        "Glucagon was excluded from the biological admissibility filter but retained as an observable "
+        "biomarker for downstream uncertainty propagation, global sensitivity, and Bayesian experimental design.\n"
     )
     (args.output_dir / "uncertainty_summary.md").write_text(summary_note)
     print(f"Saved uncertainty outputs to {args.output_dir}")
+    print(f"Observable biomarkers used: {', '.join(biomarkers)}")
     print(f"Admissible rows: {len(accepted)}; ODE simulations run: 0")
 
 

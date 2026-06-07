@@ -112,20 +112,147 @@ Legacy project notes and historical generated materials are preserved in
 
 ## Reproducibility
 
-Expensive ODE banks and profile-likelihood results were generated before final
-portfolio curation. The public workflows operate on trusted ODE archives and
-curated result tables, so routine inspection does not require recomputing large
-ODE ensembles or profile likelihoods.
+The repository is organized so the public GitHub version stays lightweight
+while preserving the scientific workflow. Large ODE banks, raw particle pools,
+debug outputs, and temporary simulation products are intentionally ignored by
+Git. Curated figures and tables needed to understand the final results are kept
+under `results_final/`.
 
-The final Bayesian/BED workflows use broad `+/-5%` prior ODE archives for
-posterior distributions and the 12,721-row ODE-confirmed admissible bank for
-MI/BED ranking stability and admissible ensemble coverage.
+### Environment Setup
+
+Use a clean Python environment and install the lightweight analysis
+dependencies:
+
+```bash
+python -m venv .venv
+source .venv/bin/activate
+pip install -r requirements.txt
+```
+
+The MATLAB reference implementation is preserved in `MetRep_Matlab/`. The
+Python workflow uses the model and parameter definitions under `MetRep_Python/`
+and `MetRep_Model/analyses/`.
+
+### Repository Logic
+
+Each analysis folder contains the main workflow scripts and a local `README.md`
+where appropriate. Generated outputs are written to local `outputs/`,
+`run_outputs/`, or figure folders and are ignored unless they are curated into
+`results_final/`.
+
+The cleaned analysis layers are:
+
+- `analyses/local_sensitivity/`
+- `analyses/identifiability/`
+- `analyses/global_sensitivity/`
+- `analyses/uncertainty/`
+- `analyses/bayesian_experimental_design/`
+- `analyses/bayesian_inference/`
+- `analyses/model_diagnostics/`
+
+### Reproducibility Modes
+
+Two reproducibility modes are supported:
+
+- **Portfolio inspection:** read `docs/`, inspect curated tables and figures in
+  `results_final/`, and run lightweight table/plot scripts.
+- **Full regeneration:** rebuild ODE banks and rerun expensive ensemble,
+  profile-likelihood, uncertainty, BED, and Bayesian workflows locally. This
+  requires substantial runtime and is not needed for routine GitHub review.
+
+### Rebuilding Large Simulation Banks
+
+Large banks are not committed. The main broad-prior and enriched-bank paths used
+by the final workflow are:
+
+```text
+analyses/bayesian_experimental_design/surrogate_bed/phd_bed_bank_5pct_50k_glucagon/
+analyses/bayesian_experimental_design/surrogate_bed/phd_bed_bank_5pct_50k_glucagon_smc_enriched/
+```
+
+The broad `+/-5%` ODE bank is the prior archive for posterior distributions.
+The enriched 12,721-row bank is used only after ODE confirmation and supports
+global sensitivity, uncertainty propagation, MI/BED ranking stability, and
+admissible ensemble coverage. Surrogate-predicted candidates are never treated
+as scientific truth.
+
+Example downstream commands, assuming the local ODE-confirmed banks exist:
+
+```bash
+python analyses/global_sensitivity/run_global_sensitivity_enriched_98x9.py \
+  --enriched-bank-dir analyses/bayesian_experimental_design/surrogate_bed/phd_bed_bank_5pct_50k_glucagon_smc_enriched \
+  --output-dir analyses/global_sensitivity/outputs_enriched \
+  --figure-dir results_final/figures \
+  --table-dir results_final/tables
+```
+
+```bash
+python analyses/uncertainty/run_uncertainty_propagation.py \
+  --bank-dir analyses/bayesian_experimental_design/surrogate_bed/phd_bed_bank_5pct_50k_glucagon_smc_enriched \
+  --output-dir analyses/uncertainty/outputs_smc_enriched_5pct_glucagon
+```
+
+```bash
+python analyses/bayesian_experimental_design/surrogate_bed/run_targeted_bed_posterior_portfolio.py \
+  --broad-prior-dir analyses/bayesian_experimental_design/surrogate_bed/phd_bed_bank_5pct_50k_glucagon \
+  --enriched-bank-dir analyses/bayesian_experimental_design/surrogate_bed/phd_bed_bank_5pct_50k_glucagon_smc_enriched \
+  --global-sensitivity-dir analyses/global_sensitivity/outputs_enriched \
+  --uncertainty-dir analyses/uncertainty/outputs_smc_enriched_5pct_glucagon \
+  --profile-dir results_final/tables \
+  --output-dir analyses/bayesian_experimental_design/surrogate_bed/run_outputs_targeted \
+  --figure-dir analyses/bayesian_experimental_design/surrogate_bed/run_figures_targeted \
+  --seed 42
+```
+
+```bash
+python analyses/bayesian_inference/select_bayesian_targets.py \
+  --profile-dir results_final/tables \
+  --global-sensitivity-dir analyses/global_sensitivity/outputs_enriched \
+  --uncertainty-dir analyses/uncertainty/outputs_smc_enriched_5pct_glucagon \
+  --output-dir analyses/bayesian_inference/outputs
+```
+
+```bash
+python analyses/bayesian_inference/reduced_archive_posterior/run_reduced_archive_posterior.py \
+  --target-parameters analyses/bayesian_inference/outputs/bayesian_target_parameters.csv \
+  --output-dir analyses/bayesian_inference/outputs/reduced_archive_posterior \
+  --figure-dir analyses/bayesian_inference/figures/reduced_archive_posterior \
+  --seed 42
+```
+
+```bash
+python analyses/bayesian_inference/archive_abc/run_archive_abc.py \
+  --target-parameters analyses/bayesian_inference/outputs/bayesian_target_parameters.csv \
+  --output-dir analyses/bayesian_inference/outputs/archive_abc \
+  --figure-dir analyses/bayesian_inference/figures/archive_abc \
+  --seed 42
+```
+
+```bash
+python analyses/bayesian_inference/compare_bayesian_methods.py
+```
+
+### Randomness And Determinism
+
+Scripts that sample, resample, or split data expose a `--seed` argument. The
+curated portfolio uses seed `42` unless noted otherwise. ODE-confirmed banks
+are deterministic once the saved parameter rows exist, but Monte Carlo
+summaries, posterior resampling, and plotting can vary slightly with seed or
+with regenerated banks.
+
+### Final Reproducibility Summary
+
+Different perturbation scales are used because each analysis answers a
+different question: local sensitivity uses `+1%` one-at-a-time perturbations,
+SVD identifiability uses small finite differences, profile likelihood explores
+a wider parameter range, global sensitivity uses simulation-bank associations,
+uncertainty propagation uses biologically admissible ensembles, and BED uses
+prior-based information calculations.
 
 ## Documentation
 
 - [Methodology](docs/methodology.md)
 - [Results summary](docs/results_summary.md)
-- [Reproducibility notes](docs/reproducibility.md)
 - [Model overview](docs/model_overview.md)
 
 ## Limitations

@@ -1,0 +1,10 @@
+parameter,profile_class,scenario,biomarker_day_combination,reason_selected
+insulin_glucose_threshold,Practically identifiable,guided_insulin_glucose_threshold,Insulin_day_58|Glucose_day_61|E2_day_87,top parameter-specific GSA biomarkers; uncertainty-window candidate days; final days ranked by BED MI proxy
+inhibin_clearance,Practically identifiable,guided_inhibin_clearance,Insulin_day_58|E2_day_64|P4_day_80,top parameter-specific GSA biomarkers; uncertainty-window candidate days; final days ranked by BED MI proxy
+hp_p4_follicle_scale,Practically identifiable,guided_hp_p4_follicle_scale,PGF_day_60|FSH_day_62|INH_day_65,top parameter-specific GSA biomarkers; uncertainty-window candidate days; final days ranked by BED MI proxy
+blood_to_liver_glucose_threshold,Boundary-limited,guided_blood_to_liver_glucose_threshold,Glucose_day_61|Insulin_day_58|Glucagon_day_54,top parameter-specific GSA biomarkers; uncertainty-window candidate days; final days ranked by BED MI proxy
+gnrh_clearance,Boundary-limited,guided_gnrh_clearance,INH_day_64|E2_day_64|Insulin_day_58,top parameter-specific GSA biomarkers; uncertainty-window candidate days; final days ranked by BED MI proxy
+hp_iof_threshold,Boundary-limited,guided_hp_iof_threshold,PGF_day_60|P4_day_81|Glucagon_day_54,top parameter-specific GSA biomarkers; uncertainty-window candidate days; final days ranked by BED MI proxy
+insulin_igf_threshold,Weak/flat/non-identifiable,guided_insulin_igf_threshold,IGF1_day_84|INH_day_65|E2_day_87,top parameter-specific GSA biomarkers; uncertainty-window candidate days; final days ranked by BED MI proxy
+feed_direct_blood_fraction,Weak/flat/non-identifiable,guided_feed_direct_blood_fraction,INH_day_65|Glucose_day_61|FSH_day_71,top parameter-specific GSA biomarkers; uncertainty-window candidate days; final days ranked by BED MI proxy
+lh_basal_release,Weak/flat/non-identifiable,guided_lh_basal_release,Glucagon_day_54|INH_day_65|IGF1_day_61,top parameter-specific GSA biomarkers; uncertainty-window candidate days; final days ranked by BED MI proxy

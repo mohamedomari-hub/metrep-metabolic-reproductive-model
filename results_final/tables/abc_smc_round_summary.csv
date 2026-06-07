@@ -1,0 +1,65 @@
+scenario,description,round,epsilon,quantile,accepted,acceptance_fraction
+gsa_uncertainty_guided,"GSA + uncertainty guided: E2 d64, E2 d66, E2 d86, E2 d87, E2 d88, FSH d62, FSH d71, FSH d78, FSH d80",1,1.2485662652826872,0.5,25000,0.5
+gsa_uncertainty_guided,"GSA + uncertainty guided: E2 d64, E2 d66, E2 d86, E2 d87, E2 d88, FSH d62, FSH d71, FSH d78, FSH d80",2,0.6860154134651815,0.25,12500,0.25
+gsa_uncertainty_guided,"GSA + uncertainty guided: E2 d64, E2 d66, E2 d86, E2 d87, E2 d88, FSH d62, FSH d71, FSH d78, FSH d80",3,0.5004063129606087,0.1,5000,0.1
+gsa_uncertainty_guided,"GSA + uncertainty guided: E2 d64, E2 d66, E2 d86, E2 d87, E2 d88, FSH d62, FSH d71, FSH d78, FSH d80",4,0.38803569486353046,0.05,2500,0.05
+independent_1_Insulin_day_65,Independent observation scenario 1: Insulin,1,1.7869418618519903,0.5,25000,0.5
+independent_1_Insulin_day_65,Independent observation scenario 1: Insulin,2,1.0410234087723924,0.25,12500,0.25
+independent_1_Insulin_day_65,Independent observation scenario 1: Insulin,3,0.458225103794543,0.1,5000,0.1
+independent_1_Insulin_day_65,Independent observation scenario 1: Insulin,4,0.23055700578577226,0.05,2500,0.05
+independent_2_Glucose_day_65,Independent observation scenario 2: Glucose,1,0.7718940459717794,0.5,25000,0.5
+independent_2_Glucose_day_65,Independent observation scenario 2: Glucose,2,0.3769454364551216,0.25,12500,0.25
+independent_2_Glucose_day_65,Independent observation scenario 2: Glucose,3,0.14870502011705064,0.1,5000,0.1
+independent_2_Glucose_day_65,Independent observation scenario 2: Glucose,4,0.07451258463131057,0.05,2500,0.05
+independent_3_IGF1_day_65,Independent observation scenario 3: IGF1,1,1.3824286158587669,0.5,25000,0.5
+independent_3_IGF1_day_65,Independent observation scenario 3: IGF1,2,0.6696743378461818,0.25,12500,0.25
+independent_3_IGF1_day_65,Independent observation scenario 3: IGF1,3,0.3796134810580914,0.1,5000,0.1
+independent_3_IGF1_day_65,Independent observation scenario 3: IGF1,4,0.19013015525588184,0.05,2500,0.05
+independent_4_E2_day_65,Independent observation scenario 4: E2,1,0.4248223878717541,0.5,25000,0.5
+independent_4_E2_day_65,Independent observation scenario 4: E2,2,0.08639232262305488,0.25,12500,0.25
+independent_4_E2_day_65,Independent observation scenario 4: E2,3,0.03863436044103323,0.1,5000,0.1
+independent_4_E2_day_65,Independent observation scenario 4: E2,4,0.02040496336458963,0.05,2500,0.05
+cumulative_best_01,Cumulative biomarkers: Insulin,1,1.7869418618519903,0.5,25000,0.5
+cumulative_best_01,Cumulative biomarkers: Insulin,2,1.0410234087723924,0.25,12500,0.25
+cumulative_best_01,Cumulative biomarkers: Insulin,3,0.458225103794543,0.1,5000,0.1
+cumulative_best_01,Cumulative biomarkers: Insulin,4,0.23055700578577226,0.05,2500,0.05
+cumulative_best_02,Cumulative biomarkers: Insulin + Glucose,1,1.514814972829719,0.5,25000,0.5
+cumulative_best_02,Cumulative biomarkers: Insulin + Glucose,2,0.9728857316893014,0.25,12500,0.25
+cumulative_best_02,Cumulative biomarkers: Insulin + Glucose,3,0.5463771372963904,0.1,5000,0.1
+cumulative_best_02,Cumulative biomarkers: Insulin + Glucose,4,0.3648293936750165,0.05,2500,0.05
+cumulative_best_03,Cumulative biomarkers: Insulin + Glucose + IGF1,1,1.538543592352195,0.5,25000,0.5
+cumulative_best_03,Cumulative biomarkers: Insulin + Glucose + IGF1,2,1.2246294016401726,0.25,12500,0.25
+cumulative_best_03,Cumulative biomarkers: Insulin + Glucose + IGF1,3,0.7676583000665059,0.1,5000,0.1
+cumulative_best_03,Cumulative biomarkers: Insulin + Glucose + IGF1,4,0.5281813008121368,0.05,2500,0.05
+cumulative_best_04,Cumulative biomarkers: Insulin + Glucose + IGF1 + E2,1,1.494948337594386,0.5,25000,0.5
+cumulative_best_04,Cumulative biomarkers: Insulin + Glucose + IGF1 + E2,2,1.1736574482460136,0.25,12500,0.25
+cumulative_best_04,Cumulative biomarkers: Insulin + Glucose + IGF1 + E2,3,0.6889870718577655,0.1,5000,0.1
+cumulative_best_04,Cumulative biomarkers: Insulin + Glucose + IGF1 + E2,4,0.4715724488737426,0.05,2500,0.05
+cumulative_best_05,Cumulative biomarkers: Insulin + Glucose + IGF1 + E2 + INH,1,1.3906468025075043,0.5,25000,0.5
+cumulative_best_05,Cumulative biomarkers: Insulin + Glucose + IGF1 + E2 + INH,2,1.1131881817726228,0.25,12500,0.25
+cumulative_best_05,Cumulative biomarkers: Insulin + Glucose + IGF1 + E2 + INH,3,0.6693030201711554,0.1,5000,0.1
+cumulative_best_05,Cumulative biomarkers: Insulin + Glucose + IGF1 + E2 + INH,4,0.46064439741558516,0.05,2500,0.05
+cumulative_best_06,Cumulative biomarkers: Insulin + Glucose + IGF1 + E2 + INH + FSH,1,1.4750910934073933,0.5,25000,0.5
+cumulative_best_06,Cumulative biomarkers: Insulin + Glucose + IGF1 + E2 + INH + FSH,2,1.101446260326882,0.25,12500,0.25
+cumulative_best_06,Cumulative biomarkers: Insulin + Glucose + IGF1 + E2 + INH + FSH,3,0.6224223555377283,0.1,5000,0.1
+cumulative_best_06,Cumulative biomarkers: Insulin + Glucose + IGF1 + E2 + INH + FSH,4,0.4246540651506182,0.05,2500,0.05
+cumulative_best_07,Cumulative biomarkers: Insulin + Glucose + IGF1 + E2 + INH + FSH + P4,1,1.4246669744900968,0.5,25000,0.5
+cumulative_best_07,Cumulative biomarkers: Insulin + Glucose + IGF1 + E2 + INH + FSH + P4,2,1.0806306391815113,0.25,12500,0.25
+cumulative_best_07,Cumulative biomarkers: Insulin + Glucose + IGF1 + E2 + INH + FSH + P4,3,0.5938177280905221,0.1,5000,0.1
+cumulative_best_07,Cumulative biomarkers: Insulin + Glucose + IGF1 + E2 + INH + FSH + P4,4,0.3964640491116867,0.05,2500,0.05
+cumulative_best_08,Cumulative biomarkers: Insulin + Glucose + IGF1 + E2 + INH + FSH + P4 + Glucagon,1,1.387993975769822,0.5,25000,0.5
+cumulative_best_08,Cumulative biomarkers: Insulin + Glucose + IGF1 + E2 + INH + FSH + P4 + Glucagon,2,1.09670679114474,0.25,12500,0.25
+cumulative_best_08,Cumulative biomarkers: Insulin + Glucose + IGF1 + E2 + INH + FSH + P4 + Glucagon,3,0.6948969552914103,0.1,5000,0.1
+cumulative_best_08,Cumulative biomarkers: Insulin + Glucose + IGF1 + E2 + INH + FSH + P4 + Glucagon,4,0.512256350936439,0.05,2500,0.05
+cumulative_best_09,Cumulative biomarkers: Insulin + Glucose + IGF1 + E2 + INH + FSH + P4 + Glucagon + PGF,1,1.3236044480294438,0.5,25000,0.5
+cumulative_best_09,Cumulative biomarkers: Insulin + Glucose + IGF1 + E2 + INH + FSH + P4 + Glucagon + PGF,2,1.0508237037911248,0.25,12500,0.25
+cumulative_best_09,Cumulative biomarkers: Insulin + Glucose + IGF1 + E2 + INH + FSH + P4 + Glucagon + PGF,3,0.6592771036593466,0.1,5000,0.1
+cumulative_best_09,Cumulative biomarkers: Insulin + Glucose + IGF1 + E2 + INH + FSH + P4 + Glucagon + PGF,4,0.48495091628574843,0.05,2500,0.05
+high_information_day_all_biomarkers,All observables at high-information day,1,1.323604448029444,0.5,25000,0.5
+high_information_day_all_biomarkers,All observables at high-information day,2,1.0508237037911248,0.25,12500,0.25
+high_information_day_all_biomarkers,All observables at high-information day,3,0.6592771036593466,0.1,5000,0.1
+high_information_day_all_biomarkers,All observables at high-information day,4,0.48495091628574843,0.05,2500,0.05
+low_information_day_all_biomarkers,All observables at low-information day,1,1.3653767110690103,0.5,25000,0.5
+low_information_day_all_biomarkers,All observables at low-information day,2,1.2331653712591184,0.25,12500,0.25
+low_information_day_all_biomarkers,All observables at low-information day,3,0.912568147206298,0.1,5000,0.1
+low_information_day_all_biomarkers,All observables at low-information day,4,0.7006009820095156,0.05,2500,0.05

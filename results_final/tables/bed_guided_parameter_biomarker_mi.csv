@@ -1,0 +1,28 @@
+parameter,profile_class,biomarker,PRCC,Spearman,MI_parameter_biomarker,rank
+insulin_glucose_threshold,Practically identifiable,Insulin,-0.7062195508263196,-0.5843366580400341,0.7062195508263196,1
+insulin_glucose_threshold,Practically identifiable,Glucose,0.5691449277591754,0.5828266109228755,0.5828266109228755,2
+insulin_glucose_threshold,Practically identifiable,E2,0.3905566136699354,0.4313735126929563,0.4313735126929563,3
+inhibin_clearance,Practically identifiable,Insulin,-0.40645676813201,-0.6071670547742083,0.6071670547742083,1
+inhibin_clearance,Practically identifiable,E2,0.3867456300298365,0.5144336158322971,0.5144336158322971,2
+inhibin_clearance,Practically identifiable,P4,-0.3704245414557613,,0.3704245414557613,3
+hp_p4_follicle_scale,Practically identifiable,PGF,-0.5861180520382406,-0.1297011275412015,0.5861180520382406,1
+hp_p4_follicle_scale,Practically identifiable,FSH,0.5851252350218034,,0.5851252350218034,2
+hp_p4_follicle_scale,Practically identifiable,INH,0.4367957005777871,0.3304376267132496,0.4367957005777871,3
+blood_to_liver_glucose_threshold,Boundary-limited,Glucose,0.6913228769398213,0.2632835139876509,0.6913228769398213,1
+blood_to_liver_glucose_threshold,Boundary-limited,Insulin,0.5220430920866618,,0.5220430920866618,2
+blood_to_liver_glucose_threshold,Boundary-limited,Glucagon,-0.3245435571162907,-0.1736406059916049,0.3245435571162907,3
+gnrh_clearance,Boundary-limited,INH,0.1084143332804292,,0.1084143332804292,1
+gnrh_clearance,Boundary-limited,E2,0.0994372615278112,,0.0994372615278112,2
+gnrh_clearance,Boundary-limited,Insulin,0.0444992131389076,0.0859863333180694,0.0859863333180694,3
+hp_iof_threshold,Boundary-limited,PGF,0.1153701934002155,0.0464517374435324,0.1153701934002155,1
+hp_iof_threshold,Boundary-limited,P4,0.0861735357126224,0.046226504737553,0.0861735357126224,2
+hp_iof_threshold,Boundary-limited,Glucagon,0.0135618137394966,0.0456536067823086,0.0456536067823086,3
+insulin_igf_threshold,Weak/flat/non-identifiable,IGF1,-0.3925435303103141,-0.1338628661428147,0.3925435303103141,1
+insulin_igf_threshold,Weak/flat/non-identifiable,INH,0.0964157932704531,,0.0964157932704531,2
+insulin_igf_threshold,Weak/flat/non-identifiable,E2,0.0835664367272747,0.0351330515604506,0.0835664367272747,3
+feed_direct_blood_fraction,Weak/flat/non-identifiable,INH,,0.0927611824840809,0.0927611824840809,1
+feed_direct_blood_fraction,Weak/flat/non-identifiable,Glucose,0.0374410809133076,,0.0374410809133076,2
+feed_direct_blood_fraction,Weak/flat/non-identifiable,FSH,0.0119226510938356,0.0274722698001887,0.0274722698001887,3
+lh_basal_release,Weak/flat/non-identifiable,Glucagon,,0.0548572686188375,0.0548572686188375,1
+lh_basal_release,Weak/flat/non-identifiable,INH,0.0546646899346996,-0.0546536774004122,0.0546646899346996,2
+lh_basal_release,Weak/flat/non-identifiable,IGF1,,-0.0519429860433595,0.0519429860433595,3

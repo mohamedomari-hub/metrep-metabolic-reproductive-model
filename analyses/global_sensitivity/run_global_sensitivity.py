@@ -22,7 +22,7 @@ from scipy.stats import rankdata, spearmanr
 
 PROJECT_ROOT = Path(__file__).resolve().parents[2]
 DEFAULT_BANK = PROJECT_ROOT / "analyses/bayesian_experimental_design/surrogate_bed/input_tables_large"
-BIOMARKERS = ["FSH", "PGF", "P4", "E2", "INH", "IGF1", "Insulin", "Glucose"]
+DEFAULT_OBSERVABLE_ORDER = ["FSH", "PGF", "P4", "E2", "INH", "IGF1", "Insulin", "Glucose", "Glucagon"]
 REPRESENTATIVE_CLASSES = {
     "insulin_glucose_threshold": "Practically identifiable",
     "inhibin_clearance": "Practically identifiable",
@@ -42,6 +42,11 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--output-dir", type=Path, default=Path(__file__).resolve().parent / "outputs")
     parser.add_argument("--variance-bins", type=int, default=20)
     parser.add_argument("--top-per-biomarker", type=int, default=10)
+    parser.add_argument(
+        "--biomarkers",
+        nargs="+",
+        help="Observable biomarkers to analyze. Omit to use all stored observable *_day_* outputs.",
+    )
     return parser.parse_args()
 
 
@@ -50,9 +55,17 @@ def stored_days(outputs: pd.DataFrame, biomarker: str) -> list[int]:
     return sorted(int(match.group(1)) for column in outputs.columns if (match := pattern.match(column)))
 
 
-def auc_endpoints(outputs: pd.DataFrame) -> pd.DataFrame:
+def infer_observable_biomarkers(outputs: pd.DataFrame) -> list[str]:
+    pattern = re.compile(r"^(.+)_day_(\d+)$")
+    found = sorted({match.group(1) for column in outputs.columns if (match := pattern.match(column))})
+    ordered = [name for name in DEFAULT_OBSERVABLE_ORDER if name in found]
+    ordered.extend(name for name in found if name not in ordered)
+    return ordered
+
+
+def auc_endpoints(outputs: pd.DataFrame, biomarkers: list[str]) -> pd.DataFrame:
     auc = {}
-    for biomarker in BIOMARKERS:
+    for biomarker in biomarkers:
         days = stored_days(outputs, biomarker)
         if len(days) < 2:
             raise ValueError(f"Need at least two stored days for {biomarker}.")
@@ -78,9 +91,9 @@ def variance_screening_score(x: np.ndarray, y: np.ndarray, bins: int) -> float:
     return explained / total_variance
 
 
-def full_prior_screening(parameters: pd.DataFrame, auc: pd.DataFrame, bins: int) -> pd.DataFrame:
+def full_prior_screening(parameters: pd.DataFrame, auc: pd.DataFrame, bins: int, biomarkers: list[str]) -> pd.DataFrame:
     rows = []
-    for biomarker in BIOMARKERS:
+    for biomarker in biomarkers:
         y = auc[biomarker].to_numpy(dtype=float)
         for parameter in parameters.columns:
             score = variance_screening_score(parameters[parameter].to_numpy(dtype=float), y, bins)
@@ -108,10 +121,10 @@ def prcc_coefficients(parameters: pd.DataFrame, y: np.ndarray) -> np.ndarray:
     return -precision[:-1, -1] / np.sqrt(np.maximum(precision[:-1, :-1].diagonal() * precision[-1, -1], 1e-15))
 
 
-def admissible_screening(parameters: pd.DataFrame, auc: pd.DataFrame) -> tuple[pd.DataFrame, pd.DataFrame]:
+def admissible_screening(parameters: pd.DataFrame, auc: pd.DataFrame, biomarkers: list[str]) -> tuple[pd.DataFrame, pd.DataFrame]:
     spearman_rows = []
     prcc_rows = []
-    for biomarker in BIOMARKERS:
+    for biomarker in biomarkers:
         y = auc[biomarker].to_numpy(dtype=float)
         prcc = prcc_coefficients(parameters, y)
         for index, parameter in enumerate(parameters.columns):
@@ -178,10 +191,14 @@ def main() -> None:
     if not (len(parameters) == len(outputs) == len(admissibility)):
         raise ValueError("Stored bank tables have inconsistent row counts.")
 
+    biomarkers = args.biomarkers or infer_observable_biomarkers(outputs)
+    if not biomarkers:
+        raise ValueError("No observable biomarker day columns were found.")
+
     finite = parameters.notna().all(axis=1) & outputs.notna().all(axis=1)
     full_parameters = parameters.loc[finite].reset_index(drop=True)
-    full_auc = auc_endpoints(outputs.loc[finite].reset_index(drop=True))
-    full = full_prior_screening(full_parameters, full_auc, args.variance_bins)
+    full_auc = auc_endpoints(outputs.loc[finite].reset_index(drop=True), biomarkers)
+    full = full_prior_screening(full_parameters, full_auc, args.variance_bins, biomarkers)
     full.to_csv(args.output_dir / "full_prior_variance_screening.csv", index=False)
     full.sort_values(["biomarker", "variance_screening_score"], ascending=[True, False]).groupby("biomarker").head(
         args.top_per_biomarker
@@ -189,8 +206,8 @@ def main() -> None:
 
     keep = finite & admissibility["admissible"].astype(bool)
     accepted_parameters = parameters.loc[keep].reset_index(drop=True)
-    accepted_auc = auc_endpoints(outputs.loc[keep].reset_index(drop=True))
-    spearman, prcc = admissible_screening(accepted_parameters, accepted_auc)
+    accepted_auc = auc_endpoints(outputs.loc[keep].reset_index(drop=True), biomarkers)
+    spearman, prcc = admissible_screening(accepted_parameters, accepted_auc, biomarkers)
     spearman.to_csv(args.output_dir / "global_sensitivity_spearman_auc.csv", index=False)
     prcc.to_csv(args.output_dir / "global_sensitivity_prcc_auc.csv", index=False)
 
@@ -215,9 +232,12 @@ def main() -> None:
         "Sobol variance decomposition. The full-prior bank is ordinary random Monte Carlo, so its variance-based result is a "
         "screening analysis, not strict Sobol indices. Perturbation scales differ because each method asks a "
         "different question. BED is handled separately.\n"
+        "Glucagon was excluded from the biological admissibility filter but retained as an observable "
+        "biomarker for downstream uncertainty propagation, global sensitivity, and Bayesian experimental design.\n"
     )
     (args.output_dir / "README.md").write_text(note)
     print(f"Saved global sensitivity outputs to {args.output_dir}")
+    print(f"Observable biomarkers used: {', '.join(biomarkers)}")
     print(f"Full-prior rows: {len(full_parameters)}; admissible rows: {len(accepted_parameters)}; ODE simulations run: 0")
 
 

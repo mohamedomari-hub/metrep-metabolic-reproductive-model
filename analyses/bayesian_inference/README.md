@@ -47,14 +47,14 @@ global sensitivity, and Bayesian experimental design.
 Builds the fixed 3x3 target table and links each parameter to global
 sensitivity biomarkers and uncertainty-informed time windows.
 
-`reduced_mcmc/run_reduced_mcmc.py`
+`reduced_archive_posterior/run_reduced_archive_posterior.py`
 
 Runs reduced selected-parameter posterior inference using likelihood weights
 on the real broad-prior ODE archive. It does not train a surrogate and does
 not run new ODE simulations; posterior support is limited to the saved broad
 `+/-5%` archive rows.
 
-`abc_smc/run_abc_smc.py`
+`archive_abc/run_archive_abc.py`
 
 Runs archive-based sequential ABC filtering over real ODE rows from the
 broad-prior bank. It uses the same independent, global cumulative, high/low
@@ -81,18 +81,18 @@ python analyses/bayesian_inference/select_bayesian_targets.py \
 ```
 
 ```bash
-python analyses/bayesian_inference/reduced_mcmc/run_reduced_mcmc.py \
+python analyses/bayesian_inference/reduced_archive_posterior/run_reduced_archive_posterior.py \
   --target-parameters analyses/bayesian_inference/outputs/bayesian_target_parameters.csv \
-  --output-dir analyses/bayesian_inference/outputs/reduced_mcmc \
-  --figure-dir analyses/bayesian_inference/figures/reduced_mcmc \
+  --output-dir analyses/bayesian_inference/outputs/reduced_archive_posterior \
+  --figure-dir analyses/bayesian_inference/figures/reduced_archive_posterior \
   --seed 42
 ```
 
 ```bash
-python analyses/bayesian_inference/abc_smc/run_abc_smc.py \
+python analyses/bayesian_inference/archive_abc/run_archive_abc.py \
   --target-parameters analyses/bayesian_inference/outputs/bayesian_target_parameters.csv \
-  --output-dir analyses/bayesian_inference/outputs/abc_smc \
-  --figure-dir analyses/bayesian_inference/figures/abc_smc \
+  --output-dir analyses/bayesian_inference/outputs/archive_abc \
+  --figure-dir analyses/bayesian_inference/figures/archive_abc \
   --seed 42
 ```
 

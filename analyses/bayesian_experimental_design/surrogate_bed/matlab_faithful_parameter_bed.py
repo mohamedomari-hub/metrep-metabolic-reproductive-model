@@ -33,7 +33,7 @@ from scipy.special import logsumexp
 from scipy.stats import gaussian_kde
 
 
-DEFAULT_SPECIES = ["FSH", "PGF", "P4", "E2", "INH", "IGF1", "Insulin", "Glucose"]
+DEFAULT_OBSERVABLE_ORDER = ["FSH", "PGF", "P4", "E2", "INH", "IGF1", "Insulin", "Glucose", "Glucagon"]
 DEFAULT_TARGETS = [
     "insulin_glucose_threshold",
     "inhibin_clearance",
@@ -76,7 +76,11 @@ def parse_args() -> argparse.Namespace:
     )
     parser.add_argument("--admissibility-csv", type=Path, required=True)
     parser.add_argument("--output-dir", type=Path, required=True)
-    parser.add_argument("--species", nargs="+", default=DEFAULT_SPECIES)
+    parser.add_argument(
+        "--species",
+        nargs="+",
+        help="Candidate observable biomarkers. Omit to use all stored observable *_day_* outputs.",
+    )
     parser.add_argument("--target-parameters", nargs="+", default=DEFAULT_TARGETS)
     parser.add_argument("--day-start", type=int, default=54)
     parser.add_argument("--day-end", type=int, default=89)
@@ -159,6 +163,18 @@ def available_days(outputs: pd.DataFrame, species: list[str]) -> list[int]:
     return sorted(days)
 
 
+def infer_observable_species(outputs: pd.DataFrame) -> list[str]:
+    found = set()
+    pattern = re.compile(r"^(.+)_day_(\d+)$")
+    for column in outputs.columns:
+        match = pattern.match(column)
+        if match:
+            found.add(match.group(1))
+    ordered = [name for name in DEFAULT_OBSERVABLE_ORDER if name in found]
+    ordered.extend(name for name in sorted(found) if name not in ordered)
+    return ordered
+
+
 def day_columns(day: int, species: list[str]) -> list[str]:
     return [f"{name}_day_{day}" for name in species]
 
@@ -172,6 +188,10 @@ def load_inputs(args: argparse.Namespace):
         raise ValueError("Parameters, outputs, and admissibility tables must have matching rows.")
     if "admissible" not in admissibility:
         raise ValueError("Admissibility table must contain an 'admissible' column.")
+    if args.species is None:
+        args.species = infer_observable_species(outputs)
+    if not args.species:
+        raise ValueError("No observable biomarker day columns were found.")
 
     keep = admissibility["admissible"].astype(bool).to_numpy()
     parameters = parameters.loc[keep].reset_index(drop=True)

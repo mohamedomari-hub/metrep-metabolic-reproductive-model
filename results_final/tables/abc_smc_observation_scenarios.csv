@@ -1,0 +1,17 @@
+scenario,description,columns,final_particles
+gsa_uncertainty_guided,"GSA + uncertainty guided: E2 d64, E2 d66, E2 d86, E2 d87, E2 d88, FSH d62, FSH d71, FSH d78, FSH d80",E2_day_64|E2_day_66|E2_day_86|E2_day_87|E2_day_88|FSH_day_62|FSH_day_71|FSH_day_78|FSH_day_80,2500
+independent_1_Insulin_day_65,Independent observation scenario 1: Insulin,Insulin_day_65,2500
+independent_2_Glucose_day_65,Independent observation scenario 2: Glucose,Glucose_day_65,2500
+independent_3_IGF1_day_65,Independent observation scenario 3: IGF1,IGF1_day_65,2500
+independent_4_E2_day_65,Independent observation scenario 4: E2,E2_day_65,2500
+cumulative_best_01,Cumulative biomarkers: Insulin,Insulin_day_65,2500
+cumulative_best_02,Cumulative biomarkers: Insulin + Glucose,Insulin_day_65|Glucose_day_65,2500
+cumulative_best_03,Cumulative biomarkers: Insulin + Glucose + IGF1,Insulin_day_65|Glucose_day_65|IGF1_day_65,2500
+cumulative_best_04,Cumulative biomarkers: Insulin + Glucose + IGF1 + E2,Insulin_day_65|Glucose_day_65|IGF1_day_65|E2_day_65,2500
+cumulative_best_05,Cumulative biomarkers: Insulin + Glucose + IGF1 + E2 + INH,Insulin_day_65|Glucose_day_65|IGF1_day_65|E2_day_65|INH_day_65,2500
+cumulative_best_06,Cumulative biomarkers: Insulin + Glucose + IGF1 + E2 + INH + FSH,Insulin_day_65|Glucose_day_65|IGF1_day_65|E2_day_65|INH_day_65|FSH_day_65,2500
+cumulative_best_07,Cumulative biomarkers: Insulin + Glucose + IGF1 + E2 + INH + FSH + P4,Insulin_day_65|Glucose_day_65|IGF1_day_65|E2_day_65|INH_day_65|FSH_day_65|P4_day_65,2500
+cumulative_best_08,Cumulative biomarkers: Insulin + Glucose + IGF1 + E2 + INH + FSH + P4 + Glucagon,Insulin_day_65|Glucose_day_65|IGF1_day_65|E2_day_65|INH_day_65|FSH_day_65|P4_day_65|Glucagon_day_65,2500
+cumulative_best_09,Cumulative biomarkers: Insulin + Glucose + IGF1 + E2 + INH + FSH + P4 + Glucagon + PGF,Insulin_day_65|Glucose_day_65|IGF1_day_65|E2_day_65|INH_day_65|FSH_day_65|P4_day_65|Glucagon_day_65|PGF_day_65,2500
+high_information_day_all_biomarkers,All observables at high-information day,FSH_day_65|PGF_day_65|P4_day_65|E2_day_65|INH_day_65|IGF1_day_65|Insulin_day_65|Glucose_day_65|Glucagon_day_65,2500
+low_information_day_all_biomarkers,All observables at low-information day,FSH_day_80|PGF_day_80|P4_day_80|E2_day_80|INH_day_80|IGF1_day_80|Insulin_day_80|Glucose_day_80|Glucagon_day_80,2500

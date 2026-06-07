@@ -1,0 +1,2 @@
+scenario,description,columns,effective_sample_size,max_weight,posterior_rows,inference_status
+all_observables_day_81,All observables at requested day,FSH_day_81|PGF_day_81|P4_day_81|E2_day_81|INH_day_81|IGF1_day_81|Insulin_day_81|Glucose_day_81|Glucagon_day_81,35.962351993989515,0.10993999815940635,20000,ode_archive_likelihood_weighted

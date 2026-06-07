@@ -1,0 +1,10 @@
+parameter,scenario,description,columns,final_particles
+insulin_glucose_threshold,guided_insulin_glucose_threshold,"insulin_glucose_threshold: Insulin d58, Glucose d61, E2 d87",Insulin_day_58|Glucose_day_61|E2_day_87,2500
+inhibin_clearance,guided_inhibin_clearance,"inhibin_clearance: Insulin d58, E2 d64, P4 d80",Insulin_day_58|E2_day_64|P4_day_80,2500
+hp_p4_follicle_scale,guided_hp_p4_follicle_scale,"hp_p4_follicle_scale: PGF d60, FSH d62, INH d65",PGF_day_60|FSH_day_62|INH_day_65,2500
+blood_to_liver_glucose_threshold,guided_blood_to_liver_glucose_threshold,"blood_to_liver_glucose_threshold: Glucose d61, Insulin d58, Glucagon d54",Glucose_day_61|Insulin_day_58|Glucagon_day_54,2500
+gnrh_clearance,guided_gnrh_clearance,"gnrh_clearance: INH d64, E2 d64, Insulin d58",INH_day_64|E2_day_64|Insulin_day_58,2500
+hp_iof_threshold,guided_hp_iof_threshold,"hp_iof_threshold: PGF d60, P4 d81, Glucagon d54",PGF_day_60|P4_day_81|Glucagon_day_54,2500
+insulin_igf_threshold,guided_insulin_igf_threshold,"insulin_igf_threshold: IGF1 d84, INH d65, E2 d87",IGF1_day_84|INH_day_65|E2_day_87,2500
+feed_direct_blood_fraction,guided_feed_direct_blood_fraction,"feed_direct_blood_fraction: INH d65, Glucose d61, FSH d71",INH_day_65|Glucose_day_61|FSH_day_71,2500
+lh_basal_release,guided_lh_basal_release,"lh_basal_release: Glucagon d54, INH d65, IGF1 d61",Glucagon_day_54|INH_day_65|IGF1_day_61,2500

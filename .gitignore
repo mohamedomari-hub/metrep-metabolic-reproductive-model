@@ -12,6 +12,17 @@ results/
 MetRep_Python/results/
 
 # Large generated simulation banks and BED result folders remain local.
+analyses/**/outputs*/
+analyses/**/run_outputs*/
+analyses/**/run_figures*/
+analyses/**/debug_outputs*/
+analyses/**/debug_figures*/
+analyses/**/phd_bed_bank*/
+analyses/**/phd_bed_results*/
+analyses/**/bed_results*/
+analyses/surrogate_admissible_prior_enrichment/outputs*/
+analyses/surrogate_admissible_prior_enrichment/figures*/
+analyses/bayesian_inference/figures*/
 analyses/bayesian_experimental_design/surrogate_bed/phd_bed_bank_5pct/
 analyses/bayesian_experimental_design/surrogate_bed/phd_bed_bank_5pct_50k_glucagon/
 analyses/bayesian_experimental_design/surrogate_bed/phd_bed_results/

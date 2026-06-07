@@ -16,8 +16,8 @@ ROOT = Path(__file__).resolve().parents[2]
 def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(description="Compare posterior reweighting, archive posterior, and archive ABC summaries.")
     parser.add_argument("--bed-dir", type=Path, default=ROOT / "analyses/bayesian_experimental_design/surrogate_bed/run_outputs_targeted")
-    parser.add_argument("--mcmc-dir", type=Path, default=ROOT / "analyses/bayesian_inference/outputs/reduced_mcmc")
-    parser.add_argument("--abc-dir", type=Path, default=ROOT / "analyses/bayesian_inference/outputs/abc_smc")
+    parser.add_argument("--mcmc-dir", type=Path, default=ROOT / "analyses/bayesian_inference/outputs/reduced_archive_posterior")
+    parser.add_argument("--abc-dir", type=Path, default=ROOT / "analyses/bayesian_inference/outputs/archive_abc")
     parser.add_argument("--table-dir", type=Path, default=ROOT / "results_final/tables")
     parser.add_argument("--figure-dir", type=Path, default=ROOT / "results_final/figures")
     return parser.parse_args()
