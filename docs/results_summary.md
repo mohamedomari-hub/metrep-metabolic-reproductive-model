@@ -1,8 +1,8 @@
 # Results Summary
 
-This summary presents the curated scientific story from the MetRep
-metabolic-reproductive model portfolio. The goal is not to list every generated
-plot, but to connect the major diagnostics into one interpretation:
+This document summarizes the curated scientific results for the MetRep
+metabolic-reproductive model portfolio. The results are organized as a single
+diagnostic chain:
 
 ```text
 sensitivity
@@ -13,205 +13,245 @@ sensitivity
 -> posterior learning
 ```
 
-The central conclusion is that Bayesian updating confirms the identifiability
-diagnosis rather than contradicting it.
+The central scientific conclusion is that Bayesian updating confirms the
+identifiability diagnosis rather than contradicting it.
 
-## 1. Local Sensitivity
-
-Local sensitivity uses `+1%` one-at-a-time perturbations and AUC endpoints to
-rank parameters by nominal output influence.
-
-Main figure:
+## 1. Local Sensitivity Analysis
 
 ![Top local sensitivity parameters](../results_final/figures/sensitivity_top_parameters.png)
 
-The strongest local effects are concentrated in metabolic control,
+Local sensitivity ranks parameters by one-at-a-time AUC response near the
+calibrated parameter vector. The strongest effects involve metabolic control,
 glucose-insulin regulation, IGF dynamics, and reproductive endocrine
-parameters. This shows that the observable biomarkers are responsive to both
-metabolic and reproductive mechanisms.
+mechanisms. This confirms that the selected observable panel responds to both
+metabolic and reproductive subsystems.
 
-However, local sensitivity is only the first screen. A parameter can strongly
-move outputs and still be difficult to estimate if another parameter can
-compensate for it.
+The result is local by design. It identifies influential mechanisms near the
+nominal model, but it does not establish whether those parameters can be
+estimated uniquely. Compensation and weak output directions are addressed by
+the identifiability analyses.
 
-## 2. Biological Admissibility
+## 2. Biological Admissibility Filtering
 
-Monte Carlo simulations were filtered to retain physiologically plausible ODE
-trajectories before downstream ensemble analyses. The historical admissibility
-filter used:
+Biological admissibility filtering restricts ensemble analyses to plausible ODE
+trajectories. This matters because nonlinear endocrine-metabolic systems can
+produce unrealistic oscillations, unstable biomarker levels, or failed cycle
+structure even when sampled parameters remain inside a nominal prior range.
 
-```text
-FSH, PGF, P4, E2, INH, IGF1, Insulin, Glucose
-```
+The historical admissibility panel used FSH, PGF, P4, E2, INH, IGF1, insulin,
+and glucose. Glucagon was excluded from the admissibility rule but retained as
+an observable biomarker for downstream uncertainty propagation, global
+sensitivity, and Bayesian experimental design.
 
-Glucagon was excluded from the admissibility rule but retained as an observable
-biomarker for downstream global sensitivity, uncertainty propagation, and BED.
+The enriched ODE-confirmed admissible ensemble contains 12,721 biologically
+admissible simulations. Only ODE-confirmed rows are treated as scientific
+truth. The admissible ensemble provides the basis for global sensitivity,
+uncertainty propagation, and MI/BED ranking stability.
 
-The enriched ODE-confirmed admissible bank contains 12,721 biologically
-admissible simulations. These rows are used for ensemble-based ranking,
-uncertainty summaries, and MI stability. Only ODE-confirmed rows are treated as
-scientific truth.
-
-## 3. Global Sensitivity
-
-Global sensitivity evaluates PRCC and Spearman parameter-biomarker AUC
-associations across the ODE-confirmed admissible ensemble.
-
-Main figures:
+## 3. Global Sensitivity Analysis
 
 ![PRCC heatmap](../results_final/figures/global_sensitivity_98x9_prcc_heatmap.png)
 
+![Spearman heatmap](../results_final/figures/global_sensitivity_98x9_spearman_heatmap.png)
+
 ![Representative global sensitivity](../results_final/figures/global_sensitivity_representative_parameters_heatmap.png)
 
-The global sensitivity results identify which observable biomarkers are most
-associated with each parameter across plausible biological variability. This is
-important because the strongest nominal local-sensitivity outputs are not
-always the best global biomarkers for posterior learning.
+Global sensitivity evaluates parameter-biomarker AUC associations across the
+ODE-confirmed admissible ensemble. PRCC and Spearman heatmaps show which
+parameters are monotonically associated with each observable biomarker.
 
-Biologically, the heatmaps connect mechanisms to output channels. For example,
-metabolic thresholds tend to link with glucose, insulin, IGF1, and glucagon
-features, while reproductive control parameters link with FSH, PGF, P4, E2, and
-INH dynamics.
+Metabolic thresholds and transport parameters tend to associate with glucose,
+insulin, IGF1, and glucagon AUC features. Reproductive endocrine parameters
+link to FSH, PGF, P4, E2, and INH features. These links define biologically
+interpretable parameter-biomarker relationships for downstream BED targeting.
 
-PRCC and Spearman are interpreted as monotonic association screens, not formal
-Sobol variance decompositions.
+The associations are not causal effects and are not formal Sobol variance
+decompositions. They are monotonic screening signals inside the admissible
+simulation ensemble.
 
 ## 4. SVD Identifiability
-
-The SVD identifiability screen examines which parameter directions are
-expressed in the measured output space and which directions are weak or
-compensatory.
-
-Main figures:
 
 ![Singular values](../results_final/figures/identifiability_singular_values.png)
 
 ![Compensation network](../results_final/figures/identifiability_compensation_network_core.png)
 
-Rapidly decaying singular values indicate weakly informed directions. The
-compensation network shows where parameters can trade off to produce similar
-outputs. This explains why sensitivity and identifiability are not identical:
-an influential parameter can still be difficult to estimate if compensation is
-available.
+![Nullspace participation](../results_final/figures/identifiability_nullspace_participation.png)
 
-The SVD screen motivates estimate/fix/anchor decisions and identifies
-candidate parameters for nonlinear profile likelihood.
+![Decision map](../results_final/figures/identifiability_decision_map.png)
+
+The SVD screen evaluates which local parameter directions are expressed in the
+measured output space. Rapidly decaying singular values indicate weakly
+informed directions. Nullspace participation identifies parameters that
+contribute strongly to poorly informed directions.
+
+The compensation network shows how parameters can trade off while preserving
+similar output behavior. Biologically, this reflects the fact that multiple
+mechanisms can influence the same endocrine-metabolic trajectories. This is why
+local influence does not automatically imply practical identifiability.
+
+The decision map summarizes which parameters are candidates for estimation,
+anchoring, or fixing in a selected output scenario.
 
 ## 5. Profile Likelihood
 
-Profile likelihood confirms practical identifiability by fixing one parameter
-over a grid and allowing nuisance parameters to compensate.
-
-Main figure:
-
 ![Representative profile likelihood classes](../results_final/figures/profile_likelihood_representative_3x3.png)
 
-The representative 3 x 3 set shows three qualitative classes:
+Profile likelihood provides nonlinear confirmation of practical
+identifiability. The representative 3 x 3 panel contains:
 
-- Practically identifiable parameters show clear profile curvature.
-- Boundary-limited parameters show one-sided or edge-constrained learning.
-- Weak/flat parameters show broad, shallow, or compensatory profiles.
+- Practically identifiable parameters:
+  `insulin_glucose_threshold`, `inhibin_clearance`,
+  `hp_p4_follicle_scale`.
+- Boundary-limited parameters:
+  `blood_to_liver_glucose_threshold`, `gnrh_clearance`,
+  `hp_iof_threshold`.
+- Weak or flat parameters:
+  `insulin_igf_threshold`, `feed_direct_blood_fraction`,
+  `lh_basal_release`.
 
-This profile-likelihood classification becomes the reference diagnosis for the
-Bayesian and BED analyses.
+Practically identifiable profiles show clear curvature around the optimum.
+Boundary-limited profiles show partial or one-sided support. Weak/flat profiles
+remain broad or shallow, indicating limited learnability under the available
+observable panel.
+
+This classification becomes the reference diagnosis for BED and Bayesian
+posterior comparisons.
 
 ## 6. Uncertainty Propagation
 
-Uncertainty propagation summarizes trajectory variability across the
-ODE-confirmed admissible ensemble.
-
-Main figure:
-
 ![Uncertainty summary](../results_final/figures/uncertainty_readme_summary.png)
 
-The shaded bands show the 5th-95th percentile range, the solid blue line shows
-the ensemble median, and the dashed black line shows the nominal trajectory.
-Time windows where admissible trajectories diverge are treated as candidate
-experimental windows.
+![Reproductive uncertainty](../results_final/figures/uncertainty_reproductive.png)
 
-These uncertainty windows are not population variability. They are plausible
-model variability under the retained biologically admissible parameter regime.
+![Metabolic uncertainty](../results_final/figures/uncertainty_metabolic.png)
+
+Uncertainty propagation summarizes the 5th-95th percentile range, ensemble
+median, and nominal trajectory across admissible ODE-confirmed simulations.
+The informative windows are periods where biologically plausible trajectories
+separate meaningfully.
+
+These windows are used by BED to restrict candidate sampling days. The
+uncertainty results therefore connect admissible model variability to
+experimental timing.
 
 ## 7. Bayesian Experimental Design
 
-BED ranks measurements by expected information about uncertain parameters and
-then tests whether those measurements narrow posterior distributions.
+### Independent Observation Scenarios
 
-Main figures:
+![Independent observation posteriors](../results_final/figures/bed_targeted_independent_observation_posteriors_3x3.png)
 
-![Guided biomarker MI bars](../results_final/figures/bed_guided_parameter_biomarker_mi_bars.png)
+Independent observation scenarios show how individual selected measurements
+reshape representative parameter priors. These plots separate direct
+single-scenario learning from cumulative acquisition effects.
 
-![Guided day MI curves](../results_final/figures/bed_guided_day_mi_curves.png)
+### Cumulative Biomarker Acquisition
+
+![Cumulative biomarker posteriors](../results_final/figures/bed_targeted_cumulative_biomarker_posteriors_3x3.png)
+
+The cumulative acquisition analysis adds biomarkers from best 1 through best 9
+using a global biomarker ranking. It shows how posterior narrowing changes as
+additional measurements are included. This is intentionally different from the
+parameter-specific guided update.
+
+### High Versus Low Information Day
+
+![High versus low information day](../results_final/figures/bed_targeted_high_vs_low_information_day_3x3.png)
+
+The high-versus-low day comparison tests whether BED-ranked sampling days
+produce stronger posterior narrowing than less informative days. The result
+connects the MI ranking to posterior behavior.
+
+### Guided Parameter-Specific Updates
 
 ![Guided posterior updates](../results_final/figures/bed_targeted_gsa_uncertainty_guided_posteriors_3x3.png)
 
-The BED workflow includes independent observation scenarios, cumulative
-biomarker acquisition from best 1 through best 9 biomarkers, highest- versus
-lowest-information day comparisons, and parameter-specific guided updates.
+The guided update is parameter-specific. For each representative parameter, the
+workflow selects biomarkers from global sensitivity links, restricts days to
+uncertainty-rich windows, ranks biomarker-day candidates by MI, and updates the
+posterior using the selected scenario.
 
-The parameter-specific guided update is the most integrated analysis:
+This creates the following chain:
 
 ```text
 profile class
 -> GSA-linked biomarkers
--> uncertainty-selected time windows
+-> uncertainty-selected days
 -> MI-ranked biomarker/day observations
 -> posterior update
 ```
 
-Specific biomarker/day selections are therefore not random. They are chosen
-because they are globally associated with the target parameter, occur in
-uncertainty-rich windows, and have high MI proxy scores.
+Examples include insulin/glucose-related observations for metabolic threshold
+parameters and PGF/FSH/INH/P4-related observations for reproductive endocrine
+parameters. These selections are not random; they reflect the intersection of
+global sensitivity, uncertainty propagation, and MI ranking.
 
-The resulting posterior behavior follows the identifiability diagnosis:
-practically identifiable parameters narrow strongly, boundary-limited
-parameters narrow partially or one-sidedly, and weak/flat parameters remain
-broad.
+### MI Biomarker Ranking
+
+![Guided biomarker MI bars](../results_final/figures/bed_guided_parameter_biomarker_mi_bars.png)
+
+The biomarker MI bars identify which observable biomarkers are most informative
+for each representative parameter. This helps explain why different parameters
+receive different guided observation scenarios.
+
+### MI Day Curves
+
+![Guided day MI curves](../results_final/figures/bed_guided_day_mi_curves.png)
+
+The day curves show candidate-day information scores within
+uncertainty-selected windows. Because each parameter has its own linked
+biomarkers and uncertainty windows, the selected days can differ across
+parameters.
 
 ## 8. Bayesian Inference
 
-Bayesian inference is evaluated with archive-based methods that use trusted ODE
-simulation rows rather than surrogate-predicted posterior truth.
+### Reduced Archive Posterior
 
-Main figures:
+![Reduced archive posterior](../results_final/figures/mcmc_prior_vs_posterior_3x3.png)
 
-![Archive ABC parameter-specific updates](../results_final/figures/abc_smc_parameter_specific_gsa_uncertainty_guided_posteriors_3x3.png)
+The reduced archive posterior uses likelihood weights over broad-prior ODE
+archive rows. It is an archive-based posterior approximation, not live ODE
+MCMC. The resulting posterior curves provide a transparent check on whether
+the selected observations concentrate probability in parameter space.
+
+### Archive ABC Filtering
+
+![Archive ABC posteriors](../results_final/figures/abc_smc_parameter_specific_gsa_uncertainty_guided_posteriors_3x3.png)
+
+Archive-based sequential ABC filtering reduces a distance tolerance over
+precomputed ODE rows. It is not full adaptive ABC-SMC because particles are not
+perturbed and ODEs are not rerun. The method cannot discover posterior regions
+absent from the archive, but it provides a likelihood-free check using trusted
+ODE simulations.
+
+### Bayesian Method Comparison
 
 ![Bayesian method comparison](../results_final/figures/bayesian_method_comparison_summary.png)
 
-The reduced archive posterior uses Gaussian likelihood weights over
-precomputed ODE rows. Archive-based sequential ABC filtering reduces a distance
-tolerance over the same archive. It is not full adaptive ABC-SMC because it
-does not perturb particles or rerun ODEs.
+The method comparison summarizes posterior behavior across reweighting,
+reduced archive posterior updates, and archive-based sequential ABC filtering.
+Agreement across these archive-based methods strengthens the final
+interpretation.
 
-These methods provide a transparent posterior check over the broad `+/-5%` ODE
-archive. They should not be oversold as live ODE MCMC or adaptive ABC-SMC.
+## 9. Integrated Scientific Story
 
-## 9. Cross-Method Scientific Story
+The results form a coherent scientific chain:
 
-The analyses form a coherent chain:
-
-1. Local sensitivity identifies nominally influential mechanisms.
-2. SVD reveals compensation and weak output-informed directions.
-3. Profile likelihood confirms nonlinear practical identifiability classes.
-4. Biological admissibility restricts ensemble analyses to plausible ODE
-   trajectories.
+1. Local sensitivity identifies mechanisms that affect outputs near the nominal
+   model.
+2. SVD identifies weak directions and compensatory parameter combinations.
+3. Profile likelihood confirms which representative parameters are practically
+   identifiable, boundary-limited, or weak/flat.
+4. Biological admissibility filtering restricts ensemble analyses to plausible
+   ODE trajectories.
 5. Global sensitivity links parameters to observable biomarkers.
-6. Uncertainty propagation identifies informative time windows.
+6. Uncertainty propagation identifies informative sampling windows.
 7. BED selects biomarker-day observations for parameter learning.
-8. Bayesian posterior updates test whether those observations actually reduce
+8. Bayesian posterior updates test whether those observations reduce
    uncertainty.
 
-The final scientific conclusion is:
+Practically identifiable parameters show strong posterior narrowing.
+Boundary-limited parameters show partial or one-sided learning. Weak/flat
+parameters remain broad even under guided observations.
 
-```text
 Bayesian updating confirms the identifiability diagnosis rather than
 contradicting it.
-```
-
-This matters because BED is not only a plotting exercise. It provides a
-mechanistic check on whether new measurements can improve parameter learning.
-Where the model contains usable information, posteriors narrow. Where the
-profile likelihood is weak or flat, guided observations may still fail to
-produce strong learning, revealing the need for richer measurements or model
-reparameterization.
