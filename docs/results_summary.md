@@ -26,6 +26,11 @@ glucose-insulin regulation, IGF dynamics, and reproductive endocrine
 mechanisms. This confirms that the selected observable panel responds to both
 metabolic and reproductive subsystems.
 
+Using AUC rather than a single time point is important for this model because
+the reproductive-metabolic trajectories are dynamic and partially oscillatory.
+The AUC endpoint summarizes sustained trajectory changes while avoiding a
+ranking that depends on one arbitrary sampling time.
+
 The result is local by design. It identifies influential mechanisms near the
 nominal model, but it does not establish whether those parameters can be
 estimated uniquely. Compensation and weak output directions are addressed by
@@ -91,6 +96,12 @@ measured output space. Rapidly decaying singular values indicate weakly
 informed directions. Nullspace participation identifies parameters that
 contribute strongly to poorly informed directions.
 
+The singular-value pattern shows that the model has a mixture of well-informed
+and poorly informed parameter combinations. This is the main reason the
+analysis separates "influential" from "identifiable": a parameter can move an
+output locally while still being difficult to estimate if another mechanism can
+produce a similar trajectory change.
+
 The compensation network shows how parameters can trade off while preserving
 similar output behavior. Biologically, this reflects the fact that multiple
 mechanisms can influence the same endocrine-metabolic trajectories. This is why
@@ -120,6 +131,11 @@ Practically identifiable profiles show clear curvature around the optimum.
 Boundary-limited profiles show partial or one-sided support. Weak/flat profiles
 remain broad or shallow, indicating limited learnability under the available
 observable panel.
+
+This nonlinear check complements the SVD screen: SVD identifies weak local
+directions and compensation structure, while profile likelihood tests whether
+those weaknesses remain after nuisance parameters are allowed to re-adjust over
+a wider parameter range.
 
 This classification becomes the reference diagnosis for BED and Bayesian
 posterior comparisons.
@@ -183,6 +199,11 @@ profile class
 -> MI-ranked biomarker/day observations
 -> posterior update
 ```
+
+Conceptually, this is the thesis connection between identifiability and
+experimental design. Identifiability diagnostics identify which parameter
+directions are weak under the current observation set; BED then asks which
+future biomarker-day measurements are most likely to reduce those weaknesses.
 
 Examples include insulin/glucose-related observations for metabolic threshold
 parameters and PGF/FSH/INH/P4-related observations for reproductive endocrine
