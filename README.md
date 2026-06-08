@@ -99,16 +99,16 @@ parameters remain difficult even under guided observations.
 ## Repository Structure
 
 ```text
-analyses/       Analysis workflows for sensitivity, identifiability,
-                uncertainty, Bayesian inference, and BED
-docs/           Public methodology, results summary, and reproducibility notes
-results_final/  Curated GitHub-facing figures and tables
 MetRep_Matlab/  Original MATLAB reference implementation
 MetRep_Python/  Python model implementation and core scripts
+docs/           Public methodology, model overview, and results summary
+results_final/  Curated GitHub-facing figures and tables
+workflows/      Lightweight reproducibility scripts for the final portfolio
 ```
 
-Legacy project notes and historical generated materials are preserved in
-`archive_legacy_project_documentation/` for provenance.
+Large generated ODE banks, particle pools, debug folders, and temporary outputs
+are not part of the public repository. They should be regenerated or restored
+locally when a full workflow rerun is needed.
 
 ## Reproducibility
 
@@ -131,24 +131,20 @@ pip install -r requirements.txt
 
 The MATLAB reference implementation is preserved in `MetRep_Matlab/`. The
 Python workflow uses the model and parameter definitions under `MetRep_Python/`
-and `MetRep_Model/analyses/`.
+and the final reproducibility scripts under `workflows/`.
 
 ### Repository Logic
 
-Each analysis folder contains the main workflow scripts and a local `README.md`
-where appropriate. Generated outputs are written to local `outputs/`,
-`run_outputs/`, or figure folders and are ignored unless they are curated into
-`results_final/`.
+The public repository separates three roles:
 
-The cleaned analysis layers are:
+- `MetRep_Matlab/` and `MetRep_Python/` preserve the model implementation.
+- `workflows/` contains the current reproducibility scripts used by the final
+  portfolio.
+- `docs/` and `results_final/` contain the public scientific narrative and
+  curated outputs.
 
-- `analyses/local_sensitivity/`
-- `analyses/identifiability/`
-- `analyses/global_sensitivity/`
-- `analyses/uncertainty/`
-- `analyses/bayesian_experimental_design/`
-- `analyses/bayesian_inference/`
-- `analyses/model_diagnostics/`
+Local generated material should be written to ignored folders such as
+`local_data/` and `local_outputs/`.
 
 ### Reproducibility Modes
 
@@ -163,11 +159,11 @@ Two reproducibility modes are supported:
 ### Rebuilding Large Simulation Banks
 
 Large banks are not committed. The main broad-prior and enriched-bank paths used
-by the final workflow are:
+by the reproducibility commands below are:
 
 ```text
-analyses/bayesian_experimental_design/surrogate_bed/phd_bed_bank_5pct_50k_glucagon/
-analyses/bayesian_experimental_design/surrogate_bed/phd_bed_bank_5pct_50k_glucagon_smc_enriched/
+local_data/phd_bed_bank_5pct_50k_glucagon/
+local_data/phd_bed_bank_5pct_50k_glucagon_smc_enriched/
 ```
 
 The broad `+/-5%` ODE bank is the prior archive for posterior distributions.
@@ -179,57 +175,57 @@ as scientific truth.
 Example downstream commands, assuming the local ODE-confirmed banks exist:
 
 ```bash
-python analyses/global_sensitivity/run_global_sensitivity_enriched_98x9.py \
-  --enriched-bank-dir analyses/bayesian_experimental_design/surrogate_bed/phd_bed_bank_5pct_50k_glucagon_smc_enriched \
-  --output-dir analyses/global_sensitivity/outputs_enriched \
+python workflows/global_sensitivity_enriched_98x9.py \
+  --enriched-bank-dir local_data/phd_bed_bank_5pct_50k_glucagon_smc_enriched \
+  --output-dir local_outputs/global_sensitivity \
   --figure-dir results_final/figures \
   --table-dir results_final/tables
 ```
 
 ```bash
-python analyses/uncertainty/run_uncertainty_propagation.py \
-  --bank-dir analyses/bayesian_experimental_design/surrogate_bed/phd_bed_bank_5pct_50k_glucagon_smc_enriched \
-  --output-dir analyses/uncertainty/outputs_smc_enriched_5pct_glucagon
+python workflows/uncertainty_propagation.py \
+  --bank-dir local_data/phd_bed_bank_5pct_50k_glucagon_smc_enriched \
+  --output-dir local_outputs/uncertainty
 ```
 
 ```bash
-python analyses/bayesian_experimental_design/surrogate_bed/run_targeted_bed_posterior_portfolio.py \
-  --broad-prior-dir analyses/bayesian_experimental_design/surrogate_bed/phd_bed_bank_5pct_50k_glucagon \
-  --enriched-bank-dir analyses/bayesian_experimental_design/surrogate_bed/phd_bed_bank_5pct_50k_glucagon_smc_enriched \
-  --global-sensitivity-dir analyses/global_sensitivity/outputs_enriched \
-  --uncertainty-dir analyses/uncertainty/outputs_smc_enriched_5pct_glucagon \
+python workflows/targeted_bed_posterior_portfolio.py \
+  --broad-prior-dir local_data/phd_bed_bank_5pct_50k_glucagon \
+  --enriched-bank-dir local_data/phd_bed_bank_5pct_50k_glucagon_smc_enriched \
+  --global-sensitivity-dir local_outputs/global_sensitivity \
+  --uncertainty-dir local_outputs/uncertainty \
   --profile-dir results_final/tables \
-  --output-dir analyses/bayesian_experimental_design/surrogate_bed/run_outputs_targeted \
-  --figure-dir analyses/bayesian_experimental_design/surrogate_bed/run_figures_targeted \
+  --output-dir local_outputs/bed_targeted \
+  --figure-dir local_outputs/bed_figures \
   --seed 42
 ```
 
 ```bash
-python analyses/bayesian_inference/select_bayesian_targets.py \
+python workflows/select_bayesian_targets.py \
   --profile-dir results_final/tables \
-  --global-sensitivity-dir analyses/global_sensitivity/outputs_enriched \
-  --uncertainty-dir analyses/uncertainty/outputs_smc_enriched_5pct_glucagon \
-  --output-dir analyses/bayesian_inference/outputs
+  --global-sensitivity-dir local_outputs/global_sensitivity \
+  --uncertainty-dir local_outputs/uncertainty \
+  --output-dir local_outputs/bayesian_targets
 ```
 
 ```bash
-python analyses/bayesian_inference/reduced_archive_posterior/run_reduced_archive_posterior.py \
-  --target-parameters analyses/bayesian_inference/outputs/bayesian_target_parameters.csv \
-  --output-dir analyses/bayesian_inference/outputs/reduced_archive_posterior \
-  --figure-dir analyses/bayesian_inference/figures/reduced_archive_posterior \
+python workflows/reduced_archive_posterior.py \
+  --target-parameters local_outputs/bayesian_targets/bayesian_target_parameters.csv \
+  --output-dir local_outputs/reduced_archive_posterior \
+  --figure-dir local_outputs/reduced_archive_posterior_figures \
   --seed 42
 ```
 
 ```bash
-python analyses/bayesian_inference/archive_abc/run_archive_abc.py \
-  --target-parameters analyses/bayesian_inference/outputs/bayesian_target_parameters.csv \
-  --output-dir analyses/bayesian_inference/outputs/archive_abc \
-  --figure-dir analyses/bayesian_inference/figures/archive_abc \
+python workflows/archive_abc_filtering.py \
+  --target-parameters local_outputs/bayesian_targets/bayesian_target_parameters.csv \
+  --output-dir local_outputs/archive_abc \
+  --figure-dir local_outputs/archive_abc_figures \
   --seed 42
 ```
 
 ```bash
-python analyses/bayesian_inference/compare_bayesian_methods.py
+python workflows/compare_bayesian_methods.py
 ```
 
 ### Randomness And Determinism
