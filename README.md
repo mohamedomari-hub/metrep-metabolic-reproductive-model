@@ -110,6 +110,29 @@ Large generated ODE banks, particle pools, debug folders, and temporary outputs
 are not part of the public repository. They should be regenerated or restored
 locally when a full workflow rerun is needed.
 
+### Code Organization
+
+The repository separates model code from final portfolio workflows:
+
+- `MetRep_Python/model_definition/` contains reusable model components:
+  parameters, ODE equations, simulation helpers, admissibility utilities,
+  profile-likelihood utilities, and plotting helpers.
+- `MetRep_Python/model_running/` contains model-side runners that execute or
+  diagnose the Python model directly. These include baseline simulation,
+  local sensitivity, SVD identifiability, model-level uncertainty, and profile
+  likelihood.
+- `workflows/` contains the final GitHub-facing orchestration scripts. These
+  scripts operate on local ODE-confirmed banks and curated outputs to reproduce
+  the portfolio-level global sensitivity, uncertainty propagation, BED,
+  archive posterior, ABC filtering, and method-comparison results.
+
+This means that similarly named analyses can appear at two levels. For example,
+`MetRep_Python/model_running/06_run_uncertainty.py` is a model-side uncertainty
+runner, while `workflows/uncertainty_propagation.py` is the final ensemble
+summary workflow for the ODE-confirmed admissible bank. Similarly,
+profile-likelihood code remains with the model runners because it fixes
+parameters and re-evaluates model fit directly.
+
 ## Reproducibility
 
 The repository is organized so the public GitHub version stays lightweight
