@@ -42,7 +42,7 @@ import matplotlib.pyplot as plt
 
 from model_analysis.analysis import structural_identifiability_svd
 from model_definition.parameters import PARAMETERS
-from model_definition.plotting import (
+from model_analysis.plotting import (
     parameter_scenario_classes,
     plot_compensation_network,
     plot_parameter_scenario_map,

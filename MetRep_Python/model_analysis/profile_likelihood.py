@@ -8,7 +8,7 @@ import numpy as np
 import pandas as pd
 from scipy.optimize import minimize
 
-from model_definition.admissibility import (
+from model_analysis.admissibility import (
     AdmissibilityThresholds,
     trajectory_admissibility,
 )

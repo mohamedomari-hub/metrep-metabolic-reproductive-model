@@ -25,7 +25,7 @@ from model_analysis.analysis import (
     uncertainty_trajectories,
 )
 from model_definition.parameters import PARAMETERS
-from model_definition.plotting import (
+from model_analysis.plotting import (
     plot_compensation_network,
     plot_all_states_grid,
     plot_scenario_comparison,

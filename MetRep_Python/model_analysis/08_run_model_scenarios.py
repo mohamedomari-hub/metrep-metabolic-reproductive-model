@@ -130,7 +130,7 @@ def main() -> None:
             print(f"- {name} ({scenario_default_days(name):g} days)")
         return
 
-    from model_definition.plotting import plot_all_states_grid, plot_scenario_comparison, plot_selected_states
+    from model_analysis.plotting import plot_all_states_grid, plot_scenario_comparison, plot_selected_states
 
     simulation_dir = PROJECT_ROOT / "results" / "simulations"
     figure_dir = PROJECT_ROOT / "results" / "figures"

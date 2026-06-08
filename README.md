@@ -116,12 +116,13 @@ main folder:
 
 - `MetRep_Python/model_definition/` contains reusable model components:
   parameters, ODE equations, initial conditions, scenarios, simulation helpers,
-  admissibility rules, and plotting helpers.
+  and Dexa model extensions.
 - `MetRep_Python/model_analysis/` contains runnable scripts for model
   validation, baseline simulation, local sensitivity, SVD identifiability,
   profile likelihood, uncertainty propagation, global sensitivity, BED,
   archive posterior analysis, ABC filtering, and method comparison. It also
-  contains the analysis utility functions used by those scripts.
+  contains the analysis utility functions used by those scripts, including
+  admissibility rules and plotting helpers.
 
 This keeps all Python scripts that a reader may run in one clear place while
 preserving the distinction between reusable model definitions and analysis

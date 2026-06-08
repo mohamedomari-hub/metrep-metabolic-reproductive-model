@@ -26,7 +26,7 @@ sys.path.insert(0, str(PROJECT_ROOT))
 
 import matplotlib.pyplot as plt
 
-from model_definition.admissibility import AdmissibilityThresholds
+from model_analysis.admissibility import AdmissibilityThresholds
 from model_definition.initial_conditions import STATE_INDEX
 from model_definition.parameters import PARAMETERS, default_parameters
 from model_analysis.profile_likelihood import (
