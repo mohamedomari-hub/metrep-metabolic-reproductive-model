@@ -3,13 +3,13 @@
 Examples
 --------
 List built-in scenarios:
-    python model_running/08_run_model_scenarios.py --list
+    python model_analysis/08_run_model_scenarios.py --list
 
 Run all built-in non-Dexa scenarios:
-    python model_running/08_run_model_scenarios.py --scenario all
+    python model_analysis/08_run_model_scenarios.py --scenario all
 
 Run an exact forcing schedule from CSV:
-    python model_running/08_run_model_scenarios.py --forcing-csv data/my_scenario.csv --mode lactating
+    python model_analysis/08_run_model_scenarios.py --forcing-csv data/my_scenario.csv --mode lactating
 
 The forcing CSV must contain columns:
     time_days,DMI,Milk

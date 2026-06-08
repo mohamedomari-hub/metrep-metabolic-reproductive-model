@@ -15,7 +15,7 @@ import numpy as np
 import pandas as pd
 
 
-PROJECT_ROOT = Path(__file__).resolve().parents[1]
+PROJECT_ROOT = Path(__file__).resolve().parents[2]
 DEFAULT_BANK = PROJECT_ROOT / "local_data/input_tables_large"
 DEFAULT_OBSERVABLE_ORDER = ["FSH", "PGF", "P4", "E2", "INH", "IGF1", "Insulin", "Glucose", "Glucagon"]
 REPRODUCTIVE = ["FSH", "PGF", "P4", "E2", "INH"]

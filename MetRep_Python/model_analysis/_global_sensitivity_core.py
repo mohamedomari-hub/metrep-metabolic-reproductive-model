@@ -20,7 +20,7 @@ import pandas as pd
 from scipy.stats import rankdata, spearmanr
 
 
-PROJECT_ROOT = Path(__file__).resolve().parents[1]
+PROJECT_ROOT = Path(__file__).resolve().parents[2]
 DEFAULT_BANK = PROJECT_ROOT / "local_data/input_tables_large"
 DEFAULT_OBSERVABLE_ORDER = ["FSH", "PGF", "P4", "E2", "INH", "IGF1", "Insulin", "Glucose", "Glucagon"]
 REPRESENTATIVE_CLASSES = {

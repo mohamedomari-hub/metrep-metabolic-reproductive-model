@@ -100,10 +100,9 @@ parameters remain difficult even under guided observations.
 
 ```text
 MetRep_Matlab/  Original MATLAB reference implementation
-MetRep_Python/  Python model implementation and core scripts
+MetRep_Python/  Python model implementation and analysis scripts
 docs/           Public methodology, model overview, and results summary
 results_final/  Curated GitHub-facing figures and tables
-workflows/      Lightweight reproducibility scripts for the final portfolio
 ```
 
 Large generated ODE banks, particle pools, debug folders, and temporary outputs
@@ -112,26 +111,20 @@ locally when a full workflow rerun is needed.
 
 ### Code Organization
 
-The repository separates model code from final portfolio workflows:
+The repository keeps Python model code and Python analysis scripts under one
+main folder:
 
 - `MetRep_Python/model_definition/` contains reusable model components:
   parameters, ODE equations, simulation helpers, admissibility utilities,
   profile-likelihood utilities, and plotting helpers.
-- `MetRep_Python/model_running/` contains model-side runners that execute or
-  diagnose the Python model directly. These include baseline simulation,
-  local sensitivity, SVD identifiability, model-level uncertainty, and profile
-  likelihood.
-- `workflows/` contains the final GitHub-facing orchestration scripts. These
-  scripts operate on local ODE-confirmed banks and curated outputs to reproduce
-  the portfolio-level global sensitivity, uncertainty propagation, BED,
-  archive posterior, ABC filtering, and method-comparison results.
+- `MetRep_Python/model_analysis/` contains runnable scripts for model
+  validation, baseline simulation, local sensitivity, SVD identifiability,
+  profile likelihood, uncertainty propagation, global sensitivity, BED,
+  archive posterior analysis, ABC filtering, and method comparison.
 
-This means that similarly named analyses can appear at two levels. For example,
-`MetRep_Python/model_running/06_run_uncertainty.py` is a model-side uncertainty
-runner, while `workflows/uncertainty_propagation.py` is the final ensemble
-summary workflow for the ODE-confirmed admissible bank. Similarly,
-profile-likelihood code remains with the model runners because it fixes
-parameters and re-evaluates model fit directly.
+This keeps all Python scripts that a reader may run in one clear place while
+preserving the distinction between reusable model definitions and analysis
+entry points.
 
 ## Reproducibility
 
@@ -154,15 +147,15 @@ pip install -r requirements.txt
 
 The MATLAB reference implementation is preserved in `MetRep_Matlab/`. The
 Python workflow uses the model and parameter definitions under `MetRep_Python/`
-and the final reproducibility scripts under `workflows/`.
+and the final reproducibility scripts under `MetRep_Python/model_analysis/`.
 
 ### Repository Logic
 
 The public repository separates three roles:
 
 - `MetRep_Matlab/` and `MetRep_Python/` preserve the model implementation.
-- `workflows/` contains the current reproducibility scripts used by the final
-  portfolio.
+- `MetRep_Python/model_analysis/` contains the current reproducibility scripts
+  used by the final portfolio.
 - `docs/` and `results_final/` contain the public scientific narrative and
   curated outputs.
 
@@ -198,7 +191,7 @@ as scientific truth.
 Example downstream commands, assuming the local ODE-confirmed banks exist:
 
 ```bash
-python workflows/global_sensitivity_enriched_98x9.py \
+python MetRep_Python/model_analysis/global_sensitivity_enriched_98x9.py \
   --enriched-bank-dir local_data/phd_bed_bank_5pct_50k_glucagon_smc_enriched \
   --output-dir local_outputs/global_sensitivity \
   --figure-dir results_final/figures \
@@ -206,13 +199,13 @@ python workflows/global_sensitivity_enriched_98x9.py \
 ```
 
 ```bash
-python workflows/uncertainty_propagation.py \
+python MetRep_Python/model_analysis/uncertainty_propagation.py \
   --bank-dir local_data/phd_bed_bank_5pct_50k_glucagon_smc_enriched \
   --output-dir local_outputs/uncertainty
 ```
 
 ```bash
-python workflows/targeted_bed_posterior_portfolio.py \
+python MetRep_Python/model_analysis/targeted_bed_posterior_portfolio.py \
   --broad-prior-dir local_data/phd_bed_bank_5pct_50k_glucagon \
   --enriched-bank-dir local_data/phd_bed_bank_5pct_50k_glucagon_smc_enriched \
   --global-sensitivity-dir local_outputs/global_sensitivity \
@@ -224,7 +217,7 @@ python workflows/targeted_bed_posterior_portfolio.py \
 ```
 
 ```bash
-python workflows/select_bayesian_targets.py \
+python MetRep_Python/model_analysis/select_bayesian_targets.py \
   --profile-dir results_final/tables \
   --global-sensitivity-dir local_outputs/global_sensitivity \
   --uncertainty-dir local_outputs/uncertainty \
@@ -232,7 +225,7 @@ python workflows/select_bayesian_targets.py \
 ```
 
 ```bash
-python workflows/reduced_archive_posterior.py \
+python MetRep_Python/model_analysis/reduced_archive_posterior.py \
   --target-parameters local_outputs/bayesian_targets/bayesian_target_parameters.csv \
   --output-dir local_outputs/reduced_archive_posterior \
   --figure-dir local_outputs/reduced_archive_posterior_figures \
@@ -240,7 +233,7 @@ python workflows/reduced_archive_posterior.py \
 ```
 
 ```bash
-python workflows/archive_abc_filtering.py \
+python MetRep_Python/model_analysis/archive_abc_filtering.py \
   --target-parameters local_outputs/bayesian_targets/bayesian_target_parameters.csv \
   --output-dir local_outputs/archive_abc \
   --figure-dir local_outputs/archive_abc_figures \
@@ -248,7 +241,7 @@ python workflows/archive_abc_filtering.py \
 ```
 
 ```bash
-python workflows/compare_bayesian_methods.py
+python MetRep_Python/model_analysis/compare_bayesian_methods.py
 ```
 
 ### Randomness And Determinism

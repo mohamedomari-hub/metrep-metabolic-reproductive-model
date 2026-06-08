@@ -20,7 +20,7 @@ import pandas as pd
 from scipy.stats import gaussian_kde
 
 
-ROOT = Path(__file__).resolve().parents[1]
+ROOT = Path(__file__).resolve().parents[2]
 BROAD_BANK = ROOT / "local_data/phd_bed_bank_5pct_50k_glucagon"
 DEFAULT_BED = ROOT / "local_outputs/bed_targeted"
 DEFAULT_GSA_UNCERTAINTY_SCENARIOS = ROOT / "results_final/tables/bed_targeted_gsa_uncertainty_observation_scenarios.csv"

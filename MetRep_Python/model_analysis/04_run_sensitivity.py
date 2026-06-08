@@ -39,7 +39,7 @@ def main() -> None:
     args = parse_args()
     scenario = constant_non_lactating(days=args.days, step=args.dt)
     # Keep this analysis on the core parameter set only. Dexa constants live in
-    # DexaConfig and are used only by model_running/07_run_dexa_scenarios.py.
+    # DexaConfig and are used only by model_analysis/07_run_dexa_scenarios.py.
     parameters = [parameter.name for parameter in PARAMETERS]
     outputs = ["Glucose", "Insulin", "IGF1", "P4", "E2", "Follicle", "CL"]
     table = local_sensitivity(scenario, parameters, outputs, relative_step=args.rel_step)

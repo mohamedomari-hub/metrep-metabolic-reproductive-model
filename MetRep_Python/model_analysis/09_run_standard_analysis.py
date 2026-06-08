@@ -1,7 +1,7 @@
 """Run 90-day scenario simulations plus all-parameter standard-scenario analyses.
 
 Run from project root:
-    python model_running/09_run_standard_analysis.py
+    python model_analysis/09_run_standard_analysis.py
 """
 
 from __future__ import annotations

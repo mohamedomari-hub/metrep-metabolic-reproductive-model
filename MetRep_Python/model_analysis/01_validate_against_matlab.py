@@ -1,7 +1,7 @@
 """Validate Python constants against the MATLAB reference metadata.
 
 Run from project root:
-    python model_running/01_validate_against_matlab.py
+    python model_analysis/01_validate_against_matlab.py
 """
 
 from __future__ import annotations

@@ -23,7 +23,7 @@ from scipy.special import logsumexp
 from scipy.stats import gaussian_kde, rankdata, spearmanr
 
 
-ROOT = Path(__file__).resolve().parents[1]
+ROOT = Path(__file__).resolve().parents[2]
 PYTHON_ROOT = ROOT / "MetRep_Python"
 sys.path.insert(0, str(PYTHON_ROOT))
 

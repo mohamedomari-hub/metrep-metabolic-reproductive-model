@@ -12,7 +12,7 @@ refactored MetRep package:
     6. holistic estimate/fix recommendation
 
 Run from project root:
-    python model_running/05_run_identifiability.py
+    python model_analysis/05_run_identifiability.py
 
 By default this analyzes all 98 MATLAB-derived core parameters for 90 days.
 Dexa PK/PD constants are not part of this parameter list; Dexa is an optional
