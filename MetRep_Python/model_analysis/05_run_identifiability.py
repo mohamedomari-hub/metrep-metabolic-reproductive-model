@@ -40,7 +40,7 @@ sys.path.insert(0, str(PROJECT_ROOT))
 
 import matplotlib.pyplot as plt
 
-from model_definition.analysis import structural_identifiability_svd
+from model_analysis.analysis import structural_identifiability_svd
 from model_definition.parameters import PARAMETERS
 from model_definition.plotting import (
     parameter_scenario_classes,

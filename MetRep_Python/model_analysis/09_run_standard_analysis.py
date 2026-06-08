@@ -19,7 +19,7 @@ PROJECT_ROOT = Path(__file__).resolve().parents[1]
 os.environ.setdefault("MPLCONFIGDIR", str(PROJECT_ROOT / ".matplotlib"))
 sys.path.insert(0, str(PROJECT_ROOT))
 
-from model_definition.analysis import (
+from model_analysis.analysis import (
     local_sensitivity,
     structural_identifiability_svd,
     uncertainty_trajectories,

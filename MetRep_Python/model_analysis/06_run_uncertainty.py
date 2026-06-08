@@ -11,7 +11,7 @@ import numpy as np
 PROJECT_ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(PROJECT_ROOT))
 
-from model_definition.analysis import uncertainty_trajectories
+from model_analysis.analysis import uncertainty_trajectories
 from model_definition.parameters import PARAMETERS
 from model_definition.plotting import plot_uncertainty_band
 from model_definition.scenarios import constant_non_lactating

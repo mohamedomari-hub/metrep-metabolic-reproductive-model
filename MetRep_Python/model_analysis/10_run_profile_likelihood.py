@@ -29,7 +29,7 @@ import matplotlib.pyplot as plt
 from model_definition.admissibility import AdmissibilityThresholds
 from model_definition.initial_conditions import STATE_INDEX
 from model_definition.parameters import PARAMETERS, default_parameters
-from model_definition.profile_likelihood import (
+from model_analysis.profile_likelihood import (
     SyntheticData,
     classify_profile,
     make_synthetic_data,
