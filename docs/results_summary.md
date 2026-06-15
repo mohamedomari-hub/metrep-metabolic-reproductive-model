@@ -43,26 +43,25 @@ sensitive parameter may still be compensated by other parameters.
 
 ## 2. Biological Admissibility Filtering
 
-<!-- TODO: Insert biological admissibility figure showing stored admissible, near-boundary, and rejected examples. -->
+![Biological admissibility examples](figures/Bio_Admissibility.png)
 
 **Figure 2.** Biological admissibility examples used to evaluate simulated
-endocrine-metabolic trajectories. The panel should contrast retained
-admissible simulations with near-boundary and rejected examples, illustrating
+endocrine-metabolic trajectories. The panel contrasts retained admissible
+simulations, near-boundary examples, and rejected trajectories, illustrating
 why downstream ensemble analyses are restricted to ODE-confirmed biologically
-plausible trajectories.
+plausible simulations.
 
-Figure 2 illustrates the role of the biological admissibility filter. Retained
-simulations preserve plausible endocrine-metabolic trajectory structure,
-whereas near-boundary and rejected examples show why unconstrained parameter
-sampling can generate trajectories that should not be used for downstream
-inference. The enriched admissible ensemble contains 12,721 ODE-confirmed
-simulations, and only these simulations are used for global sensitivity
-analysis, uncertainty propagation, and Bayesian experimental design.
-
-The historical admissibility filter used FSH, PGF, P4, E2, INH, IGF1, insulin,
-and glucose. Glucagon was excluded from that filter but retained as an
-observable biomarker for downstream uncertainty propagation, global
-sensitivity, and BED.
+Figure 2 illustrates representative outcomes of the biological admissibility
+filtering step. Retained simulations preserve plausible endocrine-metabolic
+trajectory structure across observable biomarkers, whereas near-boundary and
+rejected examples demonstrate why unconstrained parameter sampling can
+generate trajectories unsuitable for downstream inference. The enriched
+admissible ensemble contains 12,721 ODE-confirmed simulations, and only these
+simulations are retained for global sensitivity analysis, uncertainty
+propagation, and Bayesian experimental design. Glucagon was excluded from the
+original admissibility rule but retained downstream as an observable biomarker
+for uncertainty propagation, global sensitivity analysis, and Bayesian
+experimental design.
 
 ## 3. Global Sensitivity Analysis
 
@@ -178,18 +177,23 @@ profile likelihood class
 -> guided posterior update
 ```
 
-<!-- TODO: Insert BED overview figure showing experiment timing, biomarker information gain, and prior-to-posterior updating workflow. -->
+![Conceptual Bayesian experimental design workflow](figures/BED_Fig1.png)
 
 **Figure 11.** Conceptual Bayesian experimental design workflow used in the
 MetRep modelling framework. Candidate sampling days and biomarkers are ranked
-by expected information gain, and selected measurements are evaluated by their
-ability to update prior parameter uncertainty.
+by expected information gain, and selected measurements are evaluated
+according to their expected effect on prior-to-posterior parameter learning.
 
-Figure 11 provides the conceptual bridge between uncertainty propagation,
-biomarker selection, and posterior learning. The BED workflow first identifies
-informative sampling periods, then compares candidate biomarkers or biomarker
-combinations, and finally evaluates the resulting prior-to-posterior update
-for the parameter of interest.
+Figure 11 provides a conceptual overview of the Bayesian experimental design
+strategy used in the MetRep framework. Informative sampling periods are first
+identified from trajectory dynamics and uncertainty structure, after which
+candidate biomarkers are ranked according to their expected information
+contribution for parameter inference. The resulting observation scenarios are
+then evaluated according to their effect on posterior parameter learning.
+
+The subsequent analyses quantify these concepts using parameter-specific
+mutual information rankings, biomarker prioritization, and posterior updating
+behaviour.
 
 ![Guided biomarker MI bars](../results_final/figures/bed_guided_parameter_biomarker_mi_bars.png)
 
